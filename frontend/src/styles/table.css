@@ -1,0 +1,70 @@
+.FixSidebar{
+    width: 4vw;
+    height: 100vh;
+    background-color: #EBEBEB;
+    position: fixed;
+    /* border: 1px solid #000; */
+}
+.TableMain{
+    /* padding: 1vh; */
+}
+.adviewTable{
+    margin-left: 4vw;
+    /* width: 100%; */
+}
+.ant-table-row,
+.ant-table-cell {
+  /* max-height: 1px !important; */
+  padding: 4px !important;
+  color: grey;
+}
+.ant-table-wrapper .ant-table-thead >tr>th {
+    border-bottom: none !important;
+    color: grey;
+    padding-top: 3vh !important;
+}
+.ant-table-wrapper .ant-table-tbody >tr >td {
+    border-bottom: none !important;
+}
+.ant-table-wrapper .ant-table-tbody >tr{
+   padding-left: 1vw !important;
+}
+.ant-tag-green {
+    background: none;
+    border: none;
+}
+.ant-tag-red {
+    background: none;
+    border: none;
+}
+.ant-tag-orange {
+    background: none;
+    border: none;
+}
+.ModalBtn{
+    margin-left: 10px;
+    height: 70px !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+}
+.ant-btn {
+    padding: 4px 20px;
+}
+.kep-login-facebook {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    background-color: #1677ff !important;
+    box-shadow: 0 2px 0 rgb(5 145 255 / 10%);
+    height: 70px;
+    margin-left: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid transparent !important;
+    padding: 4px 20px !important;
+    border-radius: 6px !important;
+    -webkit-border-radius: 6px !important;
+    -moz-border-radius: 6px !important;
+    -ms-border-radius: 6px !important;
+    -o-border-radius: 6px !important;
+    text-transform: none !important;
+}

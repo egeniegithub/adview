@@ -1,0 +1,17 @@
+.Nav{
+    border-bottom: 2px solid #C3C3C3;
+    height: 7vh;
+    background-color: #EBEBEB;
+    color: grey !important;
+    font-weight: 600;
+}
+.NavText{
+    margin-left: 10px;
+}
+.NavList{
+    display: flex;
+    justify-content: space-evenly;
+}
+.nav_items{
+    color: grey !important;
+}
