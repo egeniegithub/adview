@@ -20,7 +20,7 @@ export class BingAdsService {
     return `This action updates a #${id} bingAd`;
   }
 
-  remove(id: number) {
+  remove(id: number) { 
     return `This action removes a #${id} bingAd`;
   }
 }
