@@ -6,7 +6,7 @@ import { LinkedinBtn } from './Components/Linkdin';
 import { BingBtn } from './Components/BingBtn';
 import Success from './Components/success';
 
-function App() {
+function App() { 
   return ( 
     <Router>
       <Routes>
