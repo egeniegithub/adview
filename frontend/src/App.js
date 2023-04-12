@@ -7,7 +7,7 @@ import { BingBtn } from './Components/BingBtn';
 import Success from './Components/success';
 
 function App() {
-  return (
+  return ( 
     <Router>
       <Routes>
         <Route exact path="/" element={<OversightTable />} />
