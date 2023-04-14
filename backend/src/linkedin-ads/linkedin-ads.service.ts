@@ -32,12 +32,14 @@ export class LinkedinAdsService {
     // const allData = await this.fetchCustomerData(email);
     // const length = allData.length
 
-    const ACCESS_TOKEN = "AQXasd";
-    const API_VERSION = '202302';
+    const ACCESS_TOKEN = "AQVFPLMfl25kYkNudAV1fxNiIEIibJ2qu2ojDcv6LTlAwqrWr7WsI519ddJXP4KFyHBv12R35pr8J5MNlqBlr1VVLApbHftUA6nTDXfDEemZaN9Zs9xEUFDiNiJ48d2-As7rPygldZpRjvZLzHElzKUUdyhSvK6ZwkJ6KJoHmLWj49RWxNEzE24Rxa0PsBcWAj7PKP630hSjwBz5ekmYrxO6lqB75zuNJVJpeRvmWokpyfTh1Q-_2sA2u5zfDK9h7McLJm1eL_6O28JbedrXR_LTSHO2mKKvT0IbYjReraO24pfnA3CUFgiJ-5ud2UisKy8qCrVLDa6lqBrxlPHtrPS84hQ7s";
 
+    const API_VERSION = '202302';
     let count = 100,
       sortField = 'ID',
       sortOrder = 'ASCENDING'
+    const uri = `https://api.linkedin.com/rest/adCampaigns?q=search&search=(status:(values:List(ACTIVE)))&sort=(field:ID,order:DESCENDING)
+    `;
     let headers = {
       'Authorization': `Bearer ${ACCESS_TOKEN}`,
       'X-RestLi-Method': 'finder',
@@ -47,23 +49,17 @@ export class LinkedinAdsService {
     }
     let params = {
       q: 'search',
-      'search.(campaignStatuses)': 'ACTIVE',
-      'search.(searchType)': 'SEARCH',
-      // search: `(reference:(values:List(${references.map(encodeURIComponent).join(',')})))`,
+      search: '(type:(values:List(SPONSORED_UPDATES)),status:(values:List(ACTIVE)))',
       count,
       sort: `(field:${sortField},order:${sortOrder})`
     }
     try {
       let res = await axios.request({
-        url: 'https://api.linkedin.com/rest/adCampaigns',
-        method: 'get',
-        headers,
-        params,
+        url: uri,method: 'get',headers,
       })
-      return { res: res.data }
+      return { res: res }
     } catch (error) {
       return { err: error }
     }
-
   }
 }
