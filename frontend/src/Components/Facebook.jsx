@@ -12,11 +12,12 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
     }
     return (
         <LoginSocialFacebook
-            appId={'5820494338079670'}
+            appId={'5498527660249813'}
             fieldsProfile={
-                'id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender'
+                'id'
             }
-            redirect_uri={'http://localhost:3000/facebook'}
+            scope='ads_read,read_insights,ads_management'
+            redirect_uri={'http://localhost:3000/'}
             onResolve={({ provider, data }) => {
                 FbResponseHandler(data)
             }}

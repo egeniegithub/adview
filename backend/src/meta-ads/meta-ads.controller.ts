@@ -7,10 +7,10 @@ import { UpdateMetaAdDto } from './dto/update-meta-ad.dto';
 export class MetaAdsController {
   constructor(private readonly metaAdsService: MetaAdsService) {}
 
-  @Get('/ObtainMetaAdsData/:email')
-  ObtainMetaAdsData(@Param('email') email: string) {
+  @Get('/ObtainMetaAdsData/:email/:token')
+  ObtainMetaAdsData(@Param('email') email: string,@Param('token') token:string) {
     try {
-      return this.metaAdsService.ObtainMetaAdsData(email);
+      return this.metaAdsService.ObtainMetaAdsData(email,token);
     } catch (error) {
       return error;
     }
