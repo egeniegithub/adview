@@ -7,10 +7,10 @@ import { UpdateLinkedinAdDto } from './dto/update-linkedin-ad.dto';
 export class LinkedinAdsController {
   constructor(private readonly linkedinAdsService: LinkedinAdsService) {}
 
-  @Get('/ObtainLinkedinAdsData/:email')
-  ObtainLinkedinAdsData(@Param('email') email: string) {
+  @Get('/ObtainLinkedinAdsData/:email/:token')
+  ObtainLinkedinAdsData(@Param('email') email: string,@Param('token') token:string) {
     try {
-      return this.linkedinAdsService.ObtainLinkedInAdsData(email);
+      return this.linkedinAdsService.ObtainLinkedInAdsData(email,token);
     } catch (error) {
       return error;
     }

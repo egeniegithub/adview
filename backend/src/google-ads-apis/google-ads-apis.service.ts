@@ -61,8 +61,8 @@ export class GoogleAdsApisService {
       let customer_id = '3007970972' //ad acount id
 
       const length = allData.length
-      const monthlySpend = await this.getMonthlySpend(email, customer_id, developer_token, access_token);
-      return ({ data: monthlySpend })
+      const data = await this.getMonthlySpend(email, customer_id, developer_token, access_token);
+      return ({...data })
     } catch (err) {
       console.log(err);
       return err;
@@ -95,17 +95,17 @@ export class GoogleAdsApisService {
     };
     try {
       let res = await axios(options)
-      let total = { cost_micros: 0 }
+      let total = { amount_spent: 0 }
       let { results = [] } = res.data
       results.forEach(e => {
-        total.cost_micros += parseInt(e.metrics.cost_micros)
+        total.amount_spent += parseInt(e.metrics.cost_micros)
       });
       // save data in db
-      const updated = await this.ClientDataService.updateByClient(email , { google: `${total.cost_micros}`})
-      return ({ google_api_res: res.data, calculated: total, db_updated: updated })
+      const updated = await this.ClientDataService.updateByClient(email , { 'google': `${total.amount_spent}`})
+      return ({ meta_api_data: res.data, calculated: total, db_updated: updated })
     } catch (error) {
       Logger.log('error: ', error)
-      return (error)
+      return ({ err: error,updation_status:false })
     }
   }
 

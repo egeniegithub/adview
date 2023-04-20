@@ -1,40 +1,33 @@
-import { Button } from 'antd';
 import React, { useState } from 'react';
-import {
-    auth,
-    signInWithPopup,
-    GoogleAuthProvider,
-    googleProvider,
-} from "../Config";
+import { LoginSocialFacebook, LoginSocialGoogle } from "reactjs-social-login";
+import { Button } from 'antd';
 
-export const GoogleBtn = ({ onCloseModal }) => {
-    const loginWithGoogle = async (e) => {
-        e.preventDefault();
-        signInWithPopup(auth, googleProvider)
-            .then((result) => {
-                const accessToken = result?._tokenResponse?.oauthIdToken;
-                const refreshToken = result?._tokenResponse?.refreshToken;
-                const email = result?.user?.email;
-                console.log(result, "res");
-                console.log(accessToken, "token");
-                if (accessToken && refreshToken) {
-                    console.log(accessToken);
-                    console.log(refreshToken);
-                    onCloseModal();
-                }
-                onCloseModal();
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                onCloseModal();
-                return {
-                    errorCode,
-                    errorMessage,
-                };
-            });
-    };
+export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
+
+    const GResponseHandler = async (response) => {
+        console.log("Google", response)
+        handleOk()
+            if(response.access_token)   
+        fetchAdsData(response.access_token, 'google')
+
+    }
     return (
-        <Button className="ModalBtn" type="primary" onClick={loginWithGoogle}>Google Ads</Button>
+        <LoginSocialGoogle
+            client_id={process.env.REACT_APP_GG_APP_ID || '1008345619855-iralf41l1ug3b8nvrsr124m2abjvboom.apps.googleusercontent.com'}
+            scope="openid profile email"
+            discoveryDocs="claims_supported"
+            access_type="offline"
+            redirect_uri={'http://localhost:3000/'}
+            onResolve={({ provider, data }) => {
+                GResponseHandler(data)
+            }}
+            onReject={err => {
+                GResponseHandler(err)
+            }}
+        >
+            <Button className="ModalBtn" type="primary">
+                google Ads
+            </Button>
+        </LoginSocialGoogle>
     );
 }

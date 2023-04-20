@@ -1,16 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import axios from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMetaAdDto } from './dto/create-meta-ad.dto';
 import { UpdateMetaAdDto } from './dto/update-meta-ad.dto';
 import { ClientDatum } from 'src/client-data/entities/client-datum.entity';
+import { ClientDataService } from 'src/client-data/client-data.service';
 
 @Injectable()
 export class MetaAdsService {
   constructor(
-    @InjectRepository(ClientDatum)
-    private readonly clientDataRepository: Repository<ClientDatum>,
+    @Inject(ClientDataService)
+    private readonly ClientDataService: ClientDataService,
   ) { }
   create(createMetaAdDto: CreateMetaAdDto) {
     return 'This action adds a new metaAd';
@@ -65,11 +66,11 @@ export class MetaAdsService {
         total.lifetime_budget += e.lifetime_budget
       });
       // save data in db
-      const updated = await this.clientDataRepository.update({ email }, { facebook: '30' })
+      const updated = await this.ClientDataService.updateByClient(email , { 'facebook': `${total.amount_spent}`})
       return ({ meta_api_data: res.data, calculated: total, db_updated: updated })
 
     } catch (error) {
-      return { err: error }
+      return { err: error,updation_status:false }
     }
   }
 }

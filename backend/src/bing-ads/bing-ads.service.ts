@@ -25,13 +25,13 @@ export class BingAdsService {
     return `This action removes a #${id} bingAd`;
   }
 
-  async ObtainBingAdsData(email: string) {
+  async ObtainBingAdsData(email: string, token: string) {
 
     const compiled = [];
     // const allData = await this.fetchCustomerData(email);
     // const length = allData.length
 
-    const ACCESS_TOKEN = "EABOI4bv6EtUBAE1XFkfhhZB5qDKZCZCYRwuoyiKTtZCEc1D00MgFYWsNGAPIZCo0enZCwhhVeFzCABOZBgi7spInZAULhrcxLV1HFbnd8ZBfbVfxOjhsLxuKyLqVFRJGMqHbLZAmZBQTtlcLcJOppjrg3GToprZBqyEIdfcRDpj5IGmXGtLita4dxhXV";
+    const ACCESS_TOKEN = token;
     const customer_id = 'Act_5498527660249813';
     const developer_token = 'NTipfGy1nGO2oAFRaSdFiw'
 
@@ -53,19 +53,17 @@ export class BingAdsService {
       'Content-Type': 'application/json',
       'MS-API-Version': '13'
     };
-
-    axios.get(url, {
-      headers: headers,
-      params: params
-    })
-      .then(function (response) {
-        const campaigns = response.data.value;
-        return campaigns
+    try {
+      let total = { amount_spent: 0 }
+      let response = await axios.get(url, {
+        headers: headers,
+        params: params
       })
-      .catch(function (error) {
-        Logger.log(error);
-        return error
-      });
+      return ({ bing_api_data: response.data, calculated: total, db_updated: "updated" })
+    } catch (error) {
+      Logger.log(error);
+      return ({ err: error, updation_status: false })
+    }
 
   }
 }
