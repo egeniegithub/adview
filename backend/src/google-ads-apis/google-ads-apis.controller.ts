@@ -16,10 +16,10 @@ export class GoogleAdsApisController {
   constructor(private readonly googleAdsApisService: GoogleAdsApisService) { }
 
 
-  @Get('/ObtainAdsData/:email')
-  ObtainAdsData(@Param('email') email: string) {
+  @Get('/ObtainAdsData/:email/:token')
+  ObtainAdsData(@Param('email') email: string,@Param('token') token:string) {
     try {
-      return this.googleAdsApisService.ObtainAdsData(email);
+      return this.googleAdsApisService.ObtainAdsData(email,token);
     } catch (error) {
       return error;
     }
