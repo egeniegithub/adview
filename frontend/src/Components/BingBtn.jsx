@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { LoginSocialMicrosoft } from "reactjs-social-login";
 
 
-export const BingBtn = () => {
+export const BingBtn = ({ onCloseModal }) => {
+  const handlebingResponse = () => {
+    onCloseModal();
+  };
   return (
     <LoginSocialMicrosoft
       client_id={'a8e64672-9325-4287-b650-3db8270ba6b6'}
@@ -14,10 +17,9 @@ export const BingBtn = () => {
       }}
       onReject={(err) => {
         console.log("shit error ", err)
-
       }}
     >
-      <Button className="ModalBtn" type="primary">
+      <Button className="ModalBtn" type="primary" onClick={handlebingResponse}>
         Bing
       </Button>
     </LoginSocialMicrosoft>

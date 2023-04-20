@@ -1,3 +1,4 @@
+// This file is not being used
 import { PublicClientApplication } from '@azure/msal-browser';
 
 const msalConfig = {

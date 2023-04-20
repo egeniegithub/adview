@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 
 import { LoginSocialLinkedin } from 'reactjs-social-login';
 
-export const LinkedinBtn = () => {
+export const LinkedinBtn = ({ onCloseModal }) => {
+  const handleLinkedinResponse = () => {
+    onCloseModal();
+  };
   return (
     <LoginSocialLinkedin
       client_id={'774lvbtq5rm9fg'}
@@ -18,7 +21,7 @@ export const LinkedinBtn = () => {
         window.close()
       }}
     >
-      <Button className="ModalBtn" type="primary">
+      <Button className="ModalBtn" type="primary" onClick={handleLinkedinResponse}>
         Linkedin
       </Button>
     </LoginSocialLinkedin>
