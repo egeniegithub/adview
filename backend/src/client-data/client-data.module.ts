@@ -7,6 +7,7 @@ import { ClientDatum } from './entities/client-datum.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([ClientDatum])],
   controllers: [ClientDataController],
-  providers: [ClientDataService]
+  providers: [ClientDataService],
+  exports: [ClientDataService],
 })
 export class ClientDataModule {}

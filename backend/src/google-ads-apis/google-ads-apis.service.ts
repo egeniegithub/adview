@@ -1,17 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateGoogleAdsApiDto } from './dto/create-google-ads-api.dto';
 import { UpdateGoogleAdsApiDto } from './dto/update-google-ads-api.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleAdsApi, enums } from 'google-ads-api';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { google } from 'googleapis';
 import axios from 'axios';
 const { OAuth2 } = google.auth;
+import {ClientDataService} from '../client-data/client-data.service'
 
 @Injectable()
 export class GoogleAdsApisService {
+  
   constructor(
+    @Inject(ClientDataService)
+    private readonly ClientDataService: ClientDataService,
   ) { }
 
   // async fetchAllCustomersData() {
@@ -50,63 +53,36 @@ export class GoogleAdsApisService {
     }
   }
 
-  async ObtainAdsData(email: string) {
+  async ObtainAdsData(email: string, access_token: string) {
     try {
       const compiled = [];
       const allData = []
-      const developer_token='NTipfGy1nGO2oAFRaSdFiw'
-      let customer_id ='1840315132' //muzamil acount id
+      const developer_token = 'NTipfGy1nGO2oAFRaSdFiw'
+      let customer_id = '3007970972' //ad acount id
 
       const length = allData.length
-      if (allData && length > 0) {
-        for (let index = 0; index < length; index++) {    
-          // if (developer_token) {
-            
-            const query = `
-          SELECT
-            segments.month,
-            metrics.cost_micros
-          FROM
-            campaign
-          WHERE
-            segments.date DURING THIS_MONTH
-        `;
-            const monthlySpend =await this.getMonthlySpend(query,customer_id,developer_token);
-            return {data: monthlySpend}
-            // if (monthlySpend) {
-            //   compiled.push({
-            //     ...clientData,
-            //     total_spent: monthlySpend,
-            //     updation_status: true,
-            //   });
-            // } else {
-            //   compiled.push({ ...clientData, updation_status: false });
-            // }
-            return { compiled: compiled, message: "running" };
-          // } else {
-          //   return { error: "develop_token is empty." }
-          // }
-        }
-      }
+      const monthlySpend = await this.getMonthlySpend(email, customer_id, developer_token, access_token);
+      return ({ data: monthlySpend })
     } catch (err) {
       console.log(err);
       return err;
     }
   }
 
-  async getMonthlySpend(query: any,customer_id,developer_token) {
+  async getMonthlySpend(email, customer_id, developer_token, access_token) {
 
-    const options = { 
+    const options = {
       url: `https://googleads.googleapis.com/v13/customers/${customer_id}/googleAds:search`,
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'developer-token': developer_token,
-        'Authorization': `Bearer ${"ya29.a0Ael9sCMStHrd4_1jaFuCgHFLfPwkpunNiBi3_zWQr9r9cXIgjBYu_5lCKQUtegjP0qhodFyqpDAvTfHgUttY41CLYbxlz5j32C2OM_p8cdDhnkH5kDItpkC8M1lSkL4JF-PMMpzgzMuMcuO9plZe5qxUIAkDaCgYKAU0SARISFQF4udJhfGTAcsfgj0m11frsQ99vog0163"}`,
+        'login-customer-id': '2549371484', //manager account id 
+        'Authorization': `Bearer ${access_token}`,
       },
       data: {
-        query : `
+        query: `
         SELECT
           segments.month,
           metrics.cost_micros
@@ -119,24 +95,18 @@ export class GoogleAdsApisService {
     };
     try {
       let res = await axios(options)
-      return res
+      let total = { cost_micros: 0 }
+      let { results = [] } = res.data
+      results.forEach(e => {
+        total.cost_micros += parseInt(e.metrics.cost_micros)
+      });
+      // save data in db
+      const updated = await this.ClientDataService.updateByClient(email , { google: `${total.cost_micros}`})
+      return ({ google_api_res: res.data, calculated: total, db_updated: updated })
     } catch (error) {
       Logger.log('error: ', error)
-      return error
+      return (error)
     }
-    
-
-  // const campaigns = await customer.query(query);
-  // return campaigns
-
-    // const [response] = await client.service.googleAds.search(query);
-    // console.log("check google spend res", response)
-    // return (
-    //   response.results.reduce(
-    //     (total, row) => total + row.metrics.cost_micros,
-    //     0,
-    //   ) / 1000000
-    // );
   }
 
 

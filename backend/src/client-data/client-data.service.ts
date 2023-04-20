@@ -57,6 +57,15 @@ export class ClientDataService {
     }
   }
 
+  async updateByClient(email: string, updateClientData: any) {
+    try {
+      return this.clientDataRepository.update({ email }, updateClientData)
+      }
+    catch (err) {
+      return { error: err }
+    }
+  }
+
   async remove(id: number) {
     const deletedData = await this.clientDataRepository.delete({ id })
     return { message: "Record deleted successfully", res: deletedData }
