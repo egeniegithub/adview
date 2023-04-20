@@ -14,9 +14,11 @@ import {
   googleProvider,
 } from "../Config";
 import { loginWithBing } from "../Services/bingAuth";
+import { loginWithGoogle } from "../Services/GoogleAuth"
 import { LinkedinBtn } from "./Linkdin";
 import { BingBtn } from "./BingBtn";
 import { Facebook } from "./Facebook";
+import { GoogleBtn } from "./GoogleBtn";
 
 const AdviewTable = () => {
   const [AccessToken, setAccessToken] = useState("");
@@ -78,25 +80,7 @@ const AdviewTable = () => {
       const updateStatus = data[0].updation_status;
       setClientData(data);
       setdataStatus(updateStatus);
-      modifyData(tableData, data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const updateClientData = async (email, accessToken, refreshToken) => {
-    console.log(email, "email");
-    try {
-      let res = await axios.patch(`${process.env.REACT_APP_API_URL}/google-ads-apis/AdsData`, {
-        email: email,
-        g_token: accessToken,
-        g_refresh: refreshToken,
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      fetchAdsData(email);
+      // modifyData(tableData, data);
     } catch (error) {
       console.error(error);
     }
@@ -104,7 +88,7 @@ const AdviewTable = () => {
 
   const storetoken = async (email, accessToken, refreshToken) => {
     try {
-      let res = await axios.post(`${process.env.REACT_APP_API_URL}/google-ads-apis/plateformTokens`, {
+      let res = await axios.post(`${process.env.REACT_APP_API_URL}/platform-tokens`, {
         email: email,
         g_token: accessToken,
         g_refresh: refreshToken,
@@ -114,44 +98,11 @@ const AdviewTable = () => {
         },
       })
       if (res)
-        updateClientData(email, accessToken, refreshToken);
+        fetchAdsData(email);
 
     } catch (error) {
       console.log(error, "error");
     }
-  };
-
-  const loginWithGoogle = async (e) => {
-    e.preventDefault();
-    signInWithPopup(auth, googleProvider)
-      .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        // const credential = GoogleAuthProvider.credentialFromResult(result);
-        //const accessToken = credential?.accessToken;
-        const accessToken = result?._tokenResponse?.oauthIdToken;
-        const refreshToken = result?._tokenResponse?.refreshToken;
-        const email = result?.user?.email;
-        console.log(result, "res");
-        console.log(accessToken, "token");
-        // const email = result.user.email;
-        // const fullName = result.user.displayName;
-        if (accessToken && refreshToken) {
-          setAccessToken(AccessToken);
-          setRefreshToken(refreshToken);
-          setEmail(email);
-          // storetoken(email, accessToken, refreshToken);
-          handleOk();
-        }
-        handleOk();
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        return {
-          errorCode,
-          errorMessage,
-        };
-      });
   };
 
   // const handleLoginWithBing = async () => {
@@ -273,12 +224,10 @@ const AdviewTable = () => {
         footer={null}
       >
         <div style={{ display: 'flex' }}>
-          <Button className="ModalBtn" type="primary" onClick={loginWithGoogle}>
-            Google Ads
-          </Button>
-          <BingBtn />
-          <LinkedinBtn />
-          <Facebook />
+          <GoogleBtn onCloseModal={() => setIsModalOpen(false)} />
+          <BingBtn onCloseModal={() => setIsModalOpen(false)} />
+          <LinkedinBtn onCloseModal={() => setIsModalOpen(false)} />
+          <Facebook onCloseModal={() => setIsModalOpen(false)} />
         </div>
 
       </Modal>
