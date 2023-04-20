@@ -17,6 +17,7 @@ import { loginWithBing } from "../Services/bingAuth";
 import { LinkedinBtn } from "./Linkdin";
 import { BingBtn } from "./BingBtn";
 import { Facebook } from "./Facebook";
+import { getBubbleUsers } from "../Services/BubbleIo";
 
 const AdviewTable = () => {
   const [AccessToken, setAccessToken] = useState("");
@@ -44,6 +45,8 @@ const AdviewTable = () => {
       }
       setTableData(data)
       console.log(data);
+      const bubble = await getBubbleUsers()
+      console.log("check bubble response ", bubble)
     }
     getdata()
   }, [])

@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
-import ReactFacebookLogin from "react-facebook-login";
-import { FacebookAuthResponse } from '../Services/FacebookAuth';
+import { LoginSocialFacebook } from "reactjs-social-login";
+import { Button } from 'antd';
 
-export const Facebook = (props) => {
-    const { isLoggedIn, setIsLoggedIn } = props
+export const Facebook = ({ fetchAdsData, handleOk }) => {
+
     const FbResponseHandler = async (response) => {
-        await FacebookAuthResponse(response)
-        setIsLoggedIn(true)
+        console.log("facebook", response)
+        handleOk()
+        fetchAdsData('', response.accessToken, 'facebook')
+
     }
     return (
-        <ReactFacebookLogin
-            appId={'424033123077473'}
-            autoLoad={false}
-            fields="name,email,picture"
-            callback={FbResponseHandler}
-            textButton='Meta Ads'
-            className='fb-login-btn'
-        />
+        <LoginSocialFacebook
+            appId={'5498527660249813'}
+            fieldsProfile={
+                'id'
+            }
+            scope='ads_read,read_insights,ads_management'
+            redirect_uri={'http://localhost:3000/'}
+            onResolve={({ provider, data }) => {
+                FbResponseHandler(data)
+            }}
+            onReject={err => {
+                FbResponseHandler(err)
+            }}
+        >
+            <Button className="ModalBtn" type="primary">
+                Meta Ads
+            </Button>
+        </LoginSocialFacebook>
     );
 }
