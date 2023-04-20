@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateGoogleAdsApiDto } from './dto/create-google-ads-api.dto';
 import { UpdateGoogleAdsApiDto } from './dto/update-google-ads-api.dto';
 import { OAuth2Client } from 'google-auth-library';
@@ -6,6 +6,7 @@ import { GoogleAdsApi, enums } from 'google-ads-api';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { google } from 'googleapis';
+import axios from 'axios';
 const { OAuth2 } = google.auth;
 
 @Injectable()
@@ -53,21 +54,14 @@ export class GoogleAdsApisService {
     try {
       const compiled = [];
       const allData = []
-      const CLIENT_ID = "930170658277-1r3ucue1tdacr9jqf0ugoougutimk3kg.apps.googleusercontent.com";
-      const CLIENT_SECRET = "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";
+      const developer_token='NTipfGy1nGO2oAFRaSdFiw'
+      let customer_id ='1840315132' //muzamil acount id
 
       const length = allData.length
       if (allData && length > 0) {
-        for (let index = 0; index < length; index++) {
-          const clientData = allData[index];
-          const developer_token = clientData.g_token;
-          if (developer_token) {
-            const client = new GoogleAdsApi({
-              client_id: CLIENT_ID,
-              client_secret: CLIENT_SECRET,
-              developer_token: developer_token,
-            });
-
+        for (let index = 0; index < length; index++) {    
+          // if (developer_token) {
+            
             const query = `
           SELECT
             segments.month,
@@ -77,21 +71,21 @@ export class GoogleAdsApisService {
           WHERE
             segments.date DURING THIS_MONTH
         `;
-            const monthlySpend = this.getMonthlySpend(client, query);
-
-            if (monthlySpend) {
-              compiled.push({
-                ...clientData,
-                total_spent: monthlySpend,
-                updation_status: true,
-              });
-            } else {
-              compiled.push({ ...clientData, updation_status: false });
-            }
+            const monthlySpend =await this.getMonthlySpend(query,customer_id,developer_token);
+            return {data: monthlySpend}
+            // if (monthlySpend) {
+            //   compiled.push({
+            //     ...clientData,
+            //     total_spent: monthlySpend,
+            //     updation_status: true,
+            //   });
+            // } else {
+            //   compiled.push({ ...clientData, updation_status: false });
+            // }
             return { compiled: compiled, message: "running" };
-          } else {
-            return { error: "develop_token is empty." }
-          }
+          // } else {
+          //   return { error: "develop_token is empty." }
+          // }
         }
       }
     } catch (err) {
@@ -100,15 +94,51 @@ export class GoogleAdsApisService {
     }
   }
 
-  async getMonthlySpend(client: any, query: any) {
-    const [response] = await client.service.googleAds.search(query);
-    return (
-      response.results.reduce(
-        (total, row) => total + row.metrics.cost_micros,
-        0,
-      ) / 1000000
-    );
+  async getMonthlySpend(query: any,customer_id,developer_token) {
+
+    const options = { 
+      url: `https://googleads.googleapis.com/v13/customers/${customer_id}/googleAds:search`,
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'developer-token': developer_token,
+        'Authorization': `Bearer ${"ya29.a0Ael9sCMStHrd4_1jaFuCgHFLfPwkpunNiBi3_zWQr9r9cXIgjBYu_5lCKQUtegjP0qhodFyqpDAvTfHgUttY41CLYbxlz5j32C2OM_p8cdDhnkH5kDItpkC8M1lSkL4JF-PMMpzgzMuMcuO9plZe5qxUIAkDaCgYKAU0SARISFQF4udJhfGTAcsfgj0m11frsQ99vog0163"}`,
+      },
+      data: {
+        query : `
+        SELECT
+          segments.month,
+          metrics.cost_micros
+        FROM
+          campaign
+        WHERE
+          segments.date DURING THIS_MONTH
+      `
+      }
+    };
+    try {
+      let res = await axios(options)
+      return res
+    } catch (error) {
+      Logger.log('error: ', error)
+      return error
+    }
+    
+
+  // const campaigns = await customer.query(query);
+  // return campaigns
+
+    // const [response] = await client.service.googleAds.search(query);
+    // console.log("check google spend res", response)
+    // return (
+    //   response.results.reduce(
+    //     (total, row) => total + row.metrics.cost_micros,
+    //     0,
+    //   ) / 1000000
+    // );
   }
+
 
   // findAll() {
   //   return `This action returns all googleAdsApis`;
