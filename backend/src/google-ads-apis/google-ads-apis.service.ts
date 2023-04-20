@@ -1,21 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateGoogleAdsApiDto } from './dto/create-google-ads-api.dto';
 import { UpdateGoogleAdsApiDto } from './dto/update-google-ads-api.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleAdsApi, enums } from 'google-ads-api';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { google } from 'googleapis';
 import axios from 'axios';
 const { OAuth2 } = google.auth;
-import { ClientDatum } from 'src/client-data/entities/client-datum.entity';
-
+import {ClientDataService} from '../client-data/client-data.service'
 
 @Injectable()
 export class GoogleAdsApisService {
+  
   constructor(
-    @InjectRepository(ClientDatum)
-    private readonly clientDataRepository: Repository<ClientDatum>,
+    @Inject(ClientDataService)
+    private readonly ClientDataService: ClientDataService,
   ) { }
 
   // async fetchAllCustomersData() {
@@ -102,7 +101,7 @@ export class GoogleAdsApisService {
         total.cost_micros += parseInt(e.metrics.cost_micros)
       });
       // save data in db
-      const updated = await this.clientDataRepository.update({ email }, { google: `${total.cost_micros}`})
+      const updated = await this.ClientDataService.updateByClient(email , { google: `${total.cost_micros}`})
       return ({ google_api_res: res.data, calculated: total, db_updated: updated })
     } catch (error) {
       Logger.log('error: ', error)
