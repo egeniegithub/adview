@@ -7,11 +7,11 @@ import { Repository } from 'typeorm';
 import { google } from 'googleapis';
 import axios from 'axios';
 const { OAuth2 } = google.auth;
-import {ClientDataService} from '../client-data/client-data.service'
+import { ClientDataService } from '../client-data/client-data.service'
 
 @Injectable()
 export class GoogleAdsApisService {
-  
+
   constructor(
     @Inject(ClientDataService)
     private readonly ClientDataService: ClientDataService,
@@ -62,7 +62,7 @@ export class GoogleAdsApisService {
 
       const length = allData.length
       const data = await this.getMonthlySpend(email, customer_id, developer_token, access_token);
-      return ({...data })
+      return ({ ...data })
     } catch (err) {
       console.log(err);
       return err;
@@ -101,11 +101,11 @@ export class GoogleAdsApisService {
         total.amount_spent += parseInt(e.metrics.cost_micros)
       });
       // save data in db
-      const updated = await this.ClientDataService.updateByClient(email , { 'google': `${total.amount_spent}`})
-      return ({ meta_api_data: res.data, calculated: total, db_updated: updated })
+      const updated = await this.ClientDataService.updateByClient(email, { 'google': `${total.amount_spent}` })
+      return ({ google_api_data: res.data, calculated: total, db_updated: updated })
     } catch (error) {
       Logger.log('error: ', error)
-      return ({ err: error,updation_status:false })
+      return ({ err: error, updation_status: false })
     }
   }
 

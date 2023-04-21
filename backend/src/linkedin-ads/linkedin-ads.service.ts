@@ -34,7 +34,7 @@ export class LinkedinAdsService {
     return `This action removes a #${id} linkedinAd`;
   }
 
-  async ObtainLinkedInAdsData(email: string,token : string) {
+  async ObtainLinkedInAdsData(email: string, token: string) {
 
     const compiled = [];
     // const allData = await this.fetchCustomerData(email);
@@ -61,20 +61,20 @@ export class LinkedinAdsService {
       sort: `(field:${sortField},order:${sortOrder})`
     }
     try {
-      let total = { amount_spent: 0}
+      let total = { amount_spent: 0 }
       let res = await axios.request({
-        url: uri,method: 'get',headers,
+        url: uri, method: 'get', headers,
       })
-      let {elements = []} = res.data
+      let { elements = [] } = res.data
       for (let i = 0; i < elements.length; i++) {
         const e = elements[i];
-        let {campaign={}} = e
+        let { campaign = {} } = e
         total.amount_spent += campaign?.budget?.total?.amount?.value || 0
       }
-      const updated = await this.ClientDataService.updateByClient(email , { 'linkedin': `${total.amount_spent}`})
-      return ({ meta_api_data: res.data, calculated: total, db_updated: updated })
+      const updated = await this.ClientDataService.updateByClient(email, { 'linkedin': `${total.amount_spent}` })
+      return ({ linkedIn_api_data: res.data, calculated: total, db_updated: updated })
     } catch (error) {
-      return ({ err: error ,updation_status:false})
+      return ({ err: error, updation_status: false })
     }
   }
 }
