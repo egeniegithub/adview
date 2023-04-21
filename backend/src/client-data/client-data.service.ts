@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateClientDatumDto } from './dto/create-client-datum.dto';
@@ -60,9 +60,24 @@ export class ClientDataService {
   async updateByClient(email: string, updateClientData: any) {
     try {
       return this.clientDataRepository.update({ email }, updateClientData)
-      }
+    }
     catch (err) {
       return { error: err }
+    }
+  }
+
+  async SyncWithBubble(bubbleData = []) {
+    let updated = { affected: 0 }
+    try {
+      for (let index = 0; index < bubbleData.length; index++) {
+        const e = bubbleData[index];
+        let obj = await this.clientDataRepository.update({ client: e.client }, { monthly_budget: e.monthly_budget })
+        updated.affected += obj.affected
+      }
+      return { message: "Data updated successfully", res: updated }
+    }
+    catch (err) {
+      Logger.log("check error ", err)
     }
   }
 

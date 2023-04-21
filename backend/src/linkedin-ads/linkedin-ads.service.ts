@@ -1,11 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateLinkedinAdDto } from './dto/create-linkedin-ad.dto';
 import { UpdateLinkedinAdDto } from './dto/update-linkedin-ad.dto';
 import axios from 'axios';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ClientDatum } from 'src/client-data/entities/client-datum.entity';
+import { Repository } from 'typeorm';
+import { ClientDataService } from 'src/client-data/client-data.service';
 
 
 @Injectable()
 export class LinkedinAdsService {
+  constructor(
+    @Inject(ClientDataService)
+    private readonly ClientDataService: ClientDataService,
+  ) { }
   create(createLinkedinAdDto: CreateLinkedinAdDto) {
     return 'This action adds a new linkedinAd';
   }
@@ -26,19 +34,18 @@ export class LinkedinAdsService {
     return `This action removes a #${id} linkedinAd`;
   }
 
-  async ObtainLinkedInAdsData(email: string) {
+  async ObtainLinkedInAdsData(email: string,token : string) {
 
     const compiled = [];
     // const allData = await this.fetchCustomerData(email);
     // const length = allData.length
 
-    const ACCESS_TOKEN = "AQVFPLMfl25kYkNudAV1fxNiIEIibJ2qu2ojDcv6LTlAwqrWr7WsI519ddJXP4KFyHBv12R35pr8J5MNlqBlr1VVLApbHftUA6nTDXfDEemZaN9Zs9xEUFDiNiJ48d2-As7rPygldZpRjvZLzHElzKUUdyhSvK6ZwkJ6KJoHmLWj49RWxNEzE24Rxa0PsBcWAj7PKP630hSjwBz5ekmYrxO6lqB75zuNJVJpeRvmWokpyfTh1Q-_2sA2u5zfDK9h7McLJm1eL_6O28JbedrXR_LTSHO2mKKvT0IbYjReraO24pfnA3CUFgiJ-5ud2UisKy8qCrVLDa6lqBrxlPHtrPS84hQ7s";
-
+    const ACCESS_TOKEN = token
     const API_VERSION = '202302';
     let count = 100,
       sortField = 'ID',
       sortOrder = 'ASCENDING'
-    const uri = `https://api.linkedin.com/rest/adCampaigns?q=search&search=(status:(values:List(ACTIVE)))&sort=(field:ID,order:DESCENDING)
+    const uri = `https://api.linkedin.com/rest/adCampaigns?q=search&search=(status:(values:List(ACTIVE)))&costType=MONTHLY&sort=(field:ID,order:DESCENDING)
     `;
     let headers = {
       'Authorization': `Bearer ${ACCESS_TOKEN}`,
@@ -54,12 +61,20 @@ export class LinkedinAdsService {
       sort: `(field:${sortField},order:${sortOrder})`
     }
     try {
+      let total = { amount_spent: 0}
       let res = await axios.request({
         url: uri,method: 'get',headers,
       })
-      return { res: res }
+      let {elements = []} = res.data
+      for (let i = 0; i < elements.length; i++) {
+        const e = elements[i];
+        let {campaign={}} = e
+        total.amount_spent += campaign?.budget?.total?.amount?.value || 0
+      }
+      const updated = await this.ClientDataService.updateByClient(email , { 'linkedin': `${total.amount_spent}`})
+      return ({ meta_api_data: res.data, calculated: total, db_updated: updated })
     } catch (error) {
-      return { err: error }
+      return ({ err: error ,updation_status:false})
     }
   }
 }

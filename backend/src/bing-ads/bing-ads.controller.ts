@@ -7,9 +7,9 @@ import { UpdateBingAdDto } from './dto/update-bing-ad.dto';
 export class BingAdsController {
   constructor(private readonly bingAdsService: BingAdsService) {}
 
-  @Get('/ObtainBingAdsData/:email')
-  ObtainBingAdsData(@Param('email') email: string) {
-    return this.bingAdsService.ObtainBingAdsData(email);
+  @Get('/ObtainBingAdsData/:email/:token')
+  ObtainBingAdsData(@Param('email') email: string,@Param('token') token:string) {
+    return this.bingAdsService.ObtainBingAdsData(email,token);
   }
   @Post()
   create(@Body() createBingAdDto: CreateBingAdDto) {

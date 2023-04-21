@@ -2,16 +2,15 @@ import React, { useState } from 'react';
 import { LoginSocialFacebook } from "reactjs-social-login";
 import { Button } from 'antd';
 
-export const Facebook = ({ fetchAdsData, onCloseModal }) => {
+export const Facebook = ({ fetchAdsData, handleOk }) => {
 
     const FbResponseHandler = async (response) => {
         console.log("facebook", response)
-        fetchAdsData('', response.accessToken, 'facebook')
+        handleOk()
+        if(response.accessToken)
+            fetchAdsData(response.accessToken, 'facebook')
 
     }
-    const handleFbResponse = () => {
-        onCloseModal();
-    };
     return (
         <LoginSocialFacebook
             appId={'5498527660249813'}
@@ -27,7 +26,7 @@ export const Facebook = ({ fetchAdsData, onCloseModal }) => {
                 FbResponseHandler(err)
             }}
         >
-            <Button className="ModalBtn" type="primary" onClick={handleFbResponse}>
+            <Button className="ModalBtn" type="primary">
                 Meta Ads
             </Button>
         </LoginSocialFacebook>

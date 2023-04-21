@@ -7,19 +7,13 @@ import {
 } from "@ant-design/icons/lib/icons";
 import "../styles/table.css";
 
-import {
-  auth,
-  signInWithPopup,
-  GoogleAuthProvider,
-  googleProvider,
-} from "../Config";
 import { loginWithBing } from "../Services/bingAuth";
-import { loginWithGoogle } from "../Services/GoogleAuth"
 import { LinkedinBtn } from "./Linkdin";
 import { BingBtn } from "./BingBtn";
 import { Facebook } from "./Facebook";
-import { GoogleBtn } from "./GoogleBtn";
 import { getBubbleUsers } from "../Services/BubbleIo";
+import { GoogleBtn } from "./GoogleBtn";
+import { GetServerCall } from "../Services/apiCall";
 
 const AdviewTable = () => {
   const [AccessToken, setAccessToken] = useState("");
@@ -29,6 +23,7 @@ const AdviewTable = () => {
   const [tableData, setTableData] = useState([]);
   const [clientData, setClientData] = useState([]);
   const [dataStatus, setdataStatus] = useState(false);
+  const [currentRow, setcurrentRow] = useState({ id: '', name: '' })
 
   useEffect(() => {
     const getdata = async () => {
@@ -69,29 +64,75 @@ const AdviewTable = () => {
     }
   };
 
-  const fetchAdsData = async (email) => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/google-ads-apis/ObtainAdsData/${email}`,
+  const fetchAdsData = async (accessToken, provider_name) => {
+    switch (provider_name) {
+      case 'google':
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          console.log("check uri ", email, accessToken)
+          const res = await GetServerCall(`/google-ads-apis/ObtainAdsData/${email}/${accessToken}`)
+          handleResponse(res, provider_name)
         }
-      );
-      const data = response.data;
-      const updateStatus = data[0].updation_status;
-      setClientData(data);
-      setdataStatus(updateStatus);
-      // modifyData(tableData, data);
-    } catch (error) {
-      console.error(error);
+        break;
+
+      case 'facebook':
+        {
+          const res = await GetServerCall(`/meta-ads/ObtainMetaAdsData/${email}/${accessToken}`)
+          handleResponse(res, provider_name)
+        }
+        break
+
+      case 'bing':
+        {
+          const res = await GetServerCall(`/bing-ads/ObtainBingAdsData/${email}/${accessToken}`)
+          handleResponse(res, provider_name)
+        }
+        break
+      case 'linkedin':
+        {
+          const res = await GetServerCall(`/linkedin-ads/ObtainLinkedinAdsData/${email}/${accessToken}`)
+          handleResponse(res, provider_name)
+        }
+        break
+      default:
+        break;
     }
+
   };
+
+  const handleResponse = (res, provider_name) => {
+    if (res.data.err) {
+      setTableData(prevArray =>
+        prevArray.map(item => {
+          // check if data isnt updated then indicator should show 
+          if (item.id === currentRow.id && res.data.updation_status == false) {
+            let temp = item.include? [...item.include,provider_name] : [provider_name]
+            return {
+              ...item,
+              'isStatusUpdated': false,
+              'include': [...temp]
+            };
+          }
+          else
+            return { ...item };
+        })
+      );
+    }
+    else {
+      setTableData(prevArray =>
+        prevArray.map(item => {
+          if (item.id === currentRow.id) {
+            return { ...item, [provider_name]: res.data?.calculated?.amount_spent };
+          }
+          else
+            return { ...item };
+        })
+      )
+    }
+  }
 
   const storetoken = async (email, accessToken, refreshToken) => {
     try {
-      let res = await axios.post(`${process.env.REACT_APP_API_URL}/platform-tokens`, {
+      let res = await axios.post(`${process.env.REACT_APP_API_URL}/google-ads-apis/plateformTokens`, {
         email: email,
         g_token: accessToken,
         g_refresh: refreshToken,
@@ -108,10 +149,6 @@ const AdviewTable = () => {
     }
   };
 
-  // const handleLoginWithBing = async () => {
-  //   const authResult = await loginWithBing();
-  //   console.log(authResult, "adviewtablefile");
-  // };
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -128,7 +165,14 @@ const AdviewTable = () => {
       title: "",
       dataIndex: "Link",
       key: "Link",
-      render: (text, record) => <a onClick={() => showModal(record)}>{text}</a>,
+      render: (text, record) => <a onClick={() => {
+        if (currentRow.name) {
+          setcurrentRow({ id: '', name: '' })
+        }
+        setEmail(record.email)
+        setcurrentRow({ ...currentRow, id: record.id })
+        showModal(record);
+      }}>{text}</a>,
     },
     {
       title: "Client",
@@ -159,7 +203,7 @@ const AdviewTable = () => {
       title: "Status",
       dataIndex: "status",
       key: "Status",
-      render: (val, { Status }) => {
+      render: (val, arg) => {
         let color = "green";
         if (val === "Take Action" || val === "Over budget") {
           color = "red";
@@ -179,33 +223,62 @@ const AdviewTable = () => {
       title: "Google",
       dataIndex: "google",
       key: "Google",
-      // render: (val, obj) => {
-      //   if (obj.updation_status == "" || obj.updation_status == true) {
-      //     return val;
-      //   } else if (obj.updation_status == false) {
-      //     return val + <WarningOutlined style={{ color: "red" }} />;
-      //   }
-      // },
+      render: (val, obj) => {
+        console.log("check incuse ", obj)
+        if (obj?.isStatusUpdated == false && obj?.include?.includes('google')) {
+          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
+        } else {
+          return val
+        }
+      },
     },
     {
       title: "Bing",
       dataIndex: "bing",
       key: "Bing",
+      render: (val, obj) => {
+        if (obj?.isStatusUpdated == false && obj?.include?.includes('bing')) {
+          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
+        } else {
+          return val
+        }
+      },
     },
     {
       title: "LinkedIn",
       dataIndex: "linkedin",
       key: "LinkedIn",
+      render: (val, obj) => {
+        if (obj?.isStatusUpdated == false && obj?.include?.includes('linkedin')) {
+          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
+        } else {
+          return val
+        }
+      },
     },
     {
       title: "Facebook",
       dataIndex: "facebook",
       key: "Facebook",
+      render: (val, obj) => {
+        if (obj?.isStatusUpdated == false && obj?.include?.includes('facebook')) {
+          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
+        } else {
+          return val
+        }
+      },
     },
     {
       title: "Instagram",
       dataIndex: "instagram",
       key: "Instagram",
+      render: (val, obj) => {
+        if (obj?.isStatusUpdated == false && obj?.include?.includes('facebook')) {
+          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
+        } else {
+          return val
+        }
+      },
     },
   ];
 
@@ -227,10 +300,10 @@ const AdviewTable = () => {
         footer={null}
       >
         <div style={{ display: 'flex' }}>
-          <GoogleBtn onCloseModal={() => setIsModalOpen(false)} />
-          <BingBtn onCloseModal={() => setIsModalOpen(false)} />
-          <LinkedinBtn onCloseModal={() => setIsModalOpen(false)} />
-          <Facebook onCloseModal={() => setIsModalOpen(false)} />
+          <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
+          <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
+          <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
+          <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} />
         </div>
 
       </Modal>

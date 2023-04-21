@@ -12,6 +12,11 @@ export class ClientDataController {
     return this.clientDataService.create(createClientDatumDto);
   }
 
+  @Post('/syncDb')
+  SyncWithBubble(@Body() bubbleData: Array<any>) {
+    return this.clientDataService.SyncWithBubble(bubbleData);
+  }
+
   @Get()
   findAll() {
     return this.clientDataService.findAll();
