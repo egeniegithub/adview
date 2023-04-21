@@ -130,24 +130,6 @@ const AdviewTable = () => {
     }
   }
 
-  const updateClientData = async (email, accessToken, refreshToken) => {
-    console.log(email, "email");
-    try {
-      let res = await axios.patch(`${process.env.REACT_APP_API_URL}/google-ads-apis/AdsData`, {
-        email: email,
-        g_token: accessToken,
-        g_refresh: refreshToken,
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      fetchAdsData(email);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const storetoken = async (email, accessToken, refreshToken) => {
     try {
       let res = await axios.post(`${process.env.REACT_APP_API_URL}/google-ads-apis/plateformTokens`, {
@@ -160,7 +142,7 @@ const AdviewTable = () => {
         },
       })
       if (res)
-        updateClientData(email, accessToken, refreshToken);
+        fetchAdsData(email);
 
     } catch (error) {
       console.log(error, "error");
