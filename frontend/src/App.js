@@ -10,10 +10,10 @@ function App() {
   return ( 
     <Router>
       <Routes>
-        <Route exact path="/" element={<OversightTable />} />
         <Route exact path="/linkedin" element={<LinkedinBtn />} />
         <Route exact path="/bing" element={<BingBtn />} />
         <Route path="/OverUnderlog" element={<U_OTableScreen />} />
+        <Route exact path="/" element={<OversightTable />} />
       </Routes>
     </Router>
   );
