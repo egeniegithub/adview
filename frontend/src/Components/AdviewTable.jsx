@@ -100,34 +100,27 @@ const AdviewTable = () => {
   };
 
   const handleResponse = (res, provider_name) => {
+    let tempArry = [...tableData]
     if (res.data.err) {
-      setTableData(prevArray =>
-        prevArray.map(item => {
-          // check if data isnt updated then indicator should show 
-          if (item.id === currentRow.id && res.data.updation_status == false) {
-            let temp = item.include? [...item.include,provider_name] : [provider_name]
-            return {
-              ...item,
-              'isStatusUpdated': false,
-              'include': [...temp]
-            };
-          }
-          else
-            return { ...item };
-        })
-      );
+    for (let index = 0; index < tempArry.length; index++) {
+      const item = tempArry[index];
+      if (item.id === currentRow.id && res.data.updation_status == false){
+        let temp = item.include? [...item.include,provider_name] : [provider_name]
+        tempArry[index] = { ...item,
+          'isStatusUpdated': false,
+          'include': [...temp]}
+      }
+    }
     }
     else {
-      setTableData(prevArray =>
-        prevArray.map(item => {
-          if (item.id === currentRow.id) {
-            return { ...item, [provider_name]: res.data?.calculated?.amount_spent };
-          }
-          else
-            return { ...item };
-        })
-      )
+      for (let index = 0; index < tempArry.length; index++) {
+        const item = tempArry[index];
+        if (item.id === currentRow.id){
+          tempArry[index] = { ...item, [provider_name]: res.data?.calculated?.amount_spent }
+        }
+      }
     }
+    setTableData(tempArry)
   }
 
   const storetoken = async (email, accessToken, refreshToken) => {
