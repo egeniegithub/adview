@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GoogleAdsApisModule } from './google-ads-apis/google-ads-apis.module';
@@ -15,13 +16,21 @@ import { PlatformToken } from './platform-tokens/entities/platform-token.entity'
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: '172.104.29.37',
       port: 3306,
-      username: 'adviewdbuser',
-      password: 'C0Cb@)z;qm6T',
-      database: 'adviewdb',
+      username: 'adviewio_api',
+      password: '-p(MX?D.pmxx',
+      database: 'adviewio_api',
       entities: [ClientDatum, PlatformToken],
       synchronize: true,
+    }),
+    HttpModule.register({
+      baseURL: 'https://api.adview.io',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Accept',
+      },
     }),
     GoogleAdsApisModule,
     BingAdsModule,
