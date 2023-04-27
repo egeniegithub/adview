@@ -17,7 +17,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
             scope="openid profile email"
             discoveryDocs="claims_supported"
             access_type="offline"
-            redirect_uri={'http://localhost:3000/'}
+            redirect_uri={`${process.env.REACT_APP_BASE_URL}/`}
             onResolve={({ provider, data }) => {
                 GResponseHandler(data)
             }}
