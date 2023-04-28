@@ -23,7 +23,7 @@ const AdviewTable = () => {
   const [tableData, setTableData] = useState([]);
   const [clientData, setClientData] = useState([]);
   const [dataStatus, setdataStatus] = useState(false);
-  const [currentRow, setcurrentRow] = useState({ id: '', name: '' })
+  const [currentRow, setcurrentRow] = useState('')
 
   useEffect(() => {
     const getdata = async () => {
@@ -100,11 +100,12 @@ const AdviewTable = () => {
   };
 
   const handleResponse = (res, provider_name) => {
+    let id = localStorage.getItem('id')
     if (res.data.err) {
       setTableData(prevArray =>
         prevArray.map(item => {
           // check if data isnt updated then indicator should show 
-          if (item.id === currentRow.id && res.data.updation_status == false) {
+          if (item.id == id && res.data.updation_status == false) {
             let temp = item.include? [...item.include,provider_name] : [provider_name]
             return {
               ...item,
@@ -120,7 +121,7 @@ const AdviewTable = () => {
     else {
       setTableData(prevArray =>
         prevArray.map(item => {
-          if (item.id === currentRow.id) {
+          if (item.id == id) {
             if(provider_name =='facebook')
               return { ...item, [provider_name]: res.data?.calculated?.amount_spent,
                 ['instagram']: res.data?.calculated?.amount_spent };
@@ -168,11 +169,10 @@ const AdviewTable = () => {
       dataIndex: "Link",
       key: "Link",
       render: (text, record) => <a onClick={() => {
-        if (currentRow.name) {
-          setcurrentRow({ id: '', name: '' })
-        }
+        localStorage.setItem('id',record.id)
+        setcurrentRow(record.id)
         setEmail(record.email)
-        setcurrentRow({ ...currentRow, id: record.id })
+
         showModal(record);
       }}>{text}</a>,
     },
@@ -283,7 +283,7 @@ const AdviewTable = () => {
       },
     },
   ];
-
+  console.log('rendered')
   return (
     <Fragment>
       <div className="TableMain">
