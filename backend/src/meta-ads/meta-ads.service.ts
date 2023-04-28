@@ -66,7 +66,7 @@ export class MetaAdsService {
         total.lifetime_budget += e.lifetime_budget
       });
       // save data in db
-      const updated = await this.ClientDataService.updateByClient(email , { 'facebook': `${total.amount_spent}`})
+      const updated = await this.ClientDataService.updateByClient(email , { 'facebook': `${total.amount_spent}`,'instagram': `${total.amount_spent}`})
       return ({ meta_api_data: res.data, calculated: total, db_updated: updated })
 
     } catch (error) {

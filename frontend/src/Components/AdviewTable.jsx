@@ -100,27 +100,36 @@ const AdviewTable = () => {
   };
 
   const handleResponse = (res, provider_name) => {
-    let tempArry = [...tableData]
     if (res.data.err) {
-    for (let index = 0; index < tempArry.length; index++) {
-      const item = tempArry[index];
-      if (item.id === currentRow.id && res.data.updation_status == false){
-        let temp = item.include? [...item.include,provider_name] : [provider_name]
-        tempArry[index] = { ...item,
-          'isStatusUpdated': false,
-          'include': [...temp]}
-      }
-    }
+      setTableData(prevArray =>
+        prevArray.map(item => {
+          // check if data isnt updated then indicator should show 
+          if (item.id === currentRow.id && res.data.updation_status == false) {
+            let temp = item.include? [...item.include,provider_name] : [provider_name]
+            return {
+              ...item,
+              'isStatusUpdated': false,
+              'include': [...temp]
+            };
+          }
+          else
+            return { ...item };
+        })
+      );
     }
     else {
-      for (let index = 0; index < tempArry.length; index++) {
-        const item = tempArry[index];
-        if (item.id === currentRow.id){
-          tempArry[index] = { ...item, [provider_name]: res.data?.calculated?.amount_spent }
-        }
-      }
-    }
-    setTableData(tempArry)
+      setTableData(prevArray =>
+        prevArray.map(item => {
+          if (item.id === currentRow.id) {
+            if(provider_name =='facebook')
+              return { ...item, [provider_name]: res.data?.calculated?.amount_spent,
+                ['instagram']: res.data?.calculated?.amount_spent };
+            return { ...item, [provider_name]: res.data?.calculated?.amount_spent };
+          }
+          else
+            return { ...item };
+        })
+      )}
   }
 
   const storetoken = async (email, accessToken, refreshToken) => {

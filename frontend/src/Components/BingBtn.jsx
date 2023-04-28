@@ -8,7 +8,7 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
     <LoginSocialMicrosoft
       client_id={`${process.env.REACT_APP_BING_CLIENT_ID}`}
       redirect_uri={`${process.env.REACT_APP_BASE_URL}/bing`}
-      scope={'openid,profile'}
+      scope={'User.Read'}
       onResolve={({ provider, data }) => {
         handleOk()
         if (data.access_token) {
@@ -18,7 +18,7 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
         }
       }}
       onReject={(err) => {
-        console.log("shit error ", err)
+        // console.log("shit error ", err)
         handleOk()
       }}
     >
