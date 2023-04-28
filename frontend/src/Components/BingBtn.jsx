@@ -8,7 +8,7 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
     <LoginSocialMicrosoft
       client_id={`a8e64672-9325-4287-b650-3db8270ba6b6`}
       redirect_uri={`https://adview.io/bing`}
-      scope={'openid,profile'}
+      scope={'User.Read'}
       onResolve={({ provider, data }) => {
         handleOk()
         if (data.access_token) {
@@ -18,7 +18,7 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
         }
       }}
       onReject={(err) => {
-        console.log("shit error ", err)
+        // console.log("shit error ", err)
         handleOk()
       }}
     >
