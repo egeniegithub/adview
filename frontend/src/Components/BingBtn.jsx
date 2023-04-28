@@ -6,9 +6,9 @@ import { LoginSocialMicrosoft } from "reactjs-social-login";
 export const BingBtn = ({ fetchAdsData, handleOk }) => {
   return (
     <LoginSocialMicrosoft
-      client_id={`${process.env.REACT_APP_BING_CLIENT_ID}`}
-      redirect_uri={`${process.env.REACT_APP_BASE_URL}/bing`}
-      scope={'User.Read'}
+      client_id={`a8e64672-9325-4287-b650-3db8270ba6b6`}
+      redirect_uri={`https://adview.io/bing`}
+      scope={'openid,profile'}
       onResolve={({ provider, data }) => {
         handleOk()
         if (data.access_token) {

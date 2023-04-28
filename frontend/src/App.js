@@ -6,14 +6,14 @@ import { LinkedinBtn } from './Components/Linkdin';
 import { BingBtn } from './Components/BingBtn';
 import Success from './Components/success';
 
-function App() { 
-  return ( 
+function App() {
+  return (
     <Router>
       <Routes>
-        <Route exact path="/linkedin" element={<LinkedinBtn />} />
-        <Route exact path="/bing" element={<BingBtn />} />
-        <Route path="/OverUnderlog" element={<U_OTableScreen />} />
         <Route exact path="/" element={<OversightTable />} />
+        <Route path="/linkedin" element={<LinkedinBtn />} />
+        <Route path="/bing" element={<BingBtn />} />
+        <Route path="/OverUnderlog" element={<U_OTableScreen />} />
       </Routes>
     </Router>
   );
