@@ -2,10 +2,14 @@ import React, { Fragment } from "react";
 import AdviewTable from "../Components/AdviewTable";
 import Layout from "../Layout/Layout";
 import { Button, Checkbox, Form, Input } from "antd";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const onFinish = (values) => {
-    console.log("Success:", values);
+	const navigate = useNavigate();
+  const onFinish = ({email,password}) => {
+		let user = {email, password }
+			localStorage.setItem('user',JSON.stringify(user))
+			navigate('/')
   };
 
   const onFinishFailed = (errorInfo) => {

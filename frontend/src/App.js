@@ -6,15 +6,23 @@ import { LinkedinBtn } from './Components/Linkdin';
 import { BingBtn } from './Components/BingBtn';
 import Success from './Components/success';
 import Login from './screens/Login';
+import ProtectedRoute from './ProtectedRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route exact path="/" element={<OversightTable />} />
         <Route exact path="/login" element={<Login />} />
         <Route path="/linkedin" element={<LinkedinBtn />} />
         <Route path="/bing" element={<BingBtn />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <OversightTable />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/OverUnderlog" element={<U_OTableScreen />} />
       </Routes>
     </Router>
