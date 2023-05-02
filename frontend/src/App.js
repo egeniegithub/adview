@@ -11,8 +11,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route exact path="/" element={<OversightTable />} />
         <Route exact path="/login" element={<Login />} />
+        <Route path="/" element={<OversightTable />} />
         <Route path="/linkedin" element={<LinkedinBtn />} />
         <Route path="/bing" element={<BingBtn />} />
         <Route path="/OverUnderlog" element={<U_OTableScreen />} />

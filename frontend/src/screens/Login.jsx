@@ -15,17 +15,18 @@ function Login() {
   return (
     <Fragment>
       {/* <Layout /> */}
-      <div style={{height:'100vh',display:'flex',justifyContent:'center',alignItems:'center'}}>
+      <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: "#EBEBEB" }}>
         <Form
           name="basic"
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
-          style={{ width: 600 }}
+          style={{ width: 600, fontSize: "16px", fontWeight: "500" }}
           initialValues={{ remember: true }}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
+          <h1 style={{ marginLeft: "15vw", color:"grey" }}>Adview</h1>
           <Form.Item
             label="Username"
             name="email"
