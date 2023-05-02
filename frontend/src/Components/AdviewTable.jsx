@@ -75,10 +75,12 @@ const AdviewTable = () => {
           const res = await GetServerCall(`/google-ads-apis/ObtainAdsData/${email}/${accessToken}`)
           handleResponse(res, provider_name,user_name)
           let list =await getAccosiatedUstomers(accessToken)
-          if(list?.resourceNames?.length){
-            setLinkedUsers(list.resourceNames)
+          if(list?.length){
+            setLinkedUsers(list)
             setshowLinkedUserModal(true)
           }
+          // close buttons popup in google case 
+          handleOk()
         }
         break;
 
@@ -166,6 +168,11 @@ const AdviewTable = () => {
       console.log(error, "error");
     }
   };
+
+  const handleCustomerSelection = (userData)=>{
+    console.log("check customer ", userData)
+    setshowLinkedUserModal(false)
+  }
 
 
   const showModal = () => {
@@ -323,7 +330,6 @@ const AdviewTable = () => {
           <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
           <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} />
         </div>
-
       </Modal>
 
       <Modal
@@ -331,13 +337,15 @@ const AdviewTable = () => {
         width={"55%"}
         open={showLinkedUserModal}
         onOk={()=>{setshowLinkedUserModal(false)}}
-        onCancel={()=>{setshowLinkedUserModal(false)}}
+        closable = {false}
         footer={null}
       >
         <div style={{ display: 'flex',flexFlow:'column',gap:'2%' }}>
           {linkedUsers.map(e=>{
             return(
-              <p key={e}>{e}</p>
+              <p onClick={()=> handleCustomerSelection(e)} style={{cursor:'pointer',width:'fit-content'}} key={e.id}>
+                <strong>ID:</strong> {e.id}, <strong>Name:</strong> {e.descriptiveName}
+              </p>
             )
           })}
         </div>

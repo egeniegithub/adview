@@ -6,7 +6,6 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
 
     const GResponseHandler = async (response) => {
         console.log("Google", response)
-        handleOk()
             if(response.access_token)   
         fetchAdsData(response.access_token, 'google',response.name)
     }
