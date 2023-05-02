@@ -14,6 +14,7 @@ import { Facebook } from "./Facebook";
 import { getBubbleUsers } from "../Services/BubbleIo";
 import { GoogleBtn } from "./GoogleBtn";
 import { GetServerCall } from "../Services/apiCall";
+import { getAccosiatedUstomers } from "../Services/googleLinkedUsers";
 
 const AdviewTable = () => {
   const [AccessToken, setAccessToken] = useState("");
@@ -24,6 +25,8 @@ const AdviewTable = () => {
   const [clientData, setClientData] = useState([]);
   const [dataStatus, setdataStatus] = useState(false);
   const [currentRow, setcurrentRow] = useState('')
+  const [linkedUsers, setLinkedUsers] = useState([])
+  const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
 
   useEffect(() => {
     const getdata = async () => {
@@ -64,33 +67,40 @@ const AdviewTable = () => {
     }
   };
 
-  const fetchAdsData = async (accessToken, provider_name) => {
+  const fetchAdsData = async (accessToken, provider_name,user_name) => {
     switch (provider_name) {
       case 'google':
         {
           console.log("check uri ", email, accessToken)
           const res = await GetServerCall(`/google-ads-apis/ObtainAdsData/${email}/${accessToken}`)
-          handleResponse(res, provider_name)
+          handleResponse(res, provider_name,user_name)
+          let list =await getAccosiatedUstomers(accessToken)
+          if(list?.length){
+            setLinkedUsers(list)
+            setshowLinkedUserModal(true)
+          }
+          // close buttons popup in google case 
+          handleOk()
         }
         break;
 
       case 'facebook':
         {
           const res = await GetServerCall(`/meta-ads/ObtainMetaAdsData/${email}/${accessToken}`)
-          handleResponse(res, provider_name)
+          handleResponse(res, provider_name,user_name)
         }
         break
 
       case 'bing':
         {
           const res = await GetServerCall(`/bing-ads/ObtainBingAdsData/${email}/${accessToken}`)
-          handleResponse(res, provider_name)
+          handleResponse(res, provider_name,user_name)
         }
         break
       case 'linkedin':
         {
           const res = await GetServerCall(`/linkedin-ads/ObtainLinkedinAdsData/${email}/${accessToken}`)
-          handleResponse(res, provider_name)
+          handleResponse(res, provider_name,user_name)
         }
         break
       default:
@@ -99,7 +109,7 @@ const AdviewTable = () => {
 
   };
 
-  const handleResponse = (res, provider_name) => {
+  const handleResponse = (res, provider_name,user_name) => {
     let id = localStorage.getItem('id')
     if (res.data.err) {
       setTableData(prevArray =>
@@ -131,6 +141,13 @@ const AdviewTable = () => {
             return { ...item };
         })
       )}
+      let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
+        logedInUsers[id] = {
+          ...logedInUsers[id],
+          [provider_name]:{name :user_name}
+        }
+      localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+
   }
 
   const storetoken = async (email, accessToken, refreshToken) => {
@@ -151,6 +168,11 @@ const AdviewTable = () => {
       console.log(error, "error");
     }
   };
+
+  const handleCustomerSelection = (userData)=>{
+    console.log("check customer ", userData)
+    setshowLinkedUserModal(false)
+  }
 
 
   const showModal = () => {
@@ -296,6 +318,7 @@ const AdviewTable = () => {
       </div>
       <Modal
         title="Link Accounts to client"
+        width={"55%"}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -306,6 +329,25 @@ const AdviewTable = () => {
           <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
           <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
           <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} />
+        </div>
+      </Modal>
+
+      <Modal
+        title="Linked Accounts"
+        width={"55%"}
+        open={showLinkedUserModal}
+        onOk={()=>{setshowLinkedUserModal(false)}}
+        closable = {false}
+        footer={null}
+      >
+        <div style={{ display: 'flex',flexFlow:'column',gap:'2%' }}>
+          {linkedUsers.map(e=>{
+            return(
+              <p onClick={()=> handleCustomerSelection(e)} style={{cursor:'pointer',width:'fit-content'}} key={e.id}>
+                <strong>ID:</strong> {e.id}, <strong>Name:</strong> {e.descriptiveName}
+              </p>
+            )
+          })}
         </div>
 
       </Modal>

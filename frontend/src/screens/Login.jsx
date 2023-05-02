@@ -1,11 +1,25 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import AdviewTable from "../Components/AdviewTable";
 import Layout from "../Layout/Layout";
 import { Button, Checkbox, Form, Input } from "antd";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const onFinish = (values) => {
-    console.log("Success:", values);
+  const navigate = useNavigate();
+  useEffect(()=>{
+    let token = JSON.parse(localStorage.getItem('token')) 
+	    if(token)
+      navigate('/')
+  },[])
+
+  const onFinish = ({email,password}) => {
+		let user = {email, password }
+      if(user?.email=='admin' && user?.password == 'admin')
+      {
+        let token = Math.floor(1000 + Math.random() * 9000000);
+        localStorage.setItem('token',token)
+			  navigate('/')
+      }
   };
 
   const onFinishFailed = (errorInfo) => {
