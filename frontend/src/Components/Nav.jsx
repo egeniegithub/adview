@@ -22,7 +22,7 @@ const Nav = () => {
                     <Link to="/OverUnderlog" className='nav_items'>
                         <p>Over/Under Log</p>
                     </Link>
-                    <p><u><button onClick={()=>{localStorage.removeItem('user');navigate('/login')}}>Log out</button></u></p>
+                    <p><u><button onClick={()=>{localStorage.removeItem('token');navigate('/login')}}>Log out</button></u></p>
                 </Col>
             </Row>
         </div>

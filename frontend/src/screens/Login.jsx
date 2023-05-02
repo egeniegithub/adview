@@ -8,8 +8,12 @@ function Login() {
 	const navigate = useNavigate();
   const onFinish = ({email,password}) => {
 		let user = {email, password }
-			localStorage.setItem('user',JSON.stringify(user))
-			navigate('/')
+      if(user?.email=='admin' && user?.password == 'admin')
+      {
+        let token = Math.floor(1000 + Math.random() * 9000000);
+        localStorage.setItem('token',token)
+			  navigate('/')
+      }
   };
 
   const onFinishFailed = (errorInfo) => {
