@@ -13,6 +13,7 @@ function App() {
     <Router>
       <Routes>
         <Route exact path="/login" element={<Login />} />
+        <Route path="/" element={<OversightTable />} />
         <Route path="/linkedin" element={<LinkedinBtn />} />
         <Route path="/bing" element={<BingBtn />} />
         <Route
