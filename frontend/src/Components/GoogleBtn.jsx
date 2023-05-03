@@ -13,19 +13,31 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
     let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
     let id = localStorage.getItem('id')
     let userExist = logedInUsers[id]
+
+    const handleRowLogout = ()=>{
+        delete userExist?.google;
+        logedInUsers[id] = userExist
+        localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+        handleOk()
+    }
+
     if(userExist?.google?.name)
         return(
-            <Button disabled className="ModalBtn" style={{color:'#646464'}} type="primary">
-                {userExist?.google?.name}
-            </Button>
+            <div style={{display:'flex',flexFlow:'column',gap:'1%'}}>
+                <Button disabled className="ModalBtn" style={{color:'#646464'}} type="primary">
+                    {userExist?.google?.name}
+                </Button>
+                <Button onClick={handleRowLogout}>Logout Google</Button>
+            </div>
+            
         )
     return (
         <LoginSocialGoogle
-            client_id={process.env.REACT_APP_GG_APP_ID || '1008345619855-iralf41l1ug3b8nvrsr124m2abjvboom.apps.googleusercontent.com'}
+            client_id={'179563720213-indaf65t1gs2t3gsm8qhv96jvmms0lmi.apps.googleusercontent.com'}
             scope="openid profile email https://www.googleapis.com/auth/adwords"
             discoveryDocs="claims_supported"
             access_type="offline"
-            redirect_uri={`http://localhost:3000/`}
+            redirect_uri={`https://adview.io/`}
             onResolve={({ provider, data }) => {
                 GResponseHandler(data)
             }}

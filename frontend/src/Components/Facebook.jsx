@@ -15,11 +15,22 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
     let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
     let id = localStorage.getItem('id')
     let userExist = logedInUsers[id]
+
+    const handleRowLogout = ()=>{
+        delete userExist?.facebook;
+        logedInUsers[id] = userExist
+        localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+        handleOk()
+    }
+
     if(userExist?.facebook?.name)
         return(
-            <Button disabled className="ModalBtn" style={{color:'#646464'}} type="primary">
-                {userExist?.facebook?.name}
-            </Button>
+            <div style={{display:'flex',flexFlow:'column'}}>
+                <Button disabled className="ModalBtn" style={{color:'#646464'}} type="primary">
+                    {userExist?.facebook?.name}
+                </Button>
+                <Button onClick={handleRowLogout}>Logout Meta</Button>
+            </div>
         )
 
     return (

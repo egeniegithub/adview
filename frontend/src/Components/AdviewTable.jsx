@@ -1,9 +1,10 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { Table, Tag, Button, Modal } from "antd";
+import { Table, Tag, Button, Modal, Spin } from "antd";
 import axios from "axios";
 import {
   WarningOutlined,
   CloseCircleOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons/lib/icons";
 import "../styles/table.css";
 
@@ -17,39 +18,34 @@ import { GetServerCall } from "../Services/apiCall";
 import { getAccosiatedUstomers } from "../Services/googleLinkedUsers";
 
 const AdviewTable = () => {
-  const [AccessToken, setAccessToken] = useState("");
-  const [RefreshToken, setRefreshToken] = useState("");
   const [email, setEmail] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tableData, setTableData] = useState([]);
-  const [clientData, setClientData] = useState([]);
-  const [dataStatus, setdataStatus] = useState(false);
-  const [currentRow, setcurrentRow] = useState('')
+  const [isloading, setIsloading] = useState(true)
   const [linkedUsers, setLinkedUsers] = useState([])
   const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
 
   useEffect(() => {
-    const getdata = async () => {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/client-data`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    getdata()
+  }, [])
+
+  const getdata = async () => {
+    setIsloading(true)
+    try {
+      const response = await GetServerCall(`/client-data`)
       const data = response.data;
       for (let i = 0; i < data.length; i++) {
         data[i]["key"] = i + 1;
         data[i]["Link"] = "Link";
       }
       setTableData(data)
-      console.log(data);
-      const bubble = await getBubbleUsers()
-      console.log("check bubble response ", bubble)
+      setIsloading(false)
+    } catch (error) {
+      setIsloading(false)
     }
-    getdata()
-  }, [])
+    const bubble = await getBubbleUsers()
+    console.log("check bubble response ", bubble)
+  }
 
   const modifyData = (tableData, data) => {
     const modified = [];
@@ -192,7 +188,6 @@ const AdviewTable = () => {
       key: "Link",
       render: (text, record) => <a onClick={() => {
         localStorage.setItem('id',record.id)
-        setcurrentRow(record.id)
         setEmail(record.email)
 
         showModal(record);
@@ -306,16 +301,24 @@ const AdviewTable = () => {
     },
   ];
   console.log('rendered')
+  const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
   return (
     <Fragment>
-      <div className="TableMain">
-        <Table
-          style={{ height: "auto" }}
-          className="adviewTable"
-          columns={columns}
-          dataSource={tableData}
-        />
-      </div>
+      <Spin tip="Loading..." indicator={antIcon} spinning={isloading} size="large" style={{marginLeft:'2vw'}}>
+        <div className="TableMain">
+          <Table
+            style={{ height: "auto" }}
+            className="adviewTable"
+            columns={columns}
+            dataSource={tableData}
+          />
+          {!isloading && tableData.length == 0 ?<div style={{display:'flex',justifyContent:'center',marginLeft:'4vw'}} >
+            <Button onClick={()=>{getdata()}}>Retry</Button>
+          </div>:''}
+          
+        </div>
+      </Spin>
+      
       <Modal
         title="Link Accounts to client"
         width={"55%"}
@@ -324,7 +327,7 @@ const AdviewTable = () => {
         onCancel={handleCancel}
         footer={null}
       >
-        <div style={{ display: 'flex' }}>
+        <div style={{ display: 'flex',gap:'2%',marginTop:'20px' }}>
           <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
           <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
           <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
@@ -338,17 +341,44 @@ const AdviewTable = () => {
         open={showLinkedUserModal}
         onOk={()=>{setshowLinkedUserModal(false)}}
         closable = {false}
-        footer={null}
+        footer={<Button onClick={()=>{setshowLinkedUserModal(false)}}>Ok</Button>}
       >
-        <div style={{ display: 'flex',flexFlow:'column',gap:'2%' }}>
-          {linkedUsers.map(e=>{
+        <Table
+            style={{ height: "auto" }}
+            pagination={false}
+            onRow={(record, rowIndex) => {
+              return {
+                onClick: event => {console.log("row clicked ", record)}, // click row
+              };
+            }}
+            columns={[
+              {
+                title: "ID",
+                dataIndex: "id",
+                key: "id",
+              },
+              {
+                title: "Name",
+                dataIndex: "descriptiveName",
+                key: "descriptiveName",
+              },
+              {
+                title: "Status",
+                dataIndex: "status",
+                key: "status",
+              },
+            ]}
+            dataSource={linkedUsers}
+          />
+        {/* <div style={{ display: 'flex',flexFlow:'column',gap:'2%' }}>
+          {linkedUsers.map((e,indx)=>{
             return(
               <p onClick={()=> handleCustomerSelection(e)} style={{cursor:'pointer',width:'fit-content'}} key={e.id}>
-                <strong>ID:</strong> {e.id}, <strong>Name:</strong> {e.descriptiveName}
+                {indx+1})&nbsp; <strong>ID:</strong> {e.id}, <strong>Name:</strong> {e.descriptiveName}  <strong>status:</strong> {e.status== 'CLOSED'? 'Disabled': 'Enable'}
               </p>
             )
           })}
-        </div>
+        </div> */}
 
       </Modal>
     </Fragment>

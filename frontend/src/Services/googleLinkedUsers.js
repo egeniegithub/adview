@@ -26,7 +26,7 @@ const getActDetails  =async(list,token) =>{
     const e = list[i];
     let arr = e.split("/");
     let id= arr[1]
-    var data = {"query":"SELECT customer.id, customer.manager, customer.resource_name, customer.descriptive_name FROM customer"};
+    var data = {"query":"SELECT customer.id, customer.manager,customer.status, customer.resource_name, customer.descriptive_name FROM customer"};
     var config = {
           method: 'post',
           url: `https://googleads.googleapis.com/v13/customers/${id}/googleAds:search`,
