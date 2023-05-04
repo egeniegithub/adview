@@ -12,10 +12,9 @@
     margin-left: 4vw;
     /* width: 100%; */
 }
-.ant-table-row,
 .ant-table-cell {
   /* max-height: 1px !important; */
-  padding: 4px !important;
+  padding-left: 10px !important;
   color: grey;
 }
 .ant-table-wrapper .ant-table-thead >tr>th {
@@ -42,9 +41,7 @@
     border: none;
 }
 .ModalBtn{
-    margin-left: 10px;
     height: 70px !important;
-    margin-top: 20px !important;
     margin-bottom: 20px !important;
 }
 .ant-btn {

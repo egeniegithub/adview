@@ -5,7 +5,7 @@ const msalConfig = {
     auth: {
         clientId: process.env.REACT_APP_BING_CLIENT,
         authority: "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a",
-        redirectUri: 'http://localhost:3000'
+        redirectUri: 'https://adview.io'
     }
 };
 

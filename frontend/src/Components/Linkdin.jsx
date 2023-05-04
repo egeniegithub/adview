@@ -27,7 +27,7 @@ export const LinkedinBtn = ({fetchAdsData,handleOk}) => {
   
   
   const handleAuth =(code)=>{
-    let redirect_uri = 'http://localhost:3000/linkedin'
+    let redirect_uri = 'https://adview.io/linkedin'
     let client_id='785n2302jr2bhy'
     let client_secret='MXOXwBdgiFqx7MXP'
     var config = {
@@ -64,11 +64,23 @@ export const LinkedinBtn = ({fetchAdsData,handleOk}) => {
   let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
   let id = localStorage.getItem('id')
   let userExist = logedInUsers[id]
+
+  const handleRowLogout = ()=>{
+    delete userExist?.linkedin;
+    logedInUsers[id] = userExist
+    localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+    handleOk()
+  }
+
   if(userExist?.linkedin?.name)
     return(
+      <div style={{display:'flex',flexFlow:'column'}}>
         <Button disabled className="ModalBtn" style={{color:'#646464'}} type="primary">
             {userExist?.linkedin?.name}
         </Button>
+        <Button onClick={handleRowLogout}>Logout Linkedin</Button>
+      </div>
+        
     )
 
   const popupWindowURL = new URL(window.location.href);
