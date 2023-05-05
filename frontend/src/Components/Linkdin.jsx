@@ -37,7 +37,7 @@ export const LinkedinBtn = ({fetchAdsData,handleOk}) => {
     
     axios(config)
     .then(function (response) {
-      getuserInfo(response.data.access_token)
+      getuserInfo(response.data.access_token,code)
     })
     .catch(function (error) {
       console.log(error);
@@ -45,7 +45,7 @@ export const LinkedinBtn = ({fetchAdsData,handleOk}) => {
   }
 
   // getuserInfo from linkedin via access token 
-  const getuserInfo =(token)=>{
+  const getuserInfo =(token,code)=>{
     fetch(`https://api.linkedin.com/v2/me?oauth2_access_token=${token}&projection=(id,profilePicture(displayImage~digitalmediaAsset:playableStreams),localizedLastName, firstName,lastName,localizedFirstName)`, {
       method: 'GET'
     })
@@ -53,7 +53,8 @@ export const LinkedinBtn = ({fetchAdsData,handleOk}) => {
       .then(response => {
         let name = response.localizedFirstName+' '+response.localizedLastName
         handleOk()
-        fetchAdsData(token,'linkedin',name)
+        fetchAdsData(token,'linkedin',name,code)
+        linkedMultiLogin(code)
       })
       .catch(err => {
         
@@ -105,4 +106,15 @@ function throttle(func, delay) {
       func.apply(this, arguments);
     }
   }
+}
+
+export const linkedMultiLogin =(code)=>{
+  let redirect_uri = 'https://adview.io/linkedin'
+        let client_id='785n2302jr2bhy'
+        let client_secret='MXOXwBdgiFqx7MXP'
+        var config = {
+          method: 'post',
+          url: `https://www.linkedin.com/oauth/v2/accessToken?grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirect_uri}&code=${code}`
+        };
+        axios(config)
 }

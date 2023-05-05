@@ -1,11 +1,12 @@
 import React, { Fragment, useEffect } from "react";
 import AdviewTable from "../Components/AdviewTable";
 import Layout from "../Layout/Layout";
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input,notification } from "antd";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
   const navigate = useNavigate();
+  const [api, contextHolder] = notification.useNotification();
   useEffect(()=>{
     let token = JSON.parse(localStorage.getItem('token')) 
 	    if(token)
@@ -20,6 +21,15 @@ function Login() {
         localStorage.setItem('token',token)
 			  navigate('/')
       }
+      else{
+        openNotification()
+      }
+  };
+
+  const openNotification = () => {
+    api.error({
+      description: 'Invalid Credentials'
+    });
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -63,6 +73,7 @@ function Login() {
           </Form.Item>
         </Form>
       </div>
+      {contextHolder}
     </Fragment>
   );
 }
