@@ -8,7 +8,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { GoogleAdsApisService } from './google-ads-apis.service';
-import { CreateGoogleAdsApiDto } from './dto/create-google-ads-api.dto';
+import { CreateGoogleAdsApiDto, ObtainAdsDataDto } from './dto/create-google-ads-api.dto';
 import { UpdateGoogleAdsApiDto } from './dto/update-google-ads-api.dto';
 
 @Controller('google-ads-apis')
@@ -16,10 +16,10 @@ export class GoogleAdsApisController {
   constructor(private readonly googleAdsApisService: GoogleAdsApisService) { }
 
 
-  @Get('/ObtainAdsData/:email/:token')
-  ObtainAdsData(@Param('email') email: string,@Param('token') token:string) {
+  @Post('/ObtainAdsData')
+  ObtainAdsData(@Body() ObtainAdsDataDto: ObtainAdsDataDto) {
     try {
-      return this.googleAdsApisService.ObtainAdsData(email,token);
+      return this.googleAdsApisService.ObtainAdsData(ObtainAdsDataDto);
     } catch (error) {
       return error;
     }

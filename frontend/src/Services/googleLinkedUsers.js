@@ -5,7 +5,8 @@ var config = {
   method: 'get',
   url: 'https://googleads.googleapis.com/v13/customers:listAccessibleCustomers',
   headers: { 
-    'developer-token': 'NTipfGy1nGO2oAFRaSdFiw', 
+    'developer-token': 'BSed2TGB27BPgmlMSYlCJw', 
+    // 'developer-token': 'BSed2TGB27BPgmlMSYlCJw', client dev_token
     'Authorization': `Bearer ${token}`}
 };
   try {
@@ -26,12 +27,13 @@ const getActDetails  =async(list,token) =>{
     const e = list[i];
     let arr = e.split("/");
     let id= arr[1]
-    var data = {"query":"SELECT customer.id, customer.manager,customer.status, customer.resource_name, customer.descriptive_name FROM customer"};
+    var data = {"query":"SELECT customer.id,customer_client.descriptive_name,customer_client.id, customer.manager,customer.status,customer_client.status, customer.resource_name, customer.descriptive_name FROM customer_client WHERE customer_client.level = 1"};
     var config = {
           method: 'post',
           url: `https://googleads.googleapis.com/v13/customers/${id}/googleAds:search`,
           headers: { 
-            'developer-token': 'NTipfGy1nGO2oAFRaSdFiw', 
+            'developer-token': 'BSed2TGB27BPgmlMSYlCJw', 
+            // 'developer-token': 'BSed2TGB27BPgmlMSYlCJw', client dev_token
             'login-customer-id': id, 
             'Authorization': `Bearer ${token}`
           },
@@ -39,11 +41,12 @@ const getActDetails  =async(list,token) =>{
         };
         try {
           let res = await axios(config)
-          console.log("check in loop ", res.data)
-          details.push(res.data.results[0].customer)
-        } catch (error) {
-          
-        }
+          // console.log("check in loop ", res.data)
+          if(res.data?.results.length)
+            res.data.results.forEach(el => {
+              details.push({...el.customerClient, manager_id: el.customer.id})
+            });
+        } catch (error) {}
   }
   return details
 }

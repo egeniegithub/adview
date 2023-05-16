@@ -10,3 +10,6 @@ export const GetServerCall =async (url)=>{
         }
       );
 }
+export const PostServerCall =async (url,data)=>{
+  return  await axios.post(`https://adview.io${url}`,data);
+}
