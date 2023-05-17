@@ -14,7 +14,7 @@ import { BingBtn } from "./BingBtn";
 import { Facebook } from "./Facebook";
 import { getBubbleUsers } from "../Services/BubbleIo";
 import { GoogleBtn } from "./GoogleBtn";
-import { GetServerCall } from "../Services/apiCall";
+import { GetServerCall, PostServerCall } from "../Services/apiCall";
 import { getAccosiatedUstomers } from "../Services/googleLinkedUsers";
 
 const AdviewTable = () => {
@@ -22,9 +22,6 @@ const AdviewTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [isloading, setIsloading] = useState(true)
-  const [linkedUsers, setLinkedUsers] = useState([])
-  const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
-
   useEffect(() => {
     getdata()
   }, [])
@@ -63,18 +60,13 @@ const AdviewTable = () => {
     }
   };
 
-  const fetchAdsData = async (accessToken, provider_name,user_name) => {
+  const fetchAdsData = async (accessToken, provider_name,user_name,customer_id,manager_id) => {
     switch (provider_name) {
       case 'google':
         {
           console.log("check uri ", email, accessToken)
-          const res = await GetServerCall(`/google-ads-apis/ObtainAdsData/${email}/${accessToken}`)
+          const res = await PostServerCall(`/google-ads-apis/ObtainAdsData`,{email ,customer_id,accessToken,manager_id})
           handleResponse(res, provider_name,user_name)
-          let list =await getAccosiatedUstomers(accessToken)
-          if(list?.length){
-            setLinkedUsers(list)
-            setshowLinkedUserModal(true)
-          }
           // close buttons popup in google case 
           handleOk()
         }
@@ -128,10 +120,12 @@ const AdviewTable = () => {
       setTableData(prevArray =>
         prevArray.map(item => {
           if (item.id == id) {
+            let temp =  [item.include]
+            temp = temp.filter(el => el != provider_name)
             if(provider_name =='facebook')
               return { ...item, [provider_name]: res.data?.calculated?.amount_spent,
-                ['instagram']: res.data?.calculated?.amount_spent };
-            return { ...item, [provider_name]: res.data?.calculated?.amount_spent };
+                ['instagram']: res.data?.calculated?.amount_spent,'include': [...temp] };
+            return { ...item, [provider_name]: res.data?.calculated?.amount_spent,'include': [...temp] };
           }
           else
             return { ...item };
@@ -164,12 +158,6 @@ const AdviewTable = () => {
       console.log(error, "error");
     }
   };
-
-  const handleCustomerSelection = (userData)=>{
-    console.log("check customer ", userData)
-    setshowLinkedUserModal(false)
-  }
-
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -333,53 +321,6 @@ const AdviewTable = () => {
           <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
           <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} />
         </div>
-      </Modal>
-
-      <Modal
-        title="Linked Accounts"
-        width={"55%"}
-        open={showLinkedUserModal}
-        onOk={()=>{setshowLinkedUserModal(false)}}
-        closable = {false}
-        footer={<Button onClick={()=>{setshowLinkedUserModal(false)}}>Ok</Button>}
-      >
-        <Table
-            style={{ height: "auto" }}
-            pagination={false}
-            onRow={(record, rowIndex) => {
-              return {
-                onClick: event => {console.log("row clicked ", record)}, // click row
-              };
-            }}
-            columns={[
-              {
-                title: "ID",
-                dataIndex: "id",
-                key: "id",
-              },
-              {
-                title: "Name",
-                dataIndex: "descriptiveName",
-                key: "descriptiveName",
-              },
-              {
-                title: "Status",
-                dataIndex: "status",
-                key: "status",
-              },
-            ]}
-            dataSource={linkedUsers}
-          />
-        {/* <div style={{ display: 'flex',flexFlow:'column',gap:'2%' }}>
-          {linkedUsers.map((e,indx)=>{
-            return(
-              <p onClick={()=> handleCustomerSelection(e)} style={{cursor:'pointer',width:'fit-content'}} key={e.id}>
-                {indx+1})&nbsp; <strong>ID:</strong> {e.id}, <strong>Name:</strong> {e.descriptiveName}  <strong>status:</strong> {e.status== 'CLOSED'? 'Disabled': 'Enable'}
-              </p>
-            )
-          })}
-        </div> */}
-
       </Modal>
     </Fragment>
   );

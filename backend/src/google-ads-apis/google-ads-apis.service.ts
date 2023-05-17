@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { CreateGoogleAdsApiDto } from './dto/create-google-ads-api.dto';
+import { CreateGoogleAdsApiDto, ObtainAdsDataDto } from './dto/create-google-ads-api.dto';
 import { UpdateGoogleAdsApiDto } from './dto/update-google-ads-api.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleAdsApi, enums } from 'google-ads-api';
@@ -53,15 +53,10 @@ export class GoogleAdsApisService {
     }
   }
 
-  async ObtainAdsData(email: string, access_token: string) {
+  async ObtainAdsData({email, accessToken,customer_id,manager_id} : ObtainAdsDataDto) {
     try {
-      const compiled = [];
-      const allData = []
-      const developer_token = 'NTipfGy1nGO2oAFRaSdFiw'
-      let customer_id = '3007970972' //ad acount id
-
-      const length = allData.length
-      const data = await this.getMonthlySpend(email, customer_id, developer_token, access_token);
+      const developer_token = 'BSed2TGB27BPgmlMSYlCJw'
+      const data = await this.getMonthlySpend(email, customer_id, developer_token, accessToken,manager_id);
       return ({ ...data })
     } catch (err) {
       console.log(err);
@@ -69,7 +64,7 @@ export class GoogleAdsApisService {
     }
   }
 
-  async getMonthlySpend(email, customer_id, developer_token, access_token) {
+  async getMonthlySpend(email, customer_id, developer_token, access_token,manager_id) {
 
     const options = {
       url: `https://googleads.googleapis.com/v13/customers/${customer_id}/googleAds:search`,
@@ -78,7 +73,7 @@ export class GoogleAdsApisService {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'developer-token': developer_token,
-        'login-customer-id': '2549371484', //manager account id 
+        'login-customer-id': manager_id, //manager account id 
         'Authorization': `Bearer ${access_token}`,
       },
       data: {
@@ -95,11 +90,13 @@ export class GoogleAdsApisService {
     };
     try {
       let res = await axios(options)
-      let total = { amount_spent: 0 }
+      let total : number|any = { amount_spent: 0 }
       let { results = [] } = res.data
       results.forEach(e => {
-        total.amount_spent += parseInt(e.metrics.cost_micros)
+        total.amount_spent += parseInt(e.metrics.costMicros)
       });
+      if(total.amount_spent > 0)
+        total.amount_spent = (total.amount_spent / 1000000).toFixed(2);
       // save data in db
       const updated = await this.ClientDataService.updateByClient(email, { 'google': `${total.amount_spent}` })
       return ({ google_api_data: res.data, calculated: total, db_updated: updated })
@@ -108,7 +105,6 @@ export class GoogleAdsApisService {
       return ({ err: error, updation_status: false })
     }
   }
-
 
   // findAll() {
   //   return `This action returns all googleAdsApis`;

@@ -30,14 +30,26 @@ export const LinkedinBtn = ({fetchAdsData,handleOk}) => {
     let redirect_uri = 'https://adview.io/linkedin'
     let client_id='785n2302jr2bhy'
     let client_secret='MXOXwBdgiFqx7MXP'
-    var config = {
-      method: 'post',
-      url: `https://www.linkedin.com/oauth/v2/accessToken?grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirect_uri}&code=${code}`
+    const params = {
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri,
+      client_id,
+      client_secret,
     };
+    const headers = new Headers({
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'x-cors-grida-api-key': '875c0462-6309-4ddf-9889-5227b1acc82c',
+    });
     
-    axios(config)
+    fetch(`https://cors.bridged.cc/https://www.linkedin.com/oauth/v2/accessToken`, {
+      method: 'POST',
+      headers,
+      body: new URLSearchParams(params),
+    })
+    .then(response => response.json())
     .then(function (response) {
-      getuserInfo(response.data.access_token,code)
+      getuserInfo(response.access_token,code)
     })
     .catch(function (error) {
       console.log(error);
@@ -46,15 +58,24 @@ export const LinkedinBtn = ({fetchAdsData,handleOk}) => {
 
   // getuserInfo from linkedin via access token 
   const getuserInfo =(token,code)=>{
-    fetch(`https://api.linkedin.com/v2/me?oauth2_access_token=${token}&projection=(id,profilePicture(displayImage~digitalmediaAsset:playableStreams),localizedLastName, firstName,lastName,localizedFirstName)`, {
-      method: 'GET'
-    })
+    fetch(
+      `https://api.allorigins.win/get?url=${encodeURIComponent('https://api.linkedin.com/v2/me?oauth2_access_token=' +
+          token +
+          '&projection=(id,profilePicture(displayImage~digitalmediaAsset:playableStreams),localizedLastName, firstName,lastName,localizedFirstName)',
+      )}`,
+      {
+        method: 'GET',
+      },
+    )
       .then(response => response.json())
-      .then(response => {
-        let name = response.localizedFirstName+' '+response.localizedLastName
-        handleOk()
-        fetchAdsData(token,'linkedin',name,code)
-        linkedMultiLogin(code)
+      .then(res => {
+        if (res.contents) {
+          const response = JSON.parse(res.contents);
+          let name = response.localizedFirstName+' '+response.localizedLastName
+          handleOk()
+          fetchAdsData(token,'linkedin',name,code)
+          setTimeout(()=>{linkedMultiLogin(code)},2000)
+        }
       })
       .catch(err => {
         
@@ -112,9 +133,20 @@ export const linkedMultiLogin =(code)=>{
   let redirect_uri = 'https://adview.io/linkedin'
         let client_id='785n2302jr2bhy'
         let client_secret='MXOXwBdgiFqx7MXP'
-        var config = {
-          method: 'post',
-          url: `https://www.linkedin.com/oauth/v2/accessToken?grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirect_uri}&code=${code}`
+        const params = {
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri,
+          client_id,
+          client_secret,
         };
-        axios(config)
+        const headers = new Headers({
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'x-cors-grida-api-key': '875c0462-6309-4ddf-9889-5227b1acc82c',
+        });
+        fetch(`https://cors.bridged.cc/https://www.linkedin.com/oauth/v2/accessToken`, {
+          method: 'POST',
+          headers,
+          body: new URLSearchParams(params),
+        })
 }

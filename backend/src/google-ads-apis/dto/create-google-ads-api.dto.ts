@@ -6,3 +6,11 @@ export class CreateGoogleAdsApiDto {
     // @IsNotEmpty()
     RefreshToken: string;
 }
+
+
+export class ObtainAdsDataDto {
+    accessToken:string
+    customer_id:string
+    email:string
+    manager_id:string
+}
