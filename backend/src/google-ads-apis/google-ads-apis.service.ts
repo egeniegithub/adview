@@ -90,11 +90,13 @@ export class GoogleAdsApisService {
     };
     try {
       let res = await axios(options)
-      let total = { amount_spent: 0 }
+      let total : number|any = { amount_spent: 0 }
       let { results = [] } = res.data
       results.forEach(e => {
-        total.amount_spent += parseInt(e.metrics.cost_micros)
+        total.amount_spent += parseInt(e.metrics.costMicros)
       });
+      if(total.amount_spent > 0)
+        total.amount_spent = (total.amount_spent / 1000000).toFixed(2);
       // save data in db
       const updated = await this.ClientDataService.updateByClient(email, { 'google': `${total.amount_spent}` })
       return ({ google_api_data: res.data, calculated: total, db_updated: updated })

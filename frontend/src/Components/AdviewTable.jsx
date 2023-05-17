@@ -120,10 +120,12 @@ const AdviewTable = () => {
       setTableData(prevArray =>
         prevArray.map(item => {
           if (item.id == id) {
+            let temp =  [item.include]
+            temp = temp.filter(el => el != provider_name)
             if(provider_name =='facebook')
               return { ...item, [provider_name]: res.data?.calculated?.amount_spent,
-                ['instagram']: res.data?.calculated?.amount_spent };
-            return { ...item, [provider_name]: res.data?.calculated?.amount_spent };
+                ['instagram']: res.data?.calculated?.amount_spent,'include': [...temp] };
+            return { ...item, [provider_name]: res.data?.calculated?.amount_spent,'include': [...temp] };
           }
           else
             return { ...item };

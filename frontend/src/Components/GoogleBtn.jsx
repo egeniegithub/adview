@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LoginSocialFacebook, LoginSocialGoogle } from "reactjs-social-login";
 import { Button, Modal, Table } from 'antd';
 import { getAccosiatedUstomers } from '../Services/googleLinkedUsers';
+import { Input } from 'antd';
 
 export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
     const [linkedUsers, setLinkedUsers] = useState([])
+    const [seacrhedName, setSeacrhedName] = useState([])
+    const [filteredLinkedUsers, setfilteredLinkedUsers] = useState([])
     const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
     const [userName, setuserName] = useState('')
     const [access_token, setaccess_token] = useState('')
-    const [isloading, setIsloading] = useState(true)
 
     const GResponseHandler = async (response) => {
         console.log("Google", response)
@@ -34,6 +36,15 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
         handleOk()
     }
 
+    useEffect(()=>{
+        let temp = [...linkedUsers]
+        let filterArr = temp.filter(el=>{
+            if(el.descriptiveName.toLowerCase().includes(seacrhedName))
+                return {...el}
+        })
+        setfilteredLinkedUsers(filterArr)
+    },[seacrhedName])
+
     if(userExist?.google?.name)
         return(
             <div style={{display:'flex',flexFlow:'column',gap:'1%'}}>
@@ -46,7 +57,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
         )
     return (
         <>
-            <LoginSocialGoogle
+            {!showLinkedUserModal && <LoginSocialGoogle
                     // client_id={'828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com'} client account
                     client_id={'828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com'}
                     scope="openid profile email https://www.googleapis.com/auth/adwords"
@@ -63,16 +74,17 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                     <Button className="ModalBtn" type="primary">
                         google Ads
                     </Button>
-            </LoginSocialGoogle>
+            </LoginSocialGoogle>}
 
             <Modal
                 title="Linked Accounts"
-                width={"55%"}
+                width={"60%"}
                 open={showLinkedUserModal}
                 onOk={()=>{setshowLinkedUserModal(false)}}
                 closable = {false}
                 footer={null}
             >
+                <Input onChange={({target})=>{setSeacrhedName(target.value)}} placeholder="Search by name.." style={{width:"50%", float:'right',marginBottom:'.3rem'}} />
                 <Table
                     style={{ height: "auto" }}
                     pagination={false}
@@ -85,7 +97,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                         setshowLinkedUserModal(false)
                         let {id: customer_id, manager_id} = record
                         fetchAdsData(access_token, 'google',userName,customer_id,manager_id)
-                        console.log("row clicked ", record)
+                        setSeacrhedName('')
                         }}>{text}</a>
                     },
                     {
@@ -99,7 +111,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                         key: "status",
                     },
                     ]}
-                    dataSource={linkedUsers}
+                    dataSource={seacrhedName != '' ? filteredLinkedUsers : linkedUsers}
                 />
             </Modal>
         </>
