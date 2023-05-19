@@ -41,7 +41,7 @@ const AdviewTable = () => {
       setIsloading(false)
     }
     const bubble = await getBubbleUsers()
-    console.log("check bubble response ", bubble)
+    // console.log("check bubble response ", bubble)
   }
 
   const modifyData = (tableData, data) => {
@@ -53,7 +53,7 @@ const AdviewTable = () => {
           ? data[0].updation_status
           : "";
         modified.push(tableData);
-        console.log(modified, "modified");
+        // console.log(modified, "modified");
       } else {
         modified.push(tableData);
       }
@@ -64,7 +64,7 @@ const AdviewTable = () => {
     switch (provider_name) {
       case 'google':
         {
-          console.log("check uri ", email, accessToken)
+          // console.log("check uri ", email, accessToken)
           const res = await PostServerCall(`/google-ads-apis/ObtainAdsData`,{email ,customer_id,accessToken,manager_id})
           handleResponse(res, provider_name,user_name)
           // close buttons popup in google case 
@@ -155,7 +155,7 @@ const AdviewTable = () => {
         fetchAdsData(email);
 
     } catch (error) {
-      console.log(error, "error");
+      // console.log(error, "error");
     }
   };
 
@@ -231,7 +231,7 @@ const AdviewTable = () => {
       dataIndex: "google",
       key: "Google",
       render: (val, obj) => {
-        console.log("check incuse ", obj)
+        // console.log("check incuse ", obj)
         if (obj?.isStatusUpdated == false && obj?.include?.includes('google')) {
           return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
@@ -288,7 +288,7 @@ const AdviewTable = () => {
       },
     },
   ];
-  console.log('rendered')
+  // console.log('rendered')
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
   return (
     <Fragment>

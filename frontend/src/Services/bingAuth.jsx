@@ -18,10 +18,10 @@ export const loginWithBing = async () => {
     };
     try {
         const authResult = await msalInstance.loginPopup(loginRequest);
-        console.log('Access token:', authResult.accessToken);
-        console.log('Refresh token:', authResult.refreshToken);
+        // console.log('Access token:', authResult.accessToken);
+        // console.log('Refresh token:', authResult.refreshToken);
         return authResult;
     } catch (error) {
-        console.log(error, "erroroccured");
+        // console.log(error, "erroroccured");
     }
 };

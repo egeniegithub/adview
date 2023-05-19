@@ -34,7 +34,7 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
         if (data.access_token) {
           let token = data.access_token.split('/')
           fetchAdsData(token[0], 'bing',data.displayName || '')
-          console.log("bing data ", data)
+          // console.log("bing data ", data)
         }
       }}
       onReject={(err) => {
