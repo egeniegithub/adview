@@ -46,6 +46,9 @@ export class ClientDatum {
     @Column()
     status: string;
 
+    @Column("longtext")
+    google_client_linked_accounts: string;
+
     @Column()
     g_token: string;
 

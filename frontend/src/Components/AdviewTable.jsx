@@ -16,12 +16,15 @@ import { getBubbleUsers } from "../Services/BubbleIo";
 import { GoogleBtn } from "./GoogleBtn";
 import { GetServerCall, PostServerCall } from "../Services/apiCall";
 import { getAccosiatedUstomers } from "../Services/googleLinkedUsers";
+import { LinkedAccountsToClient } from "./LinkedAccountsToClient";
 
 const AdviewTable = () => {
   const [email, setEmail] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [isloading, setIsloading] = useState(true)
+  const [showClientLinkedActsModal, setShowClientLinkedActsModal] = useState(false)
+  const [currentProvider, setCurrentProvider] = useState('')
   useEffect(() => {
     getdata()
   }, [])
@@ -44,29 +47,15 @@ const AdviewTable = () => {
     // console.log("check bubble response ", bubble)
   }
 
-  const modifyData = (tableData, data) => {
-    const modified = [];
-    for (let i = 0; i < tableData.length; i++) {
-      if (tableData[i].email === data[0].email) {
-        tableData[i].Google = data[0].Google ? data[0].Google : "-";
-        tableData[i].updation_status = data[0].updation_status
-          ? data[0].updation_status
-          : "";
-        modified.push(tableData);
-        // console.log(modified, "modified");
-      } else {
-        modified.push(tableData);
-      }
-    }
-  };
 
-  const fetchAdsData = async (accessToken, provider_name,user_name,customer_id,manager_id) => {
+  const fetchAdsData = async (accessToken, provider_name, user_name, customer_ids, manager_id) => {
+    setIsloading(true)
     switch (provider_name) {
       case 'google':
         {
           // console.log("check uri ", email, accessToken)
-          const res = await PostServerCall(`/google-ads-apis/ObtainAdsData`,{email ,customer_id,accessToken,manager_id})
-          handleResponse(res, provider_name,user_name)
+          const res = await PostServerCall(`/google-ads-apis/ObtainAdsData`, { email, customer_ids, accessToken, manager_id })
+          handleResponse(res, provider_name, user_name)
           // close buttons popup in google case 
           handleOk()
         }
@@ -75,20 +64,20 @@ const AdviewTable = () => {
       case 'facebook':
         {
           const res = await GetServerCall(`/meta-ads/ObtainMetaAdsData/${email}/${accessToken}`)
-          handleResponse(res, provider_name,user_name)
+          handleResponse(res, provider_name, user_name)
         }
         break
 
       case 'bing':
         {
           const res = await GetServerCall(`/bing-ads/ObtainBingAdsData/${email}/${accessToken}`)
-          handleResponse(res, provider_name,user_name)
+          handleResponse(res, provider_name, user_name)
         }
         break
       case 'linkedin':
         {
           const res = await GetServerCall(`/linkedin-ads/ObtainLinkedinAdsData/${email}/${accessToken}`)
-          handleResponse(res, provider_name,user_name)
+          handleResponse(res, provider_name, user_name)
         }
         break
       default:
@@ -97,67 +86,31 @@ const AdviewTable = () => {
 
   };
 
-  const handleResponse = (res, provider_name,user_name) => {
+  const handleResponse = (res, provider_name, user_name) => {
     let id = localStorage.getItem('id')
     if (res.data.err) {
-      setTableData(prevArray =>
-        prevArray.map(item => {
-          // check if data isnt updated then indicator should show 
-          if (item.id == id && res.data.updation_status == false) {
-            let temp = item.include? [...item.include,provider_name] : [provider_name]
-            return {
-              ...item,
-              'isStatusUpdated': false,
-              'include': [...temp]
-            };
-          }
-          else
-            return { ...item };
-        })
-      );
+      let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {};
+      is_sync_users_with_ads = { ...is_sync_users_with_ads, [id]: {...is_sync_users_with_ads[id], [provider_name]: false } };
+      localStorage.setItem("is_sync_users_with_ads", JSON.stringify(is_sync_users_with_ads));
     }
     else {
-      setTableData(prevArray =>
-        prevArray.map(item => {
-          if (item.id == id) {
-            let temp =  [item.include]
-            temp = temp.filter(el => el != provider_name)
-            if(provider_name =='facebook')
-              return { ...item, [provider_name]: res.data?.calculated?.amount_spent,
-                ['instagram']: res.data?.calculated?.amount_spent,'include': [...temp] };
-            return { ...item, [provider_name]: res.data?.calculated?.amount_spent,'include': [...temp] };
-          }
-          else
-            return { ...item };
-        })
-      )}
-      let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
-        logedInUsers[id] = {
-          ...logedInUsers[id],
-          [provider_name]:{name :user_name}
-        }
-      localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+      let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
+      if (is_sync_users_with_ads[id])
+        is_sync_users_with_ads[id].provider_name = !is_sync_users_with_ads[id].provider_name;
 
+      localStorage.setItem("is_sync_users_with_ads", JSON.stringify(is_sync_users_with_ads));
+    }
+    let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
+    logedInUsers[id] = {
+      ...logedInUsers[id],
+      [provider_name]: { name: user_name }
+    }
+    localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+    setShowClientLinkedActsModal(true);
+    setCurrentProvider(provider_name)
+    getdata()
   }
 
-  const storetoken = async (email, accessToken, refreshToken) => {
-    try {
-      let res = await axios.post(`${process.env.REACT_APP_API_URL}/google-ads-apis/plateformTokens`, {
-        email: email,
-        g_token: accessToken,
-        g_refresh: refreshToken,
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      if (res)
-        fetchAdsData(email);
-
-    } catch (error) {
-      // console.log(error, "error");
-    }
-  };
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -175,7 +128,7 @@ const AdviewTable = () => {
       dataIndex: "Link",
       key: "Link",
       render: (text, record) => <a onClick={() => {
-        localStorage.setItem('id',record.id)
+        localStorage.setItem('id', record.id)
         setEmail(record.email)
 
         showModal(record);
@@ -231,8 +184,10 @@ const AdviewTable = () => {
       dataIndex: "google",
       key: "Google",
       render: (val, obj) => {
+        let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
+        let is_sync = is_sync_users_with_ads[obj.id] || {}
         // console.log("check incuse ", obj)
-        if (obj?.isStatusUpdated == false && obj?.include?.includes('google')) {
+        if (is_sync.google == false) {
           return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
           return val
@@ -244,7 +199,9 @@ const AdviewTable = () => {
       dataIndex: "bing",
       key: "Bing",
       render: (val, obj) => {
-        if (obj?.isStatusUpdated == false && obj?.include?.includes('bing')) {
+        let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
+        let is_sync = is_sync_users_with_ads[obj.id] || {}
+        if (is_sync.bing == false) {
           return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
           return val
@@ -256,7 +213,9 @@ const AdviewTable = () => {
       dataIndex: "linkedin",
       key: "LinkedIn",
       render: (val, obj) => {
-        if (obj?.isStatusUpdated == false && obj?.include?.includes('linkedin')) {
+        let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
+        let is_sync = is_sync_users_with_ads[obj.id] || {}
+        if (is_sync.linkedin == false) {
           return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
           return val
@@ -268,7 +227,9 @@ const AdviewTable = () => {
       dataIndex: "facebook",
       key: "Facebook",
       render: (val, obj) => {
-        if (obj?.isStatusUpdated == false && obj?.include?.includes('facebook')) {
+        let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
+        let is_sync = is_sync_users_with_ads[obj.id] || {}
+        if (is_sync.facebook == false) {
           return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
           return val
@@ -280,7 +241,9 @@ const AdviewTable = () => {
       dataIndex: "instagram",
       key: "Instagram",
       render: (val, obj) => {
-        if (obj?.isStatusUpdated == false && obj?.include?.includes('facebook')) {
+        let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
+        let is_sync = is_sync_users_with_ads[obj.id] || {}
+        if (is_sync.facebook == false) {
           return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
           return val
@@ -289,10 +252,14 @@ const AdviewTable = () => {
     },
   ];
   // console.log('rendered')
-  const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
+  const antIcon = <LoadingOutlined style={{ fontSize: 22 }} spin />;
+  let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
+  let id = localStorage.getItem('id')
+  let userExist = logedInUsers[id]
+
   return (
     <Fragment>
-      <Spin tip="Loading..." indicator={antIcon} spinning={isloading} size="large" style={{marginLeft:'2vw'}}>
+      <Spin tip="Loading..." indicator={antIcon} spinning={isloading} size="large" style={{ marginLeft: '2vw' }}>
         <div className="TableMain">
           <Table
             style={{ height: "auto" }}
@@ -300,26 +267,29 @@ const AdviewTable = () => {
             columns={columns}
             dataSource={tableData}
           />
-          {!isloading && tableData.length == 0 ?<div style={{display:'flex',justifyContent:'center',marginLeft:'4vw'}} >
-            <Button onClick={()=>{getdata()}}>Retry</Button>
-          </div>:''}
-          
+          {!isloading && tableData.length == 0 ? <div style={{ display: 'flex', justifyContent: 'center', marginLeft: '4vw' }} >
+            <Button onClick={() => { getdata() }}>Retry</Button>
+          </div> : ''}
+
         </div>
       </Spin>
-      
+
       <Modal
-        title="Link Accounts to client"
+        title={userExist?.google?.name ? `Link Account to ${userExist?.google?.name}` : "Link Accounts to GoldenGate Partners"}
         width={"55%"}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
       >
-        <div style={{ display: 'flex',gap:'2%',marginTop:'20px' }}>
-          <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
-          <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
-          <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
-          <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} />
+        <div style={{ display: 'flex', flexFlow: 'column' }}>
+          <div style={{ display: 'flex', gap: '2%', marginTop: '20px' }}>
+            <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
+            <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
+            <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
+            <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} />
+          </div>
+          <LinkedAccountsToClient showClientLinkedActsModal={showClientLinkedActsModal} setshowModal={setShowClientLinkedActsModal} currentProvider={currentProvider} userData={tableData.find(e => e.email == email)} refreshData={getdata} isMainLoading={isloading} />
         </div>
       </Modal>
     </Fragment>

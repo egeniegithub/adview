@@ -33,6 +33,15 @@ export class GoogleAdsApisController {
       return error;
     }
   }
+  @Get('/unlink-customer/:id/:email')
+  hanldeUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.googleAdsApisService.hanldeUnlinkCustomer(id,email);
+  }
+
+  @Get('/relink-customer/:id/:email')
+  hanldeRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.googleAdsApisService.hanldeRelinkCustomer(id,email);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

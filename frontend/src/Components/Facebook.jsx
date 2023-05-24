@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { LoginSocialFacebook } from "reactjs-social-login";
 import { Button } from 'antd';
+import { handleLogoutIndicator } from '../utils/helper';
 
 export const Facebook = ({ fetchAdsData, handleOk }) => {
 
     const FbResponseHandler = async (response) => {
         // console.log("facebook", response)
         handleOk()
-        if(response.accessToken)
-            fetchAdsData(response.accessToken, 'facebook',response.name)
+        if (response.accessToken)
+            fetchAdsData(response.accessToken, 'facebook', response.name)
 
     }
 
@@ -16,18 +17,20 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
     let id = localStorage.getItem('id')
     let userExist = logedInUsers[id]
 
-    const handleRowLogout = ()=>{
+    const handleRowLogout = () => {
         delete userExist?.facebook;
         logedInUsers[id] = userExist
         localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+        // check is indicator exists
+        handleLogoutIndicator(id, "facebook")
         handleOk()
     }
 
-    if(userExist?.facebook?.name)
-        return(
-            <div style={{display:'flex',flexFlow:'column'}}>
-                <Button disabled className="ModalBtn" style={{color:'#646464'}} type="primary">
-                    {userExist?.facebook?.name}
+    if (userExist?.facebook?.name)
+        return (
+            <div style={{ display: 'flex', flexFlow: 'column' }}>
+                <Button disabled className="ModalBtn" style={{ color: '#fff', backgroundColor: '#018F0F' }}>
+                    Meta Ads
                 </Button>
                 <Button onClick={handleRowLogout}>Logout Meta</Button>
             </div>
