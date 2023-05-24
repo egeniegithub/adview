@@ -20,7 +20,7 @@ export const getBubbleUsers = () => {
             // console.log(JSON.stringify(response.data));
         })
         .catch((error) => {
-            console.log(error.response.data);
+            // console.log(error.response.data);
         });
 
 }

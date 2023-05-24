@@ -5,7 +5,7 @@ import { Button } from 'antd';
 export const Facebook = ({ fetchAdsData, handleOk }) => {
 
     const FbResponseHandler = async (response) => {
-        console.log("facebook", response)
+        // console.log("facebook", response)
         handleOk()
         if(response.accessToken)
             fetchAdsData(response.accessToken, 'facebook',response.name)
@@ -35,7 +35,7 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
 
     return (
         <LoginSocialFacebook
-            appId={process.env.REACT_APP_FB_CLIENT_ID || 5498527660249813}
+            appId={process.env.REACT_APP_FB_CLIENT_ID || 266566095742191}
             fieldsProfile={
                 'id,name'
             }

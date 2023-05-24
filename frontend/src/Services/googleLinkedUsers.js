@@ -12,10 +12,10 @@ var config = {
   try {
     let res = await axios(config)
     let details = await getActDetails(res.data.resourceNames,token)
-    console.log("check details ", details , res.data)
+    // console.log("check details ", details , res.data)
     return details
   } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
 } 
 

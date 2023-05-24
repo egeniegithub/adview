@@ -1,6 +1,6 @@
 // this file is not being used
 export const FacebookAuthResponse = async (response) => {
-    console.log('facebook response:', response)
+    // console.log('facebook response:', response)
     await fetch(
         `${process.env.REACT_APP_API_URL}/platform-tokens`, {
         method: "post",

@@ -26,15 +26,16 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
 
   return (
     <LoginSocialMicrosoft
-      client_id={`a8e64672-9325-4287-b650-3db8270ba6b6`}
+      client_id={`b2d7eb5f-e889-4f34-a297-7221ce6c26e7`}
       redirect_uri={`https://adview.io/bing`}
       scope={'User.Read'}
+      // https://ads.microsoft.com/msads.manage}
       onResolve={({ provider, data }) => {
         handleOk()
         if (data.access_token) {
           let token = data.access_token.split('/')
           fetchAdsData(token[0], 'bing',data.displayName || '')
-          console.log("bing data ", data)
+          // console.log("bing data ", data)
         }
       }}
       onReject={(err) => {

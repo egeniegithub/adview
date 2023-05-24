@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { LoginSocialFacebook, LoginSocialGoogle } from "reactjs-social-login";
-import { Button, Modal, Table } from 'antd';
+import { Button, Modal, Switch, Table } from 'antd';
 import { getAccosiatedUstomers } from '../Services/googleLinkedUsers';
 import { Input } from 'antd';
 
@@ -11,13 +11,20 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
     const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
     const [userName, setuserName] = useState('')
     const [access_token, setaccess_token] = useState('')
+    const [selectedRow, setselectedRow] = useState({})
+
 
     const GResponseHandler = async (response) => {
-        console.log("Google", response)
+        // console.log("Google", response)
         if(!response.access_token) 
             return
         let list =await getAccosiatedUstomers(response.access_token)
         if(list?.length){
+            // loop through list and add key 
+            list.forEach((ele,i)=>{
+                ele.key = i+1
+                ele.auto_track = false
+            })
             setLinkedUsers(list)
             setshowLinkedUserModal(true)
             setuserName(response.name)
@@ -44,6 +51,25 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
         })
         setfilteredLinkedUsers(filterArr)
     },[seacrhedName])
+
+    const rowSelection = {
+        onChange: (selectedRowKeys, selectedRows) => {
+            let {id: customer_id, manager_id} = selectedRows[0]
+            setselectedRow({customer_id,manager_id})
+        },
+        getCheckboxProps: (record) => ({
+            name: record.descriptiveName,
+        }),
+    };
+
+    const handleConnect =()=>{
+        if(!selectedRow.customer_id)
+            return
+        setshowLinkedUserModal(false)
+        fetchAdsData(access_token, 'google',userName,selectedRow.customer_id,selectedRow.manager_id)
+        setSeacrhedName('')
+    }
+
 
     if(userExist?.google?.name)
         return(
@@ -86,33 +112,53 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
             >
                 <Input onChange={({target})=>{setSeacrhedName(target.value)}} placeholder="Search by name.." style={{width:"50%", float:'right',marginBottom:'.3rem'}} />
                 <Table
-                    style={{ height: "auto" }}
-                    pagination={false}
+                    rowSelection={{
+                        type:'radio',
+                        ...rowSelection,
+                    }}
                     columns={[
                     {
-                        title: "ID",
-                        dataIndex: "id",
-                        key: "id",
-                        render: (text, record) => <a onClick={() => {
-                        setshowLinkedUserModal(false)
-                        let {id: customer_id, manager_id} = record
-                        fetchAdsData(access_token, 'google',userName,customer_id,manager_id)
-                        setSeacrhedName('')
-                        }}>{text}</a>
-                    },
-                    {
-                        title: "Name",
+                        title: "AD ACCOUNT",
                         dataIndex: "descriptiveName",
                         key: "descriptiveName",
+                    },
+                    {
+                        title: "AD ACCOUNT ID",
+                        dataIndex: "id",
+                        key: "id"
                     },
                     {
                         title: "Status",
                         dataIndex: "status",
                         key: "status",
                     },
+                    {
+                        title: "AUTO TRACKING",
+                        dataIndex: "status",
+                        key: "status",
+                        render: (text, record) => <Switch checked={record.auto_track} onChange={
+                            ()=>{setLinkedUsers(
+                            prevArray =>
+                                prevArray.map(item => {
+                                if (item.id == record.id) {
+                                    return {
+                                        ...item,
+                                        auto_track : !item.auto_track
+                                    };
+                                }
+                                else
+                                    return { ...item };
+                                })
+                            )}
+                        }/>
+                    },
                     ]}
                     dataSource={seacrhedName != '' ? filteredLinkedUsers : linkedUsers}
                 />
+                <div style={{display :'flex',gap:'2%'}}>
+                    <Button type='primary' onClick={handleConnect}>Connect</Button>
+                    <Button onClick={()=>{setshowLinkedUserModal(false);setLinkedUsers([])}}>Cancel</Button>
+                </div>
             </Modal>
         </>
     );

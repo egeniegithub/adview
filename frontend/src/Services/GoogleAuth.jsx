@@ -13,11 +13,11 @@ export const loginWithGoogle = async (e) => {
             const accessToken = result?._tokenResponse?.oauthIdToken;
             const refreshToken = result?._tokenResponse?.refreshToken;
             const email = result?.user?.email;
-            console.log(result, "res");
-            console.log(accessToken, "token");
+            // console.log(result, "res");
+            // console.log(accessToken, "token");
             if (accessToken && refreshToken) {
-                console.log(accessToken);
-                console.log(refreshToken);
+                // console.log(accessToken);
+                // console.log(refreshToken);
             }
         })
         .catch((error) => {
