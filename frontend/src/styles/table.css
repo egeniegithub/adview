@@ -65,3 +65,22 @@
     -o-border-radius: 6px !important;
     text-transform: none !important;
 }
+.rowCustomeClassName .ant-table-tbody >tr >td {
+    padding: 2px 13px;
+    background-color: #fbfbfb;
+    border-bottom: rgb(134, 134, 134) solid 1px !important;
+    text-align: center;
+
+}
+.rowCustomeClassName .ant-table-content{
+    background-color: rgb(129, 129, 129) !important;
+}
+.rowCustomeClassName .ant-table-thead >tr>th{
+    padding: 1vh !important;
+}
+
+.rowCustomeClassName .ant-table-thead .ant-table-cell {
+    background-color: rgb(129, 129, 129) !important;
+    color: #fbfbfb;
+    text-align: center;
+}

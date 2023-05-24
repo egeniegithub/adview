@@ -38,6 +38,10 @@ export class ClientDataService {
     const data = await this.clientDataRepository.find({ where: { id: id } });
     return data;
   }
+  async findByEmail(email: string) {
+    const data = await this.clientDataRepository.find({ where: { email } });
+    return data;
+  }
 
   async update(id: number, updateClientDatumDto: UpdateClientDatumDto) {
     try {

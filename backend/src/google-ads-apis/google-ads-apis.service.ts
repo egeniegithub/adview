@@ -53,18 +53,34 @@ export class GoogleAdsApisService {
     }
   }
 
-  async ObtainAdsData({email, accessToken,customer_id,manager_id} : ObtainAdsDataDto) {
-    try {
-      const developer_token = 'BSed2TGB27BPgmlMSYlCJw'
-      const data = await this.getMonthlySpend(email, customer_id, developer_token, accessToken,manager_id);
-      return ({ ...data })
-    } catch (err) {
-      console.log(err);
-      return err;
+  async ObtainAdsData({ email, accessToken, customer_ids, manager_id }: ObtainAdsDataDto) {
+
+    let ids = customer_ids.split(',')
+    let alldata = []
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      try {
+        Logger.log("check in loop ", id)
+        const developer_token = 'BSed2TGB27BPgmlMSYlCJw'
+        const data = await this.getMonthlySpend(email, parseInt(id), developer_token, accessToken, manager_id);
+        alldata.push({ ...data, id })
+        // return ({ ...data })
+      } catch (error) { return error; }
     }
+
+    // sum amount for all accounts selected
+    let total_amount = 0
+    let connected_accounts = []
+    alldata.forEach(el => {
+      total_amount += parseInt(el.calculated.amount_spent)
+      connected_accounts.push({ id: el.id, descriptiveName: el.calculated.descriptiveName, amount_spend: el.calculated.amount_spent })
+    })
+    // save data in db
+    const updated = await this.ClientDataService.updateByClient(email, { 'google': `${total_amount}`, google_client_linked_accounts: JSON.stringify(connected_accounts) })
+    return ({ data: alldata, updated, calculated: { amount_spent: total_amount } })
   }
 
-  async getMonthlySpend(email, customer_id, developer_token, access_token,manager_id) {
+  async getMonthlySpend(email, customer_id, developer_token, access_token, manager_id) {
 
     const options = {
       url: `https://googleads.googleapis.com/v13/customers/${customer_id}/googleAds:search`,
@@ -80,7 +96,8 @@ export class GoogleAdsApisService {
         query: `
         SELECT
           segments.month,
-          metrics.cost_micros
+          metrics.cost_micros,
+          customer.descriptive_name
         FROM
           campaign
         WHERE
@@ -90,25 +107,65 @@ export class GoogleAdsApisService {
     };
     try {
       let res = await axios(options)
-      let total : number|any = { amount_spent: 0 }
+      let total: number | any = { amount_spent: 0, descriptiveName: '' }
       let { results = [] } = res.data
       results.forEach(e => {
         total.amount_spent += parseInt(e.metrics.costMicros)
+        total.descriptiveName = e.customer.descriptiveName
       });
-      if(total.amount_spent > 0)
+      if (total.amount_spent > 0)
         total.amount_spent = (total.amount_spent / 1000000).toFixed(2);
-      // save data in db
-      const updated = await this.ClientDataService.updateByClient(email, { 'google': `${total.amount_spent}` })
-      return ({ google_api_data: res.data, calculated: total, db_updated: updated })
+      return ({ google_api_data: res.data, calculated: total, db_updated: "updated" })
     } catch (error) {
       Logger.log('error: ', error)
       return ({ err: error, updation_status: false })
     }
   }
 
-  // findAll() {
-  //   return `This action returns all googleAdsApis`;
-  // }
+  async hanldeUnlinkCustomer(id: string, email: string) {
+
+    try {
+      const user = await this.ClientDataService.findByEmail(email)
+      if (!user[0]?.google_client_linked_accounts)
+        return ({ error: "user not found" })
+      let connected_accounts = JSON.parse(user[0]?.google_client_linked_accounts)
+      let total_amount = 0
+      connected_accounts.forEach(el => {
+        if (el.id == id)
+          el.unlinked = true
+        else
+          total_amount += parseInt(el.amount_spend) 
+      })
+      const updated = await this.ClientDataService.updateByClient(email, { 'google': `${total_amount}`, google_client_linked_accounts: JSON.stringify(connected_accounts) })
+
+      return ({ success: updated })
+    } catch (error) {
+      return ({ error: "Something went wrong" })
+    }
+
+  }
+
+  async hanldeRelinkCustomer(id: string, email: string) {
+
+    try {
+      const user = await this.ClientDataService.findByEmail(email)
+      if (!user[0]?.google_client_linked_accounts)
+        return ({ error: "user not found" })
+      let connected_accounts = JSON.parse(user[0]?.google_client_linked_accounts)
+      let total_amount = 0
+      connected_accounts.forEach(el => {
+        if (el.id == id)
+          delete el.unlinked
+          total_amount += parseInt(el.amount_spend) 
+      })
+      const updated = await this.ClientDataService.updateByClient(email, { 'google': `${total_amount}`, google_client_linked_accounts: JSON.stringify(connected_accounts) })
+
+      return ({ success: updated })
+    } catch (error) {
+      return ({ error: "Something went wrong" })
+    }
+
+  }
 
   findOne(id: number) {
     return `This action returns a #${id} googleAdsApi`;

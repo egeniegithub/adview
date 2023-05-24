@@ -27,7 +27,7 @@ const getActDetails  =async(list,token) =>{
     const e = list[i];
     let arr = e.split("/");
     let id= arr[1]
-    var data = {"query":"SELECT customer.id,customer_client.descriptive_name,customer_client.id, customer.manager,customer.status,customer_client.status, customer.resource_name, customer.descriptive_name FROM customer_client WHERE customer_client.level = 1"};
+    var data = {"query":"SELECT customer.id,customer_client.descriptive_name,customer_client.id, customer.manager,customer.status,customer_client.status, customer.resource_name, customer.descriptive_name FROM customer_client WHERE customer_client.manager != TRUE AND customer_client.level = 1"};
     var config = {
           method: 'post',
           url: `https://googleads.googleapis.com/v13/customers/${id}/googleAds:search`,
