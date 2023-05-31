@@ -49,6 +49,9 @@ export class ClientDatum {
     @Column("longtext")
     google_client_linked_accounts: string;
 
+    @Column("longtext")
+    facebook_client_linked_accounts: string;
+
     @Column()
     g_token: string;
 

@@ -3,17 +3,34 @@ import { MetaAdsService } from './meta-ads.service';
 import { CreateMetaAdDto } from './dto/create-meta-ad.dto';
 import { UpdateMetaAdDto } from './dto/update-meta-ad.dto';
 
+export class ObtainMetaAdsDataDto {
+  accessToken:string
+  customer_ids:string
+  email:string
+}
+
 @Controller('meta-ads')
 export class MetaAdsController {
   constructor(private readonly metaAdsService: MetaAdsService) {}
 
-  @Get('/ObtainMetaAdsData/:email/:token')
-  ObtainMetaAdsData(@Param('email') email: string,@Param('token') token:string) {
+
+  @Post('/ObtainMetaAdsData')
+  ObtainAdsData(@Body() ObtainAdsDataDto: ObtainMetaAdsDataDto) {
     try {
-      return this.metaAdsService.ObtainMetaAdsData(email,token);
+      return this.metaAdsService.ObtainMetaAdsData(ObtainAdsDataDto);
     } catch (error) {
       return error;
     }
+  }
+
+  @Get('/unlink-customer/:id/:email')
+  hanldeUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.metaAdsService.hanldeUnlinkCustomer(id,email);
+  }
+
+  @Get('/relink-customer/:id/:email')
+  hanldeRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.metaAdsService.hanldeRelinkCustomer(id,email);
   }
 
   @Post()

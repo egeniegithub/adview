@@ -31,18 +31,18 @@ const AdviewTable = () => {
   }, [])
 
   // refresh data after 2 sec must track api calls to prevent infinite calls 
-  useEffect(()=>{
+  useEffect(() => {
     let timer
-    if(!isloading && tableData.length == 0 && timmerCount < 30)
-    timer =  setTimeout(() => {
-      getdata()
-      let t = timmerCount
-      settimmerCount(t+1)
-    }, 2000)
+    if (!isloading && tableData.length == 0 && timmerCount < 30)
+      timer = setTimeout(() => {
+        getdata()
+        let t = timmerCount
+        settimmerCount(t + 1)
+      }, 2000)
     return () => clearTimeout(timer);
-  },[isloading,tableData])
+  }, [isloading, tableData])
 
-  
+
   const getdata = async () => {
     setIsloading(true)
     try {
@@ -80,8 +80,10 @@ const AdviewTable = () => {
 
       case 'facebook':
         {
-          const res = await GetServerCall(`/meta-ads/ObtainMetaAdsData/${email}/${accessToken}`)
+          console.log('check request ', email, customer_ids, accessToken)
+          const res = await PostServerCall(`/meta-ads/ObtainMetaAdsData`, { email, customer_ids, accessToken })
           handleResponse(res, provider_name, user_name)
+          handleOk()
         }
         break
 
@@ -263,6 +265,15 @@ const AdviewTable = () => {
   let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
   let id = localStorage.getItem('id')
   let userExist = logedInUsers[id]
+  const getIfUserExits = () => {
+    if (userExist?.google?.name)
+      return userExist?.google?.name
+    else if (userExist?.facebook?.name)
+      return userExist?.facebook?.name
+    else
+      return null
+
+  }
 
   return (
     <Fragment>
@@ -282,7 +293,7 @@ const AdviewTable = () => {
       </Spin>
 
       <Modal
-        title={userExist?.google?.name ? `Link Account to ${userExist?.google?.name}` : "Link Accounts to GoldenGate Partners"}
+        title={getIfUserExits() ? `Link Account to ${getIfUserExits()}` : "Link Accounts to GoldenGate Partners"}
         width={"55%"}
         open={isModalOpen}
         onOk={handleOk}
