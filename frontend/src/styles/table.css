@@ -65,22 +65,55 @@
     -o-border-radius: 6px !important;
     text-transform: none !important;
 }
-.rowCustomeClassName .ant-table-tbody >tr >td {
-    padding: 2px 13px;
-    background-color: #fbfbfb;
-    border-bottom: rgb(134, 134, 134) solid 1px !important;
-    text-align: center;
 
+.ant-collapse-header {
+    padding: 3px 16px !important;
+}
+
+.rowCustomeClassName .ant-table-tbody >tr >td {
+    padding: 2px 13px;  
+    background-color: #ffffff;
+    border-bottom: #3e3e3e2e solid 1px !important;
+    text-align: start;
+    padding-left: 6% !important;
+    color: rgba(0, 0, 0, 0.88) !important;
 }
 .rowCustomeClassName .ant-table-content{
-    background-color: rgb(129, 129, 129) !important;
+    background-color: #D9D9D9 !important;
 }
 .rowCustomeClassName .ant-table-thead >tr>th{
-    padding: 1vh !important;
+    padding: 0.8vh !important;
+    padding-left: 6% !important;
 }
 
 .rowCustomeClassName .ant-table-thead .ant-table-cell {
-    background-color: rgb(129, 129, 129) !important;
-    color: #fbfbfb;
-    text-align: center;
+    background-color: #D9D9D9 !important;
+    color: rgba(0, 0, 0, 0.88);
+    text-align: start;
+}
+
+.rowCustomeClassName2 .ant-table-thead >tr>th{
+    padding: 0.8vh !important;
+    text-align: start;
+    padding-left: 1% !important;
+    border-right: 0px !important;   
+}
+
+.rowCustomeClassName2 .ant-table-tbody >tr >td {
+    padding: 8px 13px;  
+    background-color: #ffffff;
+    text-align: start;
+    border-bottom: #3e3e3e2e solid 1px !important;
+    padding-left: 1% !important;
+    color: rgba(0, 0, 0, 0.88) !important;
+    border-right: 0px !important;
+}
+
+.rowCustomeClassName2 .ant-table-thead .ant-table-cell {
+    background-color: #D9D9D9 !important;
+    color: rgba(0, 0, 0, 0.88);
+}
+.rowCustomeClassName2 .ant-table .ant-table-container{
+    border: 1px #3e3e3e2e solid !important;
+    border-bottom: 0px !important;
 }

@@ -43,7 +43,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
         logedInUsers[id] = userExist
         localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
         // check is indicator exists
-        handleLogoutIndicator(id,"google")
+        handleLogoutIndicator(id, "google")
 
         handleOk()
     }
@@ -115,14 +115,18 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
             </LoginSocialGoogle>}
 
             <Modal
-                title="Select Google ad Accounts to link"
+                title={<h5 style={{     padding: "2.5% 0% 0px 2.5%"}} >Select Google ad Accounts to link</h5>}
                 width={"67%"}
                 open={showLinkedUserModal}
                 onOk={() => { setshowLinkedUserModal(false) }}
                 closable={false}
+                bodyStyle={{ padding: "2.5% 3.5%" }}
                 footer={null}
             >
+                
                 <Table
+                    bordered
+                    className='rowCustomeClassName2'
                     rowSelection={{
                         type: 'checkbox',
                         ...rowSelection,
@@ -147,6 +151,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                             title: "AUTO TRACKING",
                             dataIndex: "status",
                             key: "status",
+                            width:'15%',
                             render: (text, record) => <Switch checked={record.auto_track} onChange={
                                 () => {
                                     setLinkedUsers(
@@ -177,7 +182,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                             ),
                             dataIndex: "",
                             key: "",
-
+                            width:'20%'
                         },
                     ]}
                     dataSource={seacrhedName != '' ? filteredLinkedUsers : linkedUsers}

@@ -25,18 +25,35 @@ const AdviewTable = () => {
   const [isloading, setIsloading] = useState(true)
   const [showClientLinkedActsModal, setShowClientLinkedActsModal] = useState(false)
   const [currentProvider, setCurrentProvider] = useState('')
+  const [timmerCount, settimmerCount] = useState(0)
   useEffect(() => {
     getdata()
   }, [])
 
+  // refresh data after 2 sec must track api calls to prevent infinite calls 
+  useEffect(()=>{
+    let timer
+    if(!isloading && tableData.length == 0 && timmerCount < 30)
+    timer =  setTimeout(() => {
+      getdata()
+      let t = timmerCount
+      settimmerCount(t+1)
+    }, 2000)
+    return () => clearTimeout(timer);
+  },[isloading,tableData])
+
+  
   const getdata = async () => {
     setIsloading(true)
     try {
       const response = await GetServerCall(`/client-data`)
       const data = response.data;
       for (let i = 0; i < data.length; i++) {
+        let { facebook = 0, bing = 0, linkedin = 0, google = 0 } = data[i]
         data[i]["key"] = i + 1;
         data[i]["Link"] = "Link";
+
+        data[i].monthly_spent = parseInt(facebook) + parseInt(google) + parseInt(bing) + parseInt(linkedin)
       }
       setTableData(data)
       setIsloading(false)
@@ -90,7 +107,7 @@ const AdviewTable = () => {
     let id = localStorage.getItem('id')
     if (res.data.err) {
       let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {};
-      is_sync_users_with_ads = { ...is_sync_users_with_ads, [id]: {...is_sync_users_with_ads[id], [provider_name]: false } };
+      is_sync_users_with_ads = { ...is_sync_users_with_ads, [id]: { ...is_sync_users_with_ads[id], [provider_name]: false } };
       localStorage.setItem("is_sync_users_with_ads", JSON.stringify(is_sync_users_with_ads));
     }
     else {
@@ -143,21 +160,25 @@ const AdviewTable = () => {
       title: "Total Over/Under",
       dataIndex: "total",
       key: "TotalOverUnder",
+      render: (text) => '$' + parseInt(text).toLocaleString()
     },
     {
       title: "Monthly Budget",
       dataIndex: "monthly_budget",
       key: "MonthlyBudget",
+      render: (text) => '$' + parseInt(text).toLocaleString()
     },
     {
       title: "Month-to-Date Spent",
       dataIndex: "monthly_spent",
       key: "Month_to_DateSpent",
+      render: (text) => '$' + parseInt(text).toLocaleString()
     },
     {
       title: "Remaining",
       dataIndex: "remaining",
       key: "Remaining",
+      render: (text) => '$' + parseInt(text).toLocaleString()
     },
     {
       title: "Status",
@@ -188,9 +209,9 @@ const AdviewTable = () => {
         let is_sync = is_sync_users_with_ads[obj.id] || {}
         // console.log("check incuse ", obj)
         if (is_sync.google == false) {
-          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
+          return (<> {'$' + parseInt(val).toLocaleString()}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
-          return val
+          return '$' + parseInt(val).toLocaleString()
         }
       },
     },
@@ -202,9 +223,9 @@ const AdviewTable = () => {
         let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
         let is_sync = is_sync_users_with_ads[obj.id] || {}
         if (is_sync.bing == false) {
-          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
+          return (<>{'$' + parseInt(val).toLocaleString()}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
-          return val
+          return '$' + parseInt(val).toLocaleString()
         }
       },
     },
@@ -216,40 +237,26 @@ const AdviewTable = () => {
         let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
         let is_sync = is_sync_users_with_ads[obj.id] || {}
         if (is_sync.linkedin == false) {
-          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
+          return (<>{'$' + parseInt(val).toLocaleString()}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
-          return val
+          return '$' + parseInt(val).toLocaleString()
         }
       },
     },
     {
-      title: "Facebook",
+      title: "Meta",
       dataIndex: "facebook",
       key: "Facebook",
       render: (val, obj) => {
         let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
         let is_sync = is_sync_users_with_ads[obj.id] || {}
         if (is_sync.facebook == false) {
-          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
+          return (<>{'$' + parseInt(val).toLocaleString()}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
-          return val
+          return '$' + parseInt(val).toLocaleString()
         }
       },
-    },
-    {
-      title: "Instagram",
-      dataIndex: "instagram",
-      key: "Instagram",
-      render: (val, obj) => {
-        let is_sync_users_with_ads = JSON.parse(localStorage.getItem('is_sync_users_with_ads')) || {}
-        let is_sync = is_sync_users_with_ads[obj.id] || {}
-        if (is_sync.facebook == false) {
-          return (<>{val}  <WarningOutlined style={{ color: "red" }} /></>)
-        } else {
-          return val
-        }
-      },
-    },
+    }
   ];
   // console.log('rendered')
   const antIcon = <LoadingOutlined style={{ fontSize: 22 }} spin />;
@@ -268,7 +275,7 @@ const AdviewTable = () => {
             dataSource={tableData}
           />
           {!isloading && tableData.length == 0 ? <div style={{ display: 'flex', justifyContent: 'center', marginLeft: '4vw' }} >
-            <Button onClick={() => { getdata() }}>Retry</Button>
+            {<Button onClick={() => { getdata() }}>Retry</Button>}
           </div> : ''}
 
         </div>
