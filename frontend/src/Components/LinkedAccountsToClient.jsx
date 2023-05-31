@@ -6,14 +6,23 @@ import { BingIcon, GoogleIcon, LinkedinIcon, MetaIcon } from '../icons/Icons';
 const { Panel } = Collapse;
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, currentProvider, client_name = '', userData: { google_client_linked_accounts, email }, refreshData }) => {
+export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, currentProvider, client_name = '', userData: { google_client_linked_accounts, email,facebook_client_linked_accounts }, refreshData }) => {
     const [isloading, setIsloading] = useState(isMainLoading)
     const gLinkedAccountsToClient = google_client_linked_accounts ? JSON.parse(google_client_linked_accounts) : []
+    const fLinkedAccountsToClient = facebook_client_linked_accounts ? JSON.parse(facebook_client_linked_accounts) : []
 
 
-    const handlelink = async (item, isRelink) => {
+    const handlelinkGoogle = async (item, isRelink) => {
         setIsloading(true)
         let uri = isRelink ? '/google-ads-apis/relink-customer/' : '/google-ads-apis/unlink-customer/'
+        const res = await GetServerCall(uri + item.id + '/' + email)
+        refreshData()
+        setIsloading(false)
+    }
+
+    const handlelinkMeta = async (item, isRelink) => {
+        setIsloading(true)
+        let uri = isRelink ? '/meta-ads/relink-customer/' : '/meta-ads/unlink-customer/'
         const res = await GetServerCall(uri + item.id + '/' + email)
         refreshData()
         setIsloading(false)
@@ -24,7 +33,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
     let id = localStorage.getItem('id')
     let userExist = logedInUsers[id]
     console.log("check user  exists", userExist)
-    if (!userExist?.google?.name)
+    if (!userExist?.google?.name && !userExist?.facebook?.name )
         return null
     return (
         <div style={{ marginTop: '2vh' }} >
@@ -53,14 +62,14 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                                         title: "Action",
                                         dataIndex: "status",
                                         key: "status",
-                                        render: (text, item) => !item.unlinked ? <Button onClick={() => handlelink(item)} style={{ ...btnStyle}}>
+                                        render: (text, item) => !item.unlinked ? <Button onClick={() => handlelinkGoogle(item)} style={{ ...btnStyle}}>
                                             Unlink
-                                        </Button> : <Button onClick={() => handlelink(item, true)} style={{ ...btnStyle }}>
+                                        </Button> : <Button onClick={() => handlelinkGoogle(item, true)} style={{ ...btnStyle }}>
                                             Relink
                                         </Button>
                                     },
                                 ]}
-                                dataSource={gLinkedAccountsToClient}
+                                dataSource={userExist?.google?.name ? gLinkedAccountsToClient :[]}
                             />
                         </div>
                     </Panel>
@@ -87,7 +96,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                                         title: "",
                                         dataIndex: "status",
                                         key: "status",
-                                        render: (text, item) => <Button onClick={() => handlelink(item)} style={{ ...btnStyle}}>
+                                        render: (text, item) => <Button onClick={() => handlelinkGoogle(item)} style={{ ...btnStyle}}>
                                             Unlink
                                         </Button>
                                     },
@@ -151,12 +160,14 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                                         title: "",
                                         dataIndex: "status",
                                         key: "status",
-                                        render: (text, item) => <Button style={{ ...btnStyle }}>
+                                        render: (text, item) => !item.unlinked ? <Button onClick={() => handlelinkMeta(item)} style={{ ...btnStyle}}>
                                             Unlink
+                                        </Button> : <Button onClick={() => handlelinkMeta(item, true)} style={{ ...btnStyle }}>
+                                            Relink
                                         </Button>
                                     },
                                 ]}
-                                dataSource={[]}
+                                dataSource={userExist?.facebook?.name ? fLinkedAccountsToClient :[]}
                             />
                         </div>
                     </Panel>
