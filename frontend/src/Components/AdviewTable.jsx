@@ -53,7 +53,7 @@ const AdviewTable = () => {
         data[i]["key"] = i + 1;
         data[i]["Link"] = "Link";
 
-        data[i].monthly_spent = facebook > 0 ? parseInt(facebook) : 0 + google > 0 ? parseInt(google) : 0 + bing > 0 ? parseInt(bing) : 0 + linkedin > 0 ? parseInt(linkedin) : 0
+        data[i].monthly_spent = (facebook > 0 ? parseInt(facebook) : 0) + (google > 0 ? parseInt(google) : 0) + (bing > 0 ? parseInt(bing) : 0) + (linkedin > 0 ? parseInt(linkedin) : 0)
       }
       setTableData(data)
       setIsloading(false)
