@@ -42,11 +42,11 @@ export class MetaAdsService {
     for (let i = 0; i < ids.length; i++) {
       const id = ids[i];
       try {
-        const data = await this.getMonthlySpend(id,  accessToken);
+        const data = await this.getMonthlySpend(id, accessToken);
         alldata.push({ ...data, id })
-        total_amount +=  data.insights ? (parseInt(data.insights.data[0].spend))/100 : 0
-        connected_accounts.push({id: data.id,amount_spend: data.insights ? (data.insights.data[0].spend)/100:0,descriptiveName:data.name})
-        
+        total_amount += data.insights ? (parseInt(data.insights.data[0].spend)) / 100 : 0
+        connected_accounts.push({ id: data.id, amount_spend: data.insights ? (data.insights.data[0].spend) / 100 : 0, descriptiveName: data.name })
+
       } catch (error) { return error; }
     }
     const updated = await this.ClientDataService.updateByClient(email, { 'facebook': `${total_amount}`, facebook_client_linked_accounts: JSON.stringify(connected_accounts) })
@@ -77,7 +77,7 @@ export class MetaAdsService {
       let res = await axios.request(config)
       // res2 is to get account name cuz insights will not return account name if data is null
 
-      return ({...res.data})
+      return ({ ...res.data })
       // let total = { daily_budget: 0, amount_spent: 0, lifetime_budget: 0 }
       // let { data } = res.data
       // data.forEach(e => {
@@ -106,7 +106,8 @@ export class MetaAdsService {
         if (el.id == id)
           el.unlinked = true
         else
-          total_amount += parseInt(el.amount_spend) 
+          if (!el.unlinked)
+            total_amount += parseInt(el.amount_spend)
       })
       const updated = await this.ClientDataService.updateByClient(email, { 'facebook': `${total_amount}`, facebook_client_linked_accounts: JSON.stringify(connected_accounts) })
 
@@ -126,9 +127,13 @@ export class MetaAdsService {
       let connected_accounts = JSON.parse(user[0]?.facebook_client_linked_accounts)
       let total_amount = 0
       connected_accounts.forEach(el => {
-        if (el.id == id)
+        if (el.id == id) {
+          total_amount += parseInt(el.amount_spend)
           delete el.unlinked
-          total_amount += parseInt(el.amount_spend) 
+        }
+        else
+          if (!el.unlinked)
+            total_amount += parseInt(el.amount_spend)
       })
       const updated = await this.ClientDataService.updateByClient(email, { 'facebook': `${total_amount}`, facebook_client_linked_accounts: JSON.stringify(connected_accounts) })
       return ({ success: updated })

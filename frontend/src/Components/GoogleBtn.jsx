@@ -63,7 +63,6 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
             selectedRows.forEach(el => {
                 tempArr.push(el.id)
             })
-            console.log("check row s", tempArr)
             if (!tempArr.length)
                 return setselectedRow({})
             // pick manager id form any of selected row 

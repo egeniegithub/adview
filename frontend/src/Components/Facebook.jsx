@@ -38,7 +38,6 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
         if (!selectedRow.customer_ids.length)
             return
         let customer_ids = selectedRow.customer_ids.join(",");
-        console.log('check logs ', customer_ids)
         setshowLinkedUserModal(false)
         fetchAdsData(access_token, 'facebook', userName,customer_ids)
         // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)

@@ -134,7 +134,8 @@ export class GoogleAdsApisService {
         if (el.id == id)
           el.unlinked = true
         else
-          total_amount += parseInt(el.amount_spend) 
+          if (!el.unlinked)
+            total_amount += parseInt(el.amount_spend)
       })
       const updated = await this.ClientDataService.updateByClient(email, { 'google': `${total_amount}`, google_client_linked_accounts: JSON.stringify(connected_accounts) })
 
@@ -154,9 +155,13 @@ export class GoogleAdsApisService {
       let connected_accounts = JSON.parse(user[0]?.google_client_linked_accounts)
       let total_amount = 0
       connected_accounts.forEach(el => {
-        if (el.id == id)
+        if (el.id == id) {
+          total_amount += parseInt(el.amount_spend)
           delete el.unlinked
-          total_amount += parseInt(el.amount_spend) 
+        }
+        else
+          if (!el.unlinked)
+            total_amount += parseInt(el.amount_spend)
       })
       const updated = await this.ClientDataService.updateByClient(email, { 'google': `${total_amount}`, google_client_linked_accounts: JSON.stringify(connected_accounts) })
 

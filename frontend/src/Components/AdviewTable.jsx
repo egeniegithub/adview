@@ -53,7 +53,7 @@ const AdviewTable = () => {
         data[i]["key"] = i + 1;
         data[i]["Link"] = "Link";
 
-        data[i].monthly_spent = parseInt(facebook) + parseInt(google) + parseInt(bing) + parseInt(linkedin)
+        data[i].monthly_spent = facebook > 0 ? parseInt(facebook) : 0 + google > 0 ? parseInt(google) : 0 + bing > 0 ? parseInt(bing) : 0 + linkedin > 0 ? parseInt(linkedin) : 0
       }
       setTableData(data)
       setIsloading(false)
@@ -80,7 +80,6 @@ const AdviewTable = () => {
 
       case 'facebook':
         {
-          console.log('check request ', email, customer_ids, accessToken)
           const res = await PostServerCall(`/meta-ads/ObtainMetaAdsData`, { email, customer_ids, accessToken })
           handleResponse(res, provider_name, user_name)
           handleOk()
@@ -162,25 +161,25 @@ const AdviewTable = () => {
       title: "Total Over/Under",
       dataIndex: "total",
       key: "TotalOverUnder",
-      render: (text) => '$' + parseInt(text).toLocaleString()
+      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-'
     },
     {
       title: "Monthly Budget",
       dataIndex: "monthly_budget",
       key: "MonthlyBudget",
-      render: (text) => '$' + parseInt(text).toLocaleString()
+      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-'
     },
     {
       title: "Month-to-Date Spent",
       dataIndex: "monthly_spent",
       key: "Month_to_DateSpent",
-      render: (text) => '$' + parseInt(text).toLocaleString()
+      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-'
     },
     {
       title: "Remaining",
       dataIndex: "remaining",
       key: "Remaining",
-      render: (text) => '$' + parseInt(text).toLocaleString()
+      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-'
     },
     {
       title: "Status",
@@ -213,7 +212,7 @@ const AdviewTable = () => {
         if (is_sync.google == false) {
           return (<> {'$' + parseInt(val).toLocaleString()}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
-          return '$' + parseInt(val).toLocaleString()
+          return val > 0 ? '$' + parseInt(val).toLocaleString() : '-'
         }
       },
     },
@@ -227,7 +226,7 @@ const AdviewTable = () => {
         if (is_sync.bing == false) {
           return (<>{'$' + parseInt(val).toLocaleString()}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
-          return '$' + parseInt(val).toLocaleString()
+          return val > 0 ? '$' + parseInt(val).toLocaleString() : '-'
         }
       },
     },
@@ -241,7 +240,7 @@ const AdviewTable = () => {
         if (is_sync.linkedin == false) {
           return (<>{'$' + parseInt(val).toLocaleString()}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
-          return '$' + parseInt(val).toLocaleString()
+          return val > 0 ? '$' + parseInt(val).toLocaleString() : '-'
         }
       },
     },
@@ -255,7 +254,7 @@ const AdviewTable = () => {
         if (is_sync.facebook == false) {
           return (<>{'$' + parseInt(val).toLocaleString()}  <WarningOutlined style={{ color: "red" }} /></>)
         } else {
-          return '$' + parseInt(val).toLocaleString()
+          return val > 0 ? '$' + parseInt(val).toLocaleString() : '-'
         }
       },
     }
