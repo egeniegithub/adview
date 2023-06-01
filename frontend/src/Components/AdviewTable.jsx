@@ -80,7 +80,6 @@ const AdviewTable = () => {
 
       case 'facebook':
         {
-          console.log('check request ', email, customer_ids, accessToken)
           const res = await PostServerCall(`/meta-ads/ObtainMetaAdsData`, { email, customer_ids, accessToken })
           handleResponse(res, provider_name, user_name)
           handleOk()
