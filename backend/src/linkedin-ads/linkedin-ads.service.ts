@@ -35,7 +35,7 @@ export class LinkedinAdsService {
     return `This action removes a #${id} linkedinAd`;
   }
 
-  async getLinkedActs(access_token) {
+  async getLinkedActs(access_token:string) {
 
     try {
       let config = {
