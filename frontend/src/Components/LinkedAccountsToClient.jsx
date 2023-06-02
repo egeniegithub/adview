@@ -6,10 +6,12 @@ import { BingIcon, GoogleIcon, LinkedinIcon, MetaIcon } from '../icons/Icons';
 const { Panel } = Collapse;
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, currentProvider, client_name = '', userData: { google_client_linked_accounts, email,facebook_client_linked_accounts }, refreshData }) => {
+export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, currentProvider, client_name = '', userData: { google_client_linked_accounts, email,facebook_client_linked_accounts,linkedin_client_linked_accounts }, refreshData }) => {
     const [isloading, setIsloading] = useState(isMainLoading)
     const gLinkedAccountsToClient = google_client_linked_accounts ? JSON.parse(google_client_linked_accounts) : []
     const fLinkedAccountsToClient = facebook_client_linked_accounts ? JSON.parse(facebook_client_linked_accounts) : []
+    const LLinkedAccountsToClient = linkedin_client_linked_accounts ? JSON.parse(linkedin_client_linked_accounts) : []
+
 
 
     const handlelinkGoogle = async (item, isRelink) => {
@@ -28,12 +30,20 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
         setIsloading(false)
     }
 
+    const handlelinkLinkedin = async (item, isRelink) => {
+        setIsloading(true)
+        let uri = isRelink ? '/linkedin-ads/relink-customer/' : '/linkedin-ads/unlink-customer/'
+        const res = await GetServerCall(uri + item.id + '/' + email)
+        setIsloading(false)
+        refreshData()
+    }
+
+
 
     let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
     let id = localStorage.getItem('id')
     let userExist = logedInUsers[id]
-    console.log("check user  exists", userExist)
-    if (!userExist?.google?.name && !userExist?.facebook?.name )
+    if (!userExist?.google?.name && !userExist?.facebook?.name && !userExist?.linkedin?.name)
         return null
     return (
         <div style={{ marginTop: '2vh' }} >
@@ -128,12 +138,15 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                                         title: "",
                                         dataIndex: "status",
                                         key: "status",
-                                        render: (text, item) => <Button style={{ ...btnStyle}}>
+                                        render: (text, item) => !item.unlinked ? <Button onClick={() => handlelinkLinkedin(item)} style={{ ...btnStyle}}>
                                             Unlink
+                                        </Button> : <Button onClick={() => handlelinkLinkedin(item, true)} style={{ ...btnStyle }}>
+                                            Relink
                                         </Button>
                                     },
                                 ]}
-                                dataSource={[]}
+                                dataSource={userExist?.linkedin?.name ? LLinkedAccountsToClient :[]}
+                            
                             />
                         </div>
                     </Panel>

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateLinkedinAdDto } from './dto/create-linkedin-ad.dto';
 import { UpdateLinkedinAdDto } from './dto/update-linkedin-ad.dto';
 import axios from 'axios';
@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ClientDatum } from 'src/client-data/entities/client-datum.entity';
 import { Repository } from 'typeorm';
 import { ClientDataService } from 'src/client-data/client-data.service';
+import { ObtainLinkedinAdsDataDto } from './linkedin-ads.controller';
 
 
 @Injectable()
@@ -34,47 +35,136 @@ export class LinkedinAdsService {
     return `This action removes a #${id} linkedinAd`;
   }
 
-  async ObtainLinkedInAdsData(email: string, token: string) {
+  async getLinkedActs(access_token) {
 
-    const compiled = [];
-    // const allData = await this.fetchCustomerData(email);
-    // const length = allData.length
-
-    const ACCESS_TOKEN = token
-    const API_VERSION = '202302';
-    let count = 100,
-      sortField = 'ID',
-      sortOrder = 'ASCENDING'
-    const uri = `https://api.linkedin.com/rest/adCampaigns?q=search&search=(status:(values:List(ACTIVE)))&costType=MONTHLY&sort=(field:ID,order:DESCENDING)
-    `;
-    let headers = {
-      'Authorization': `Bearer ${ACCESS_TOKEN}`,
-      'X-RestLi-Method': 'finder',
-      'X-RestLi-Protocol-Version': '2.0.0',
-      'Connection': 'Keep-Alive',
-      'LinkedIn-Version': API_VERSION
-    }
-    let params = {
-      q: 'search',
-      search: '(type:(values:List(SPONSORED_UPDATES)),status:(values:List(ACTIVE)))',
-      count,
-      sort: `(field:${sortField},order:${sortOrder})`
-    }
     try {
-      let total = { amount_spent: 0 }
-      let res = await axios.request({
-        url: uri, method: 'get', headers,
-      })
-      let { elements = [] } = res.data
-      for (let i = 0; i < elements.length; i++) {
-        const e = elements[i];
-        let { campaign = {} } = e
-        total.amount_spent += campaign?.budget?.total?.amount?.value || 0
-      }
-      const updated = await this.ClientDataService.updateByClient(email, { 'linkedin': `${total.amount_spent}` })
-      return ({ linkedIn_api_data: res.data, calculated: total, db_updated: updated })
+      let config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        url: 'https://api.linkedin.com/rest/adAccounts?q=search',
+        headers: {
+          'LinkedIn-Version': '202302',
+          'X-Restli-Protocol-Version': '2.0.0',
+          'X-RestLi-Method': 'finder',
+          'Authorization': `Bearer ${access_token}`
+        }
+      };
+
+      let res = await axios.request(config)
+      return { list: res.data.elements }
+
+    } catch (error) {
+      return { error: error }
+    }
+  }
+
+
+  async ObtainLinkedInAdsData({ email, accessToken, customer_ids,customer_names }: ObtainLinkedinAdsDataDto) {
+
+    let ids = customer_ids.split(',')
+    let cust_names = customer_names.split(',')
+    let alldata = []
+    let total_amount = 0
+    let connected_accounts = []
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      const name = cust_names[i]
+      try {
+        let last_month_date = getPreviousMonthDate()
+        const data:any = await this.getMonthlySpend(parseInt(id) , accessToken,last_month_date);
+        alldata.push({ list:data, id })
+        total_amount += parseFloat(data.calculated) 
+        connected_accounts.push({ id: id, amount_spend: data.calculated, descriptiveName: name })
+      } catch (error) { return error; }
+    }
+    const updated = await this.ClientDataService.updateByClient(email, { 'linkedin': `${total_amount}`, linkedin_client_linked_accounts: JSON.stringify(connected_accounts) })
+    return ({ data: alldata, updated, calculated: { amount_spent: total_amount } })
+  }
+
+  async getMonthlySpend(customer_id, access_token,last_month_date) {
+    try {
+      let config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        url: `https://api.linkedin.com/rest/adAnalytics?q=analytics&dateRange=(start:(${last_month_date}),end:(year:2023,month:6,day:2))&timeGranularity=MONTHLY&accounts=List(urn%3Ali%3AsponsoredAccount%3A${customer_id})&projection=(*,elements*(externalWebsiteConversions,dateRange(*),impressions,landingPageClicks,likes,shares,costInLocalCurrency,approximateUniqueImpressions,pivotValues*~(localizedName)))&fields=externalWebsiteConversions,costInLocalCurrency`,
+        headers: {
+          'LinkedIn-Version': '202302',
+          'X-Restli-Protocol-Version': '2.0.0',
+          'X-RestLi-Method': 'finder',
+          'Authorization': `Bearer ${access_token}`
+        }
+      };
+      let total = 0
+      let res = await axios.request(config)
+      let obj = {}
+      res.data?.elements.forEach(e => {
+        total += parseFloat(e.costInLocalCurrency)
+      });
+      obj['calculated'] = total
+      return ({ ...obj })
     } catch (error) {
       return ({ err: error, updation_status: false })
     }
   }
+
+
+  async hanldeUnlinkCustomer(id: string, email: string) {
+
+    try {
+      const user = await this.ClientDataService.findByEmail(email)
+      if (!user[0]?.linkedin_client_linked_accounts)
+        return ({ error: "user not found" })
+      let connected_accounts = JSON.parse(user[0]?.linkedin_client_linked_accounts)
+      let total_amount = 0
+      connected_accounts.forEach(el => {
+        if (el.id == id)
+          el.unlinked = true
+        else
+          if (!el.unlinked)
+            total_amount += parseInt(el.amount_spend)
+      })
+      const updated = await this.ClientDataService.updateByClient(email, { 'linkedin': `${total_amount}`, linkedin_client_linked_accounts: JSON.stringify(connected_accounts) })
+
+      return ({ success: updated })
+    } catch (error) {
+      return ({ error: "Something went wrong" })
+    }
+  }
+
+  async hanldeRelinkCustomer(id: string, email: string) {
+
+    try {
+      const user = await this.ClientDataService.findByEmail(email)
+      if (!user[0]?.linkedin_client_linked_accounts)
+        return ({ error: "user not found" })
+      let connected_accounts = JSON.parse(user[0]?.linkedin_client_linked_accounts)
+      let total_amount = 0
+      connected_accounts.forEach(el => {
+        if (el.id == id) {
+          total_amount += parseInt(el.amount_spend)
+          delete el.unlinked
+        }
+        else
+          if (!el.unlinked)
+            total_amount += parseInt(el.amount_spend)
+      })
+      const updated = await this.ClientDataService.updateByClient(email, { 'linkedin': `${total_amount}`, linkedin_client_linked_accounts: JSON.stringify(connected_accounts) })
+      return ({ success: updated })
+    } catch (error) {
+      return ({ error: "Something went wrong" })
+    }
+  }
+
+}
+
+
+function getPreviousMonthDate() {
+  var currentDate = new Date();
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  
+  var year = currentDate.getFullYear();
+  var month = currentDate.getMonth() + 1;
+  var day = currentDate.getDate();
+  
+  return "year:" + year + ",month:" + month + ",day:" + day;
 }

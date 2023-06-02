@@ -52,6 +52,9 @@ export class ClientDatum {
     @Column("longtext")
     facebook_client_linked_accounts: string;
 
+    @Column("longtext")
+    linkedin_client_linked_accounts: string;
+
     @Column()
     g_token: string;
 

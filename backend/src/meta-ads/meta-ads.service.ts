@@ -98,7 +98,7 @@ export class MetaAdsService {
 
     try {
       const user = await this.ClientDataService.findByEmail(email)
-      if (!user[0]?.google_client_linked_accounts)
+      if (!user[0]?.facebook_client_linked_accounts)
         return ({ error: "user not found" })
       let connected_accounts = JSON.parse(user[0]?.facebook_client_linked_accounts)
       let total_amount = 0
