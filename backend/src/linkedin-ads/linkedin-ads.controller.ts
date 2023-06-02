@@ -3,18 +3,44 @@ import { LinkedinAdsService } from './linkedin-ads.service';
 import { CreateLinkedinAdDto } from './dto/create-linkedin-ad.dto';
 import { UpdateLinkedinAdDto } from './dto/update-linkedin-ad.dto';
 
+
+export class ObtainLinkedinAdsDataDto {
+  accessToken:string
+  customer_ids:string
+  email:string
+  customer_names:string
+}
+
+
 @Controller('linkedin-ads')
 export class LinkedinAdsController {
   constructor(private readonly linkedinAdsService: LinkedinAdsService) {}
 
-  @Get('/ObtainLinkedinAdsData/:email/:token')
-  ObtainLinkedinAdsData(@Param('email') email: string,@Param('token') token:string) {
+  @Post('/ObtainLinkedinAdsData')
+  ObtainAdsData(@Body() ObtainLinkedinAdsDataDto: ObtainLinkedinAdsDataDto) {
     try {
-      return this.linkedinAdsService.ObtainLinkedInAdsData(email,token);
+      return this.linkedinAdsService.ObtainLinkedInAdsData(ObtainLinkedinAdsDataDto);
     } catch (error) {
       return error;
     }
   }
+
+  @Get('/getManagerActDetails/:token')
+  GetMangerActInfo(@Param('token') token:string) {
+    return this.linkedinAdsService.getLinkedActs(token);
+  }
+
+  @Get('/unlink-customer/:id/:email')
+  hanldeUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.linkedinAdsService.hanldeUnlinkCustomer(id,email);
+  }
+
+  @Get('/relink-customer/:id/:email')
+  hanldeRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.linkedinAdsService.hanldeRelinkCustomer(id,email);
+  }
+  
+
   @Post()
   create(@Body() createLinkedinAdDto: CreateLinkedinAdDto) {
     return this.linkedinAdsService.create(createLinkedinAdDto);

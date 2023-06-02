@@ -115,7 +115,7 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
             </LoginSocialFacebook>
 
             <Modal
-                title={<h5 style={{ padding: "2.5% 0% 0px 2.5%" }} >Select Google ad Accounts to link</h5>}
+                title={<h5 style={{ padding: "2.5% 0% 0px 2.5%" }} >Select Meta ad Accounts to link</h5>}
                 width={"67%"}
                 open={showLinkedUserModal}
                 onOk={() => { setshowLinkedUserModal(false) }}

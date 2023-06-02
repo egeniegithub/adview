@@ -9,7 +9,7 @@ import {
 import "../styles/table.css";
 
 import { loginWithBing } from "../Services/bingAuth";
-import { LinkedinBtn } from "./Linkdin";
+import { LinkedinBtn, linkedMultiLogin } from "./Linkdin";
 import { BingBtn } from "./BingBtn";
 import { Facebook } from "./Facebook";
 import { getBubbleUsers } from "../Services/BubbleIo";
@@ -65,7 +65,7 @@ const AdviewTable = () => {
   }
 
 
-  const fetchAdsData = async (accessToken, provider_name, user_name, customer_ids, manager_id) => {
+  const fetchAdsData = async (accessToken, provider_name, user_name, customer_ids, manager_id,linkedinCode) => {
     setIsloading(true)
     switch (provider_name) {
       case 'google':
@@ -94,8 +94,10 @@ const AdviewTable = () => {
         break
       case 'linkedin':
         {
-          const res = await GetServerCall(`/linkedin-ads/ObtainLinkedinAdsData/${email}/${accessToken}`)
+          const res = await PostServerCall(`/linkedin-ads/ObtainLinkedinAdsData`, { email, customer_ids, accessToken, customer_names: manager_id })
           handleResponse(res, provider_name, user_name)
+          handleOk()
+          linkedMultiLogin(linkedinCode)
         }
         break
       default:
@@ -269,6 +271,8 @@ const AdviewTable = () => {
       return userExist?.google?.name
     else if (userExist?.facebook?.name)
       return userExist?.facebook?.name
+    else if (userExist?.linkedin?.name)
+      return userExist?.linkedin?.name
     else
       return null
 
