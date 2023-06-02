@@ -27,7 +27,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk }) => {
     let customer_ids = selectedRow.customer_ids.join(",");
     let customer_names = selectedRow.customer_names.join(",")
     setshowLinkedUserModal(false)
-    fetchAdsData(access_token, 'linkedin', userName, customer_ids,customer_names,authCodeMultiLogin)
+    fetchAdsData(access_token, 'linkedin', userName, customer_ids,customer_names , authCodeMultiLogin)
     // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
     setSeacrhedName('')
   }
