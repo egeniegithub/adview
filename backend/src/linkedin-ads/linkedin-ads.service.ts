@@ -35,7 +35,7 @@ export class LinkedinAdsService {
     return `This action removes a #${id} linkedinAd`;
   }
 
-  async getLinkedActs(access_token) {
+  async getLinkedActs(access_token:string) {
 
     try {
       let config = {
@@ -57,9 +57,8 @@ export class LinkedinAdsService {
       return { error: error }
     }
   }
-
-
-  async ObtainLinkedInAdsData({ email, accessToken, customer_ids,customer_names }: ObtainLinkedinAdsDataDto) {
+  
+  async ObtainLinkedInAdsData({ email, accessToken, customer_ids,customer_names }: any) {
 
     let ids = customer_ids.split(',')
     let cust_names = customer_names.split(',')
