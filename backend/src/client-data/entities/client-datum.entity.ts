@@ -54,6 +54,8 @@ export class ClientDatum {
 
     @Column("longtext")
     linkedin_client_linked_accounts: string;
+    @Column("longtext")
+    bing_client_linked_accounts: string;
 
     @Column()
     g_token: string;
