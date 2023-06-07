@@ -112,7 +112,7 @@ export class BingAdsService {
         <s:Body>
           <GetAccountMonthlySpendRequest xmlns="https://bingads.microsoft.com/Billing/v13"> 
             <AccountId>${customer_id}</AccountId>
-            <MonthYear>2023-05</MonthYear>   
+            <MonthYear>${getPreviousMonthDate()}</MonthYear>   
           </GetAccountMonthlySpendRequest>
         </s:Body>
         </s:Envelope>`;
@@ -215,4 +215,14 @@ const func = async (xml) => {
       }
     });
   });
+}
+
+function getPreviousMonthDate() {
+  var currentDate = new Date();
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  var year = currentDate.getFullYear();
+  var month:any = currentDate.getMonth() + 1;
+  if(month < 10)
+    month = "0"+month
+  return   year + "-" + month;
 }
