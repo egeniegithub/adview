@@ -118,6 +118,7 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
                 title={<h5 style={{ padding: "2.5% 0% 0px 2.5%" }} >Select Meta ad Accounts to link</h5>}
                 width={"67%"}
                 open={showLinkedUserModal}
+                className='responsive_warper'
                 onOk={() => { setshowLinkedUserModal(false) }}
                 closable={false}
                 bodyStyle={{ padding: "2.5% 3.5%" }}
@@ -126,6 +127,7 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
 
                 <Table
                     bordered
+                    scroll={{ x: 900 }}
                     className='rowCustomeClassName2'
                     rowSelection={{
                         type: 'checkbox',

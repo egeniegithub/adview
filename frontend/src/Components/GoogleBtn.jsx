@@ -116,6 +116,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
             <Modal
                 title={<h5 style={{     padding: "2.5% 0% 0px 2.5%"}} >Select Google ad Accounts to link</h5>}
                 width={"67%"}
+                className='responsive_warper'
                 open={showLinkedUserModal}
                 onOk={() => { setshowLinkedUserModal(false) }}
                 closable={false}
@@ -124,6 +125,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
             >
                 
                 <Table
+                    scroll={{ x: 900 }}
                     bordered
                     className='rowCustomeClassName2'
                     rowSelection={{

@@ -284,6 +284,7 @@ const AdviewTable = () => {
         <div className="TableMain">
           <Table
             style={{ height: "auto" }}
+            scroll={{ x: 900 }}
             className="adviewTable"
             columns={columns}
             dataSource={tableData}
@@ -294,17 +295,17 @@ const AdviewTable = () => {
 
         </div>
       </Spin>
-
       <Modal
         title={getIfUserExits() ? `Link Account to ${getIfUserExits()}` : "Link Accounts to GoldenGate Partners"}
-        width={"55%"}
+        width={"100%"}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
+        className="responsive_warper"
       >
         <div style={{ display: 'flex', flexFlow: 'column' }}>
-          <div style={{ display: 'flex', gap: '2%', marginTop: '20px' }}>
+          <div className="buttons_wrapper">
             <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
             <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
             <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />

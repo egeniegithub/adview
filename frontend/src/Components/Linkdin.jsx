@@ -185,6 +185,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk }) => {
         title={<h5 style={{ padding: "2.5% 0% 0px 2.5%" }} >Select Linkedin ad Accounts to link</h5>}
         width={"67%"}
         open={showLinkedUserModal}
+        className='responsive_warper'
         onOk={() => { setshowLinkedUserModal(false) }}
         closable={false}
         bodyStyle={{ padding: "2.5% 3.5%" }}
@@ -192,6 +193,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk }) => {
       >
 
         <Table
+          scroll={{ x: 900 }}
           bordered
           className='rowCustomeClassName2'
           rowSelection={{
