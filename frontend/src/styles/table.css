@@ -46,6 +46,7 @@
 }
 .ant-btn {
     padding: 4px 20px;
+    width: 100%;
 }
 .kep-login-facebook {
     font-size: 14px !important;
@@ -116,4 +117,22 @@
 .rowCustomeClassName2 .ant-table .ant-table-container{
     border: 1px #3e3e3e2e solid !important;
     border-bottom: 0px !important;
+}
+
+.responsive_warper{
+    width: 55% !important;
+    @media only screen and (max-width: 800px) {
+        width: 100% !important;
+    }
+}
+.buttons_wrapper{
+    display: flex;
+    gap: 2%; 
+    margin-top: 20px;
+    @media only screen and (max-width: 900px) {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 2fr));
+        grid-gap: 10px;
+    }
+
 }

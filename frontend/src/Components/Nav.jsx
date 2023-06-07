@@ -8,14 +8,14 @@ const Nav = () => {
     return (
         <div className='Nav'>
             <Row>
-                <Col md={1}>
+                <Col md={1} sm={3} xs={1}>
                     <img className='Navlogo' src="./capture.png" alt="" />
                 </Col>
-                <Col md={8}>
+                <Col md={8} sm={3} xs={4}>
                     <p className='NavText'>Advertising Pricing tool</p>
                 </Col>
-                <Col md={9}></Col>
-                <Col md={5} className="NavList">
+                <Col md={9} sm={4} xs={4}></Col>
+                <Col md={5} sm={12} xs={15} className="NavList">
                     <Link to="/" className='nav_items'>
                         <p>Home</p>
                     </Link>
