@@ -38,8 +38,9 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
         if (!selectedRow.customer_ids.length)
             return
         let customer_ids = selectedRow.customer_ids.join(",");
+        let customer_names = selectedRow.customer_names.join(",")
         setshowLinkedUserModal(false)
-        fetchAdsData(access_token, 'facebook', userName,customer_ids)
+        fetchAdsData(access_token, 'facebook', userName, customer_ids,customer_names)
         // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
         setSeacrhedName('')
     }
@@ -55,15 +56,17 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
 
     const rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
+
             let tempArr = []
+            let namesArr = []
             selectedRows.forEach(el => {
                 tempArr.push(el.id)
+                namesArr.push(el.name)
             })
             if (!tempArr.length)
                 return setselectedRow({})
             // pick manager id form any of selected row 
-            let { manager_id } = selectedRows[0]
-            setselectedRow({ customer_ids: [...tempArr], manager_id })
+            setselectedRow({ customer_ids: [...tempArr], customer_names: [...namesArr] })
         },
         getCheckboxProps: (record) => ({
             name: record.name,
@@ -127,7 +130,7 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
 
                 <Table
                     bordered
-                    scroll={{ x: 900 }}
+                    scroll={{ x: 700 }}
                     className='rowCustomeClassName2'
                     rowSelection={{
                         type: 'checkbox',

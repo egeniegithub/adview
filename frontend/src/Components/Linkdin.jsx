@@ -195,7 +195,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk }) => {
       >
 
         <Table
-          scroll={{ x: 900 }}
+          scroll={{ x: 700 }}
           bordered
           className='rowCustomeClassName2'
           rowSelection={{
@@ -259,8 +259,8 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk }) => {
           dataSource={seacrhedName != '' ? filteredLinkedUsers : linkedUsers}
         />
         <div style={{ display: 'flex', gap: '2%' }}>
-          <Button type='primary' onClick={handleConnect}>Connect</Button>
-          <Button onClick={() => { setshowLinkedUserModal(false); setLinkedUsers([]) }}>Cancel</Button>
+          <Button style={{ flexBasis: '20%' }} type='primary' onClick={handleConnect}>Connect</Button>
+          <Button style={{ flexBasis: '20%' }} onClick={() => { setshowLinkedUserModal(false); setLinkedUsers([]) }}>Cancel</Button>
         </div>
       </Modal>
 

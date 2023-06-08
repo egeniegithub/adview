@@ -69,8 +69,8 @@ export class LinkedinAdsService {
       const id = ids[i];
       const name = cust_names[i]
       try {
-        let last_month_date = getPreviousMonthDate()
-        const data:any = await this.getMonthlySpend(parseInt(id) , accessToken,last_month_date);
+        let first_date = getCurrentMonthFirstDate()
+        const data:any = await this.getMonthlySpend(parseInt(id) , accessToken,first_date);
         alldata.push({ list:data, id })
         total_amount += parseFloat(data.calculated) 
         connected_accounts.push({ id: id, amount_spend: data.calculated, descriptiveName: name })
@@ -80,12 +80,12 @@ export class LinkedinAdsService {
     return ({ data: alldata, updated, calculated: { amount_spent: total_amount } })
   }
 
-  async getMonthlySpend(customer_id, access_token,last_month_date) {
+  async getMonthlySpend(customer_id, access_token,first_date) {
     try {
       let config = {
         method: 'get',
         maxBodyLength: Infinity,
-        url: `https://api.linkedin.com/rest/adAnalytics?q=analytics&dateRange=(start:(${last_month_date}),end:(year:2023,month:6,day:2))&timeGranularity=MONTHLY&accounts=List(urn%3Ali%3AsponsoredAccount%3A${customer_id})&projection=(*,elements*(externalWebsiteConversions,dateRange(*),impressions,landingPageClicks,likes,shares,costInLocalCurrency,approximateUniqueImpressions,pivotValues*~(localizedName)))&fields=externalWebsiteConversions,costInLocalCurrency`,
+        url: `https://api.linkedin.com/rest/adAnalytics?q=analytics&dateRange=(start:(${first_date}))&timeGranularity=MONTHLY&accounts=List(urn%3Ali%3AsponsoredAccount%3A${customer_id})&projection=(*,elements*(externalWebsiteConversions,dateRange(*),impressions,landingPageClicks,likes,shares,costInLocalCurrency,approximateUniqueImpressions,pivotValues*~(localizedName)))&fields=externalWebsiteConversions,costInLocalCurrency`,
         headers: {
           'LinkedIn-Version': '202302',
           'X-Restli-Protocol-Version': '2.0.0',
@@ -156,14 +156,13 @@ export class LinkedinAdsService {
 
 }
 
-
-function getPreviousMonthDate() {
+function getCurrentMonthFirstDate() {
   var currentDate = new Date();
-  currentDate.setMonth(currentDate.getMonth() - 1);
+  currentDate.setMonth(currentDate.getMonth());
   
   var year = currentDate.getFullYear();
   var month = currentDate.getMonth() + 1;
   var day = currentDate.getDate();
   
-  return "year:" + year + ",month:" + month + ",day:" + day;
+  return "year:" + year + ",month:" + month + ",day:" + 1;
 }

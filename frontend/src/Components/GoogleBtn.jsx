@@ -125,7 +125,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
             >
                 
                 <Table
-                    scroll={{ x: 900 }}
+                    scroll={{ x: 700 }}
                     bordered
                     className='rowCustomeClassName2'
                     rowSelection={{

@@ -34,18 +34,20 @@ export class MetaAdsService {
     return `This action removes a #${id} metaAd`;
   }
 
-  async ObtainMetaAdsData({ email, accessToken, customer_ids }: ObtainMetaAdsDataDto) {
+  async ObtainMetaAdsData({ email, accessToken, customer_ids,customer_names }: ObtainMetaAdsDataDto) {
     let ids = customer_ids.split(',')
+    let cust_names = customer_names.split(',')
     let alldata = []
     let total_amount = 0
     let connected_accounts = []
     for (let i = 0; i < ids.length; i++) {
       const id = ids[i];
+      const name = cust_names[i]
       try {
         const data = await this.getMonthlySpend(id, accessToken);
         alldata.push({ ...data, id })
-        total_amount += data.insights ? (parseInt(data.insights.data[0].spend)) / 100 : 0
-        connected_accounts.push({ id: data.id, amount_spend: data.insights ? (data.insights.data[0].spend) / 100 : 0, descriptiveName: data.name })
+        total_amount += data.data.length ? (parseInt(data.data[0].spend)) : 0
+        connected_accounts.push({ id: id, amount_spend: data.data.length ? (data.data[0].spend) : 0, descriptiveName: name })
 
       } catch (error) { return error; }
     }
@@ -65,7 +67,7 @@ export class MetaAdsService {
       let config = {
         method: 'get',
         maxBodyLength: Infinity,
-        url: `https://graph.facebook.com/v16.0/${customer_id}?fields=name,insights&access_token=${access_token}`,
+        url: `https://graph.facebook.com/v16.0/${customer_id}/insights?date_preset=this_month&access_token=${access_token}`,
         headers: headers
       };
       let config2 = {
@@ -75,19 +77,7 @@ export class MetaAdsService {
         headers: headers
       };
       let res = await axios.request(config)
-      // res2 is to get account name cuz insights will not return account name if data is null
-
       return ({ ...res.data })
-      // let total = { daily_budget: 0, amount_spent: 0, lifetime_budget: 0 }
-      // let { data } = res.data
-      // data.forEach(e => {
-      //   total.daily_budget += e.daily_budget
-      //   total.amount_spent += e.amount_spent
-      //   total.lifetime_budget += e.lifetime_budget
-      // });
-      // // save data in db
-      // const updated = await this.ClientDataService.updateByClient(email , { 'facebook': `${total.amount_spent}`})
-      // return ({ meta_api_data: res.data, calculated: total, db_updated: updated })
 
     } catch (error) {
       return { err: error, updation_status: false }
