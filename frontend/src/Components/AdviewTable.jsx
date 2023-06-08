@@ -65,7 +65,8 @@ const AdviewTable = () => {
   }
 
 
-  const fetchAdsData = async (accessToken, provider_name, user_name, customer_ids, manager_id,linkedinCode) => {
+  const fetchAdsData = async (accessToken, provider_name, user_name, customer_ids, manager_id, linkedinCode) => {
+    // manager_id can be have different value 
     setIsloading(true)
     switch (provider_name) {
       case 'google':
@@ -88,8 +89,9 @@ const AdviewTable = () => {
 
       case 'bing':
         {
-          const res = await GetServerCall(`/bing-ads/ObtainBingAdsData/${email}/${accessToken}`)
+          const res = await PostServerCall(`/bing-ads/ObtainBingAdsData`, { email, customer_ids, accessToken, customer_names: manager_id })
           handleResponse(res, provider_name, user_name)
+          handleOk()
         }
         break
       case 'linkedin':
@@ -273,6 +275,8 @@ const AdviewTable = () => {
       return userExist?.facebook?.name
     else if (userExist?.linkedin?.name)
       return userExist?.linkedin?.name
+    else if (userExist?.bing?.name)
+      return userExist?.bing?.name
     else
       return null
 

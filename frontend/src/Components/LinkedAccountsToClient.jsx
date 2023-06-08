@@ -6,11 +6,12 @@ import { BingIcon, GoogleIcon, LinkedinIcon, MetaIcon } from '../icons/Icons';
 const { Panel } = Collapse;
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, currentProvider, client_name = '', userData: { google_client_linked_accounts, email,facebook_client_linked_accounts,linkedin_client_linked_accounts }, refreshData }) => {
+export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, currentProvider, client_name = '', userData: { google_client_linked_accounts, email,facebook_client_linked_accounts,linkedin_client_linked_accounts,bing_client_linked_accounts }, refreshData }) => {
     const [isloading, setIsloading] = useState(isMainLoading)
     const gLinkedAccountsToClient = google_client_linked_accounts ? JSON.parse(google_client_linked_accounts) : []
     const fLinkedAccountsToClient = facebook_client_linked_accounts ? JSON.parse(facebook_client_linked_accounts) : []
     const LLinkedAccountsToClient = linkedin_client_linked_accounts ? JSON.parse(linkedin_client_linked_accounts) : []
+    const BingLinkedAccountsToClient = bing_client_linked_accounts ? JSON.parse(bing_client_linked_accounts) : []
 
 
 
@@ -33,6 +34,13 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
     const handlelinkLinkedin = async (item, isRelink) => {
         setIsloading(true)
         let uri = isRelink ? '/linkedin-ads/relink-customer/' : '/linkedin-ads/unlink-customer/'
+        const res = await GetServerCall(uri + item.id + '/' + email)
+        setIsloading(false)
+        refreshData()
+    }
+    const handlelinkBing = async (item, isRelink) => {
+        setIsloading(true)
+        let uri = isRelink ? '/bing-ads/relink-customer/' : '/bing-ads/unlink-customer/'
         const res = await GetServerCall(uri + item.id + '/' + email)
         setIsloading(false)
         refreshData()
@@ -84,7 +92,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                         </div>
                     </Panel>
                     <Panel header={getHeader('Bing Ads',<BingIcon/>)} key="2" style={panelStyle}>
-                        <h5>Accounts Currently Linked {currentProvider}</h5>
+                        <h5>Accounts Currently Bing {currentProvider}</h5>
                         <div style={{ border: "1px", borderBottom: "0px", borderStyle: 'solid' }}>
                             <Table
                                 className='rowCustomeClassName'
@@ -106,12 +114,14 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                                         title: "",
                                         dataIndex: "status",
                                         key: "status",
-                                        render: (text, item) => <Button onClick={() => handlelinkGoogle(item)} style={{ ...btnStyle}}>
+                                        render: (text, item) => !item.unlinked ? <Button onClick={() => handlelinkBing(item)} style={{ ...btnStyle}}>
                                             Unlink
+                                        </Button> : <Button onClick={() => handlelinkBing(item, true)} style={{ ...btnStyle }}>
+                                            Relink
                                         </Button>
                                     },
                                 ]}
-                                dataSource={[]}
+                                dataSource={userExist?.bing?.name ? BingLinkedAccountsToClient :[]}
                             />
                         </div>
                     </Panel>

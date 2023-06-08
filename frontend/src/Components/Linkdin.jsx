@@ -8,6 +8,7 @@ import { getLinkedAdsAccountsWithLinkedin } from '../Services/LinkedinLinkedUser
 import { SearchOutlined } from '@ant-design/icons';
 
 const redirect_uri_ver = 'https://adview.io/linkedin'
+// const redirect_uri_ver = 'http://localhost:3000/linkedin'
 
 export const LinkedinBtn = ({ fetchAdsData, handleOk }) => {
   const [linkedUsers, setLinkedUsers] = useState([])
@@ -27,7 +28,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk }) => {
     let customer_ids = selectedRow.customer_ids.join(",");
     let customer_names = selectedRow.customer_names.join(",")
     setshowLinkedUserModal(false)
-    fetchAdsData(access_token, 'linkedin', userName, customer_ids,customer_names , authCodeMultiLogin)
+    fetchAdsData(access_token, 'linkedin', userName, customer_ids, customer_names, authCodeMultiLogin)
     // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
     setSeacrhedName('')
   }
@@ -177,10 +178,11 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk }) => {
     return <LinkedInCallback />;
   return (
     <>
-      <Button onClick={linkedInLogin} className="ModalBtn" type="primary">
-        LI Ads
-      </Button>
-
+      <div>
+        <Button onClick={linkedInLogin} className="ModalBtn" type="primary">
+          LI Ads
+        </Button>
+      </div>
       <Modal
         title={<h5 style={{ padding: "2.5% 0% 0px 2.5%" }} >Select Linkedin ad Accounts to link</h5>}
         width={"67%"}
