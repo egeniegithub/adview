@@ -7,6 +7,7 @@ export class ObtainMetaAdsDataDto {
   accessToken:string
   customer_ids:string
   email:string
+  customer_names:string
 }
 
 @Controller('meta-ads')
