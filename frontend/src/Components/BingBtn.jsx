@@ -128,7 +128,7 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
 
         <Table
           bordered
-          scroll={{ x: 900 }}
+          scroll={{ x: 700 }}
           className='rowCustomeClassName2'
           rowSelection={{
             type: 'checkbox',
