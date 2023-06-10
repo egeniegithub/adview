@@ -296,7 +296,7 @@ const AdviewTable = () => {
             dataSource={tableData}
           />
           {!isloading && tableData.length == 0 ? <div style={{ display: 'flex', justifyContent: 'center', marginLeft: '4vw' }} >
-            {<Button onClick={() => { getdata() }}>Retry</Button>}
+            {<Button style={{width:'10vh'}} onClick={() => { getdata() }}>Retry</Button>}
           </div> : ''}
 
         </div>
