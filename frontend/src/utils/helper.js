@@ -19,3 +19,17 @@ function deleteNestedProperty(obj, propertyPath) {
         delete obj[lastProperty];
     }
 }
+
+export const getStatus = (remaining) => {
+    var threshold = 200; // 200 threshold for determining "closer" value
+    if (remaining < 50) {
+        // spend is greater than remaining
+        return "Take Action";
+    } else if (remaining <= threshold) {
+        // spend is closer to remaining
+        return "Monitor";
+    } else {
+        // spend is less than remaining
+        return "Good";
+    }
+}

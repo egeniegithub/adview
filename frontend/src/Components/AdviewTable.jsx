@@ -17,6 +17,7 @@ import { GoogleBtn } from "./GoogleBtn";
 import { GetServerCall, PostServerCall } from "../Services/apiCall";
 import { getAccosiatedUstomers } from "../Services/googleLinkedUsers";
 import { LinkedAccountsToClient } from "./LinkedAccountsToClient";
+import { getStatus } from "../utils/helper";
 
 const AdviewTable = () => {
   const [email, setEmail] = useState("");
@@ -51,9 +52,10 @@ const AdviewTable = () => {
       for (let i = 0; i < data.length; i++) {
         let { facebook = 0, bing = 0, linkedin = 0, google = 0 } = data[i]
         data[i]["key"] = i + 1;
-        data[i]["Link"] = "Link";
-
+        data[i]["Link"] = "Link"; 
         data[i].monthly_spent = (facebook > 0 ? parseInt(facebook) : 0) + (google > 0 ? parseInt(google) : 0) + (bing > 0 ? parseInt(bing) : 0) + (linkedin > 0 ? parseInt(linkedin) : 0)
+        data[i].remaining = parseInt(data[i].monthly_budget) - data[i].monthly_spent
+        data[i].status = getStatus(data[i].remaining) 
       }
       setTableData(data)
       setIsloading(false)
@@ -294,7 +296,7 @@ const AdviewTable = () => {
             dataSource={tableData}
           />
           {!isloading && tableData.length == 0 ? <div style={{ display: 'flex', justifyContent: 'center', marginLeft: '4vw' }} >
-            {<Button onClick={() => { getdata() }}>Retry</Button>}
+            {<Button style={{width:'10vh'}} onClick={() => { getdata() }}>Retry</Button>}
           </div> : ''}
 
         </div>
