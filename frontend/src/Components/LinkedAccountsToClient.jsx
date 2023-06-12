@@ -6,7 +6,7 @@ import { BingIcon, GoogleIcon, LinkedinIcon, MetaIcon } from '../icons/Icons';
 const { Panel } = Collapse;
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, currentProvider, client_name = '', userData: { google_client_linked_accounts, email,facebook_client_linked_accounts,linkedin_client_linked_accounts,bing_client_linked_accounts }, refreshData }) => {
+export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, client_name = '', userData: { google_client_linked_accounts, email,facebook_client_linked_accounts,linkedin_client_linked_accounts,bing_client_linked_accounts }, refreshData }) => {
     const [isloading, setIsloading] = useState(isMainLoading)
     const gLinkedAccountsToClient = google_client_linked_accounts ? JSON.parse(google_client_linked_accounts) : []
     const fLinkedAccountsToClient = facebook_client_linked_accounts ? JSON.parse(facebook_client_linked_accounts) : []
@@ -58,7 +58,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
             <Spin indicator={antIcon} spinning={isloading} size="large" style={{ marginLeft: '2vw' }}>
                 <Collapse defaultActiveKey={['1']} bordered={false} style={{ backgroundColor: 'transparent' }}>
                     <Panel header={getHeader('Google Ads',<GoogleIcon/>)} key="1" style={panelStyle}>
-                        <h5>Accounts Currently Linked {currentProvider}</h5>
+                        <h5>Accounts Currently Linked </h5>
                         <div style={{ border: "1px",borderColor:'#3e3e3e2e', borderBottom: "0px", borderStyle: 'solid' }}>
                             <Table
                                 className='rowCustomeClassName'
@@ -92,7 +92,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                         </div>
                     </Panel>
                     <Panel header={getHeader('Bing Ads',<BingIcon/>)} key="2" style={panelStyle}>
-                        <h5>Accounts Currently Bing {currentProvider}</h5>
+                        <h5>Accounts Currently Bing </h5>
                         <div style={{ border: "1px", borderBottom: "0px", borderStyle: 'solid' }}>
                             <Table
                                 className='rowCustomeClassName'
@@ -126,7 +126,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                         </div>
                     </Panel>
                     <Panel header={getHeader('Linkedin Ads',<LinkedinIcon/>)} key="3" style={panelStyle}>
-                        <h5>Accounts Currently Linked {currentProvider}</h5>
+                        <h5>Accounts Currently Linked </h5>
                         <div style={{ border: "1px", borderBottom: "0px", borderStyle: 'solid' }}>
                             <Table
                                 className='rowCustomeClassName'
@@ -161,7 +161,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                         </div>
                     </Panel>
                     <Panel header={getHeader('Meta Ads',<MetaIcon/>)} key="4" style={panelStyle}>
-                        <h5>Accounts Currently Linked {currentProvider}</h5>
+                        <h5>Accounts Currently Linked </h5>
                         <div style={{ border: "1px", borderBottom: "0px", borderStyle: 'solid' }}>
                             <Table
                                 className='rowCustomeClassName'
