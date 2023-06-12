@@ -25,7 +25,6 @@ const AdviewTable = () => {
   const [tableData, setTableData] = useState([]);
   const [isloading, setIsloading] = useState(true)
   const [showClientLinkedActsModal, setShowClientLinkedActsModal] = useState(false)
-  const [currentProvider, setCurrentProvider] = useState('')
   const [timmerCount, settimmerCount] = useState(0)
   useEffect(() => {
     getdata()
@@ -131,7 +130,6 @@ const AdviewTable = () => {
     }
     localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
     setShowClientLinkedActsModal(true);
-    setCurrentProvider(provider_name)
     getdata()
   }
 
@@ -317,7 +315,7 @@ const AdviewTable = () => {
             <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
             <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} />
           </div>
-          <LinkedAccountsToClient showClientLinkedActsModal={showClientLinkedActsModal} setshowModal={setShowClientLinkedActsModal} currentProvider={currentProvider} userData={tableData.find(e => e.email == email)} refreshData={getdata} isMainLoading={isloading} />
+          <LinkedAccountsToClient showClientLinkedActsModal={showClientLinkedActsModal} setshowModal={setShowClientLinkedActsModal} userData={tableData.find(e => e.email == email)} refreshData={getdata} isMainLoading={isloading} />
         </div>
       </Modal>
     </Fragment>
