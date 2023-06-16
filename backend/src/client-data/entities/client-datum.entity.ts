@@ -4,68 +4,77 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
+    Unique,
 } from 'typeorm';
 @Entity()
+@Unique(["email"])
 export class ClientDatum {
     @PrimaryGeneratedColumn('increment')
     id: number;
 
-    @Column()
-    email: string;
+    // email is used as bubble_id cuz actual email is not provided by api  
+    @Column({ name: "email" })
+    email: string
 
     @Column()
     client: string;
 
-    @Column()
+    @Column({ default: '0' })
     total: string;
 
-    @Column()
+    @Column({ default: '0' })
     monthly_budget: string;
 
-    @Column()
+    @Column({ default: '' })
+    frequency: string;
+
+    // monthly_spent is calculating on frontend = sum of all platform
+    @Column({ default: '0' })
     monthly_spent: string;
 
-    @Column()
+    @Column({ default: '0' })
     remaining: string;
 
-    @Column()
+    @Column({ default: '0' })
     google: string;
 
-    @Column()
+    @Column({ default: '0' })
     bing: string;
 
-    @Column()
+    @Column({ default: '0' })
     linkedin: string;
 
-    @Column()
+    @Column({ default: '0' })
     facebook: string;
 
-    @Column()
+    @Column({ default: '0' })
     instagram: string;
 
-    @Column()
+    @Column({ default: true })
     status: string;
 
-    @Column("longtext")
+    @Column({ type: 'longtext', default: '' })
     google_client_linked_accounts: string;
 
-    @Column("longtext")
+    @Column({ type: 'longtext', default: '' })
     facebook_client_linked_accounts: string;
 
-    @Column("longtext")
+    @Column({ type: 'longtext', default: '' })
     linkedin_client_linked_accounts: string;
-    @Column("longtext")
+    @Column({ type: 'longtext', default: '' })
     bing_client_linked_accounts: string;
 
-    @Column()
+    @Column({ default: '' })
     g_token: string;
 
-    @Column()
+    @Column({ default: '' })
     g_refresh: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
     updated_at: Date;
 }
+
+

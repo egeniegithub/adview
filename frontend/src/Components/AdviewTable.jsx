@@ -8,14 +8,12 @@ import {
 } from "@ant-design/icons/lib/icons";
 import "../styles/table.css";
 
-import { loginWithBing } from "../Services/bingAuth";
 import { LinkedinBtn, linkedMultiLogin } from "./Linkdin";
 import { BingBtn } from "./BingBtn";
 import { Facebook } from "./Facebook";
 import { getBubbleUsers } from "../Services/BubbleIo";
 import { GoogleBtn } from "./GoogleBtn";
 import { GetServerCall, PostServerCall } from "../Services/apiCall";
-import { getAccosiatedUstomers } from "../Services/googleLinkedUsers";
 import { LinkedAccountsToClient } from "./LinkedAccountsToClient";
 import { getStatus } from "../utils/helper";
 
