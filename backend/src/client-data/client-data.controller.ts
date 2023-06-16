@@ -17,6 +17,31 @@ export class ClientDataController {
     return this.clientDataService.SyncWithBubble(bubbleData);
   }
 
+  @Post('webhook-call/update')
+  handleWebhook(@Body() payload: any) {
+    return this.clientDataService.HandleWebhookUpdateUser(payload);
+  }
+
+  @Post('webhook-call/create')
+  HandleWebhookCreateUser(@Body() payload: any) {
+    return this.clientDataService.HandleWebhookCreateUser(payload);
+  }
+  
+  // @Get('compute')
+  // ComputeData() {
+  //   return this.clientDataService.ComputeMonthlyData();
+  // }
+
+  @Get('get-monthly-clients-data')
+  GetMonthlyClientsData() {
+    return this.clientDataService.GetMonthlyClientsData();
+  }
+
+  @Get('insert-users-from-bubble')
+  InsertClientData() {
+    return this.clientDataService.InsertClientData();
+  }
+  
   @Get()
   findAll() {
     return this.clientDataService.findAll();

@@ -11,6 +11,8 @@ import { LinkedinAdsModule } from './linkedin-ads/linkedin-ads.module';
 import { MetaAdsModule } from './meta-ads/meta-ads.module';
 import { ClientDatum } from './client-data/entities/client-datum.entity';
 import { PlatformToken } from './platform-tokens/entities/platform-token.entity';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ClientMonthlyDatum } from './client-data/entities/client-monthly-datum.entity';
 
 @Module({
   imports: [
@@ -21,7 +23,7 @@ import { PlatformToken } from './platform-tokens/entities/platform-token.entity'
       username: 'adviewio_api',
       password: '-p(MX?D.pmxx',
       database: 'adviewio_api',
-      entities: [ClientDatum, PlatformToken],
+      entities: [ClientDatum, PlatformToken,ClientMonthlyDatum],
       synchronize: true,
     }),
     HttpModule.register({
@@ -32,6 +34,7 @@ import { PlatformToken } from './platform-tokens/entities/platform-token.entity'
         'Access-Control-Allow-Headers': 'Content-Type, Accept',
       },
     }),
+    ScheduleModule.forRoot(),
     GoogleAdsApisModule,
     BingAdsModule,
     ClientDataModule,
