@@ -38,9 +38,9 @@ export class ClientMonthlyDatum {
     @Column()
     year: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
     updated_at: Date;
 }
