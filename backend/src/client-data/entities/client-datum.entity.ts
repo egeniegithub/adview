@@ -70,10 +70,10 @@ export class ClientDatum {
     @Column({ default: '' })
     g_refresh: string;
 
-    @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
+    @CreateDateColumn()
     created_at: Date;
 
-    @UpdateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
+    @UpdateDateColumn()
     updated_at: Date;
 }
 
