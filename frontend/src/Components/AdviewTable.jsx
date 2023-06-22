@@ -163,7 +163,7 @@ const AdviewTable = () => {
       title: "Total Over/Under",
       dataIndex: "remaining",
       key: "TotalOverUnder",
-      render: (text) => text > 0 ? 'Over' : 'Under'
+      render: (text) => text > 0 ? 'Under' : 'Over'
     },
     {
       title: "Monthly Budget",
