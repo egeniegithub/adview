@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const GetServerCall =async (url)=>{
     return  await axios.get(
-        `https://adview.io${url}`,
+        `https://api.adview.io${url}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -11,5 +11,5 @@ export const GetServerCall =async (url)=>{
       );
 }
 export const PostServerCall =async (url,data)=>{
-  return  await axios.post(`https://adview.io${url}`,data);
+  return  await axios.post(`https://api.adview.io${url}`,data);
 }
