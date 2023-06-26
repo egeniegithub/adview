@@ -4,10 +4,12 @@ import { CreateMetaAdDto } from './dto/create-meta-ad.dto';
 import { UpdateMetaAdDto } from './dto/update-meta-ad.dto';
 
 export class ObtainMetaAdsDataDto {
-  accessToken:string
+  access_token:string
   customer_ids:string
   email:string
   customer_names:string
+  refresh_token:string
+  customers ?: Array<any>
 }
 
 @Controller('meta-ads')
@@ -33,6 +35,12 @@ export class MetaAdsController {
   hanldeRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
     return this.metaAdsService.hanldeRelinkCustomer(id,email);
   }
+
+  @Get('/logout-user/:email')
+  hanldeMetaLogout(@Param('email') email: string) {
+    return this.metaAdsService.hanldeMetaLogout(email);
+  }
+
 
   @Post()
   create(@Body() createMetaAdDto: CreateMetaAdDto) {

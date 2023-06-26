@@ -34,7 +34,7 @@ export class MetaAdsService {
     return `This action removes a #${id} metaAd`;
   }
 
-  async ObtainMetaAdsData({ email, accessToken, customer_ids,customer_names }: ObtainMetaAdsDataDto) {
+  async ObtainMetaAdsData({ email, access_token, customer_ids,customer_names,refresh_token }: ObtainMetaAdsDataDto) {
     let ids = customer_ids.split(',')
     let cust_names = customer_names.split(',')
     let alldata = []
@@ -44,14 +44,14 @@ export class MetaAdsService {
       const id = ids[i];
       const name = cust_names[i]
       try {
-        const data = await this.getMonthlySpend(id, accessToken);
+        const data = await this.getMonthlySpend(id, access_token);
         alldata.push({ ...data, id })
         total_amount += data.data.length ? (parseInt(data.data[0].spend)) : 0
         connected_accounts.push({ id: id, amount_spend: data.data.length ? (data.data[0].spend) : 0, descriptiveName: name })
 
       } catch (error) { return error; }
     }
-    const updated = await this.ClientDataService.updateByClient(email, { 'facebook': `${total_amount}`, facebook_client_linked_accounts: JSON.stringify(connected_accounts) })
+    const updated = await this.ClientDataService.updateByClient(email, { 'facebook': `${total_amount}`, facebook_client_linked_accounts: JSON.stringify(connected_accounts), meta_refresh_token : refresh_token, is_meta_login : '1'})
     return ({ data: alldata, updated, calculated: { amount_spent: total_amount } })
 
   }
@@ -82,6 +82,25 @@ export class MetaAdsService {
     } catch (error) {
       return { err: error, updation_status: false }
     }
+  }
+
+  async ObtainMetaAdsDataWithCrone({ email, refresh_token, customers }: ObtainMetaAdsDataDto) {
+    let total_amount = 0
+    let connected_accounts = []
+    // return {email, refresh_token, customers}
+    for (let i = 0; i < customers.length; i++) {
+      const {id} = customers[i];
+      try {
+        const data = await this.getMonthlySpend(id, refresh_token);
+        total_amount += data.data.length ? (parseInt(data.data[0].spend)) : 0
+      } catch (error) { 
+        await this.ClientDataService.updateByClient(email, {is_meta_login : '0'})
+        return error; 
+      }
+    }
+    const updated = await this.ClientDataService.updateByClient(email, { 'facebook': `${total_amount}`, is_meta_login : '1'})
+    return ({ updated, calculated: { amount_spent: total_amount } })
+
   }
 
   async hanldeUnlinkCustomer(id: string, email: string) {
@@ -131,6 +150,19 @@ export class MetaAdsService {
       return ({ error: "Something went wrong" })
     }
   }
+
+  async hanldeMetaLogout(email: string) {
+    try {
+      const user = await this.ClientDataService.findByEmail(email)
+      if (!user[0]?.facebook_client_linked_accounts)
+        return ({ error: "user not found" })
+      const updated = await this.ClientDataService.updateByClient(email, { is_meta_login: `0` })
+      return ({ status: 'success' })
+    } catch (error) {
+      return ({ error: "Something went wrong" })
+    }
+  }
+
 
 }
 

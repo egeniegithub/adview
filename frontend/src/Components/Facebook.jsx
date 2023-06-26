@@ -2,16 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { LoginSocialFacebook } from "reactjs-social-login";
 import { Button, Input, Modal, Switch, Table } from 'antd';
 import { handleLogoutIndicator } from '../utils/helper';
-import { getLinkedAdsAccounts } from '../Services/MetaLinkedUsers';
+import { getLinkedAdsAccounts, getMetaRefreshToken } from '../Services/MetaLinkedUsers';
 import { SearchOutlined } from '@ant-design/icons';
+import { GetServerCall } from '../Services/apiCall';
 
-export const Facebook = ({ fetchAdsData, handleOk }) => {
+export const Facebook = ({ fetchAdsData, handleOk ,userData,getdata}) => {
     const [linkedUsers, setLinkedUsers] = useState([])
     const [seacrhedName, setSeacrhedName] = useState([])
     const [filteredLinkedUsers, setfilteredLinkedUsers] = useState([])
     const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
     const [userName, setuserName] = useState('')
     const [access_token, setaccess_token] = useState('')
+    const [refresh_token, setrefresh_token_token] = useState('')
     const [selectedRow, setselectedRow] = useState({})
 
     const FbResponseHandler = async (response) => {
@@ -19,6 +21,9 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
         if (!response.accessToken)
             return
         let list = await getLinkedAdsAccounts(response.accessToken)
+        let refreshToken = await getMetaRefreshToken(response.accessToken)
+        if(!refreshToken)
+            return
         if (list?.length) {
             // loop through list and add key 
             list.forEach((ele, i) => {
@@ -30,6 +35,7 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
             setshowLinkedUserModal(true)
             setuserName(response.name)
             setaccess_token(response.accessToken)
+            setrefresh_token_token(refreshToken)
         }
         // fetchAdsData(response.accessToken, 'facebook', response.name)
     }
@@ -40,7 +46,7 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
         let customer_ids = selectedRow.customer_ids.join(",");
         let customer_names = selectedRow.customer_names.join(",")
         setshowLinkedUserModal(false)
-        fetchAdsData(access_token, 'facebook', userName, customer_ids,customer_names)
+        fetchAdsData({access_token,refresh_token}, 'facebook', userName, customer_ids,customer_names)
         // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
         setSeacrhedName('')
     }
@@ -73,20 +79,17 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
         }),
     };
 
-    let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
     let id = localStorage.getItem('id')
-    let userExist = logedInUsers[id]
 
-    const handleRowLogout = () => {
-        delete userExist?.facebook;
-        logedInUsers[id] = userExist
-        localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+    const handleRowLogout =async () => {
         // check is indicator exists
+        await GetServerCall('/meta-ads/logout-user/'+userData.email)
+        getdata()
         handleLogoutIndicator(id, "facebook")
         handleOk()
     }
 
-    if (userExist?.facebook?.name)
+    if (userData?.is_meta_login == '1')
         return (
             <div style={{ display: 'flex', flexFlow: 'column' }}>
                 <Button disabled className="ModalBtn" style={{ color: '#fff', backgroundColor: '#018F0F' }}>
@@ -105,6 +108,7 @@ export const Facebook = ({ fetchAdsData, handleOk }) => {
                 }
                 scope='ads_read,read_insights,ads_management'
                 redirect_uri={`https://adview.io/`}
+                
                 onResolve={({ provider, data }) => {
                     FbResponseHandler(data)
                 }}

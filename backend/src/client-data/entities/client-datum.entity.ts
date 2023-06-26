@@ -28,6 +28,9 @@ export class ClientDatum {
     @Column({ default: '' })
     frequency: string;
 
+    @Column({ default: '' })
+    buyer: string;
+    
     // monthly_spent is calculating on frontend = sum of all platform
     @Column({ default: '0' })
     monthly_spent: string;
@@ -63,6 +66,30 @@ export class ClientDatum {
     linkedin_client_linked_accounts: string;
     @Column({ type: 'longtext', default: '' })
     bing_client_linked_accounts: string;
+
+    @Column({ type: 'longtext', default: '' })
+    meta_refresh_token: string;
+
+    @Column({ type: 'longtext', default: '' })
+    bing_refresh_token: string;
+
+    @Column({ type: 'longtext', default: '' })
+    linkedin_refresh_token: string;
+
+    @Column({ type: 'longtext', default: '' })
+    google_refresh_token: string;
+
+    @Column({  default: '0' })
+    is_bing_login: string;
+
+    @Column({  default: '0' })
+    is_meta_login: string;
+
+    @Column({  default: '0' })
+    is_linkedin_login: string;
+
+    @Column({ default: '0' })
+    is_google_login: string;
 
     @Column({ default: '' })
     g_token: string;

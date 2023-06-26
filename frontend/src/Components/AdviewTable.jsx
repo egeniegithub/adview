@@ -80,7 +80,8 @@ const AdviewTable = () => {
 
       case 'facebook':
         {
-          const res = await PostServerCall(`/meta-ads/ObtainMetaAdsData`, { email, customer_ids, accessToken, customer_names: manager_id })
+          let {refresh_token,access_token } = accessToken
+          const res = await PostServerCall(`/meta-ads/ObtainMetaAdsData`, { email, customer_ids, access_token, customer_names: manager_id ,refresh_token})
           handleResponse(res, provider_name, user_name)
           handleOk()
         }
@@ -311,7 +312,7 @@ const AdviewTable = () => {
             <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
             <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
             <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
-            <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} />
+            <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)} />
           </div>
           <LinkedAccountsToClient showClientLinkedActsModal={showClientLinkedActsModal} setshowModal={setShowClientLinkedActsModal} userData={tableData.find(e => e.email == email)} refreshData={getdata} isMainLoading={isloading} />
         </div>
