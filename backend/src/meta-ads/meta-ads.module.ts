@@ -6,6 +6,7 @@ import { ClientDataModule } from 'src/client-data/client-data.module';
 @Module({
   imports: [ClientDataModule],
   controllers: [MetaAdsController],
-  providers: [MetaAdsService]
+  providers: [MetaAdsService],
+  exports : [MetaAdsService]
 })
 export class MetaAdsModule {}

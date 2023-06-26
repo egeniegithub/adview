@@ -16,7 +16,6 @@ export class ClientDataService {
     private readonly clientDataRepository: Repository<ClientDatum>,
     @InjectRepository(ClientMonthlyDatum)
     private readonly clientMonthlyDataRepository: Repository<ClientMonthlyDatum>,
-
   ) { }
 
   async create(createClientDatumDto: CreateClientDatumDto) {
@@ -38,6 +37,11 @@ export class ClientDataService {
 
   async findAll() {
     const data = await this.clientDataRepository.find();
+    return data;
+  }
+
+  async findAllWithQuery(query) {
+    const data = await this.clientDataRepository.find(query);
     return data;
   }
 
@@ -94,8 +98,8 @@ export class ClientDataService {
 
   async GetMonthlyClientsData() {
     try {
-      let data =await this.clientMonthlyDataRepository.find()
-      return {list : data}
+      let data = await this.clientMonthlyDataRepository.find()
+      return { list: data }
     } catch (error) {
       return { error: "error while getting Monthly Data" }
     }
@@ -103,13 +107,13 @@ export class ClientDataService {
 
 
   //crone job will run 1st day of every month at 9:00AM EST time
-  @Cron('0 9 1 * *',{
+  @Cron('0 9 1 * *', {
     name: 'monthly update',
     timeZone: 'EST',
   })
   async handleCron() {
     let data = await this.ComputeMonthlyData()
-    Logger.log('Cron job response',data);
+    Logger.log('Cron job response', data);
   }
 
   // Monthly Calculation
@@ -119,7 +123,7 @@ export class ClientDataService {
       const accessToken = '3bf2d433d7db4b76e663f78faefccbab';
       let { month, year } = getPreviousMonthYear()
       let currentDate = getCurrentIOSDate()
-      let savedUsers =await this.clientDataRepository.find()
+      let savedUsers = await this.clientDataRepository.find()
       const config = {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -145,7 +149,7 @@ export class ClientDataService {
           ]),
         },
       };
-      
+
       let res = await axios.get(apiUrl, config)
       const list = res.data.response.results || []
       // Calculate the date one month ago
@@ -159,10 +163,10 @@ export class ClientDataService {
           return true; // Include this object in the filtered array
         });
         uniqueArray.forEach(e => {
-          let {  account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule, media_buyer_option_media_buyer: buyer }: any = e
+          let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule, media_buyer_option_media_buyer: buyer }: any = e
           // find corresponding user 
-          const {email : bub_email,facebook , bing, linkedin , google} = savedUsers.find((u) => u.email == email) || {};
-          if(!bub_email)
+          const { email: bub_email, facebook, bing, linkedin, google } = savedUsers.find((u) => u.email == email) || {};
+          if (!bub_email)
             return
 
           const total = (facebook > '0' ? parseInt(facebook) : 0) + (google > '0' ? parseInt(google) : 0) + (bing > '0' ? parseInt(bing) : 0) + (linkedin > '0' ? parseInt(linkedin) : 0)
@@ -180,14 +184,14 @@ export class ClientDataService {
               }
             })
           }
-          let obj = { email, client: name_text, buyer: buyer, month, year, frequency: billing_schedule_option_billing_schedule, remaining: `` + (budget_number - total) || `0`, monthly_spent: ``+total, monthly_budget: ``+budget_number }
+          let obj = { email, client: name_text, buyer: buyer, month, year, frequency: billing_schedule_option_billing_schedule, remaining: `` + (budget_number - total) || `0`, monthly_spent: `` + total, monthly_budget: `` + budget_number }
           arr.push(obj)
         });
         // insert list in monthly table 
-          await this.clientMonthlyDataRepository.insert(arr)
+        await this.clientMonthlyDataRepository.insert(arr)
         return ('Cron job success')
       }
-    
+
     }
     catch (err) {
       Logger.log("Error in Cron Job ", err)
@@ -198,19 +202,19 @@ export class ClientDataService {
 
   // handle bubble user update budget 
   async HandleWebhookUpdateUser(payload) {
-    let {  account_custom_account: email, name_text, budget_number }: any = payload
+    let { account_custom_account: email, name_text, budget_number }: any = payload
     let obj = { monthly_budget: budget_number }
     try {
       await this.clientDataRepository.update({ email }, obj)
       return { status: 'success' }
     } catch (error) {
-      return { status: 'error',message:error }
+      return { status: 'error', message: error }
     }
   }
 
   // handle bubble new user call
   async HandleWebhookCreateUser(payload) {
-    const {  account_custom_account: email, name_text, budget_number }: any = payload
+    const { account_custom_account: email, name_text, budget_number }: any = payload
     try {
       let obj = { email, client: name_text, monthly_budget: budget_number }
       await this.clientDataRepository.insert(obj)
@@ -259,9 +263,9 @@ export class ClientDataService {
       const list = res.data.response.results || []
       // map data
       list.forEach(e => {
-        let { account_custom_account: email, name_text, budget_number,billing_schedule_option_billing_schedule = '' }: any = e
+        let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule = '',media_buyer_option_media_buyer: buyer  }: any = e
 
-        let obj = { email, client: name_text, frequency:billing_schedule_option_billing_schedule,monthly_budget: budget_number,updated_at:getCurrentTimeForUpdateField() }
+        let obj = { email, client: name_text,buyer:buyer, frequency: billing_schedule_option_billing_schedule, monthly_budget: budget_number, updated_at: getCurrentTimeForUpdateField() }
         arr.push(obj)
       });
       // update list in client table 
@@ -270,7 +274,7 @@ export class ClientDataService {
       return { list: data }
 
     } catch (error) {
-      Logger.log("Error in Inserting client from bubble ",error)
+      Logger.log("Error in Inserting client from bubble ", error)
       return { error: error }
     }
 
@@ -280,6 +284,7 @@ export class ClientDataService {
     const deletedData = await this.clientDataRepository.delete({ id })
     return { message: "Record deleted successfully", res: deletedData }
   }
+
 }
 
 
