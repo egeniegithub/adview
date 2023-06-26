@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { Table, Tag, Button, Modal, Spin } from "antd";
+import { Table, Tag, Button, Modal, Spin, Input, Space } from "antd";
+import { SearchOutlined } from '@ant-design/icons';
 import axios from "axios";
 import {
   WarningOutlined,
@@ -160,10 +161,51 @@ const AdviewTable = () => {
       key: "Client",
     },
     {
-      title: "Total Over/Under",
+      title: "Buyer",
+      dataIndex: "buyer",
+      key: "Buyer",
+    },
+    {
+      title: "Frequency",
+      dataIndex: "frequency",
+      key: "Frequency",
+    },
+    {
+      title: "Over/Under",
       dataIndex: "remaining",
       key: "TotalOverUnder",
-      render: (text) => text > 0 ? 'Under' : 'Over'
+      render: (text) => text> 0 ? '$' + parseInt(text).toLocaleString(): <p style={{color: `red`}}>${parseInt(text).toLocaleString()}</p>,
+      sorter: (a, b) => a.remaining - b.remaining,
+      onFilter: (value, record) => record.remaining.toString().startsWith(value.toString()),
+      filterIcon: filtered => <SearchOutlined className="ant-table-filter-icon" />,
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search remaining"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Search
+            </Button>
+            <Button onClick={() => {
+              clearFilters();
+              setSelectedKeys([]); // Clear selected keys
+              confirm();
+            }} size="small" style={{ width: 90 }}>
+              Reset
+            </Button>
+          </Space>
+        </div>
+      ),
     },
     {
       title: "Monthly Budget",
@@ -181,8 +223,38 @@ const AdviewTable = () => {
       title: "Remaining",
       dataIndex: "remaining",
       key: "Remaining",
-      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-'
-    },
+      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-',
+      onFilter: (value, record) => record.remaining.toString().startsWith(value.toString()),
+      filterIcon: filtered => <SearchOutlined className="ant-table-filter-icon" />,
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search remaining"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Search
+            </Button>
+            <Button onClick={() => {
+              clearFilters();
+              setSelectedKeys([]); // Clear selected keys
+              confirm();
+            }} size="small" style={{ width: 90 }}>
+              Reset
+            </Button>
+          </Space>
+        </div>
+      ),
+    },      
     {
       title: "Status",
       dataIndex: "status",
@@ -290,6 +362,7 @@ const AdviewTable = () => {
             className="adviewTable"
             columns={columns}
             dataSource={tableData}
+            pagination={false}
           />
           {!isloading && tableData.length == 0 ? <div style={{ display: 'flex', justifyContent: 'center', marginLeft: '4vw' }} >
             {<Button style={{width:'10vh'}} onClick={() => { getdata() }}>Retry</Button>}
