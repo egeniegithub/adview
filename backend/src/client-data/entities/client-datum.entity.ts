@@ -28,9 +28,9 @@ export class ClientDatum {
     @Column({ default: '' })
     frequency: string;
 
-    @Column({ default: '' })
+    @Column()
     buyer: string;
-    
+
     // monthly_spent is calculating on frontend = sum of all platform
     @Column({ default: '0' })
     monthly_spent: string;

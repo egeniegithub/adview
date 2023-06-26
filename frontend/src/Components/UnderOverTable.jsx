@@ -84,6 +84,7 @@ const UnderOverTable = () => {
                         className="adviewTable"
                         columns={columns}
                         dataSource={list}
+                        pagination={false}
                     />
                 </div>
             </Spin>
