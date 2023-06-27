@@ -5,22 +5,32 @@ import { getAccosiatedUstomers } from '../Services/googleLinkedUsers';
 import { Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { handleLogoutIndicator } from '../utils/helper';
+import { useGoogleLogin } from '@react-oauth/google';
+import { GetServerCall, PostServerCall } from '../Services/apiCall';
 
-export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
+export const GoogleBtn = ({ fetchAdsData, handleOk,userData,getdata }) => {
     const [linkedUsers, setLinkedUsers] = useState([])
     const [seacrhedName, setSeacrhedName] = useState([])
     const [filteredLinkedUsers, setfilteredLinkedUsers] = useState([])
     const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
     const [userName, setuserName] = useState('')
     const [access_token, setaccess_token] = useState('')
+    const [refresh_token, setrefresh_token_token] = useState('')
     const [selectedRow, setselectedRow] = useState({})
 
+    const login = useGoogleLogin({
+        onSuccess: codeResponse => GResponseHandler(codeResponse.code),
+        flow: 'auth-code',
+        scope:['https://www.googleapis.com/auth/adwords']
+    });
 
-    const GResponseHandler = async (response) => {
+    const GResponseHandler = async (code) => {
         // console.log("Google", response)
-        if (!response.access_token)
+        let response = await PostServerCall('/google-ads-apis/generate-tokens',{code})
+        if (!response.data.tokens)
             return
-        let list = await getAccosiatedUstomers(response.access_token)
+        let {access_token, refresh_token} = response.data.tokens
+        let list = await getAccosiatedUstomers(access_token)
         if (list?.length) {
             // loop through list and add key 
             list.forEach((ele, i) => {
@@ -29,22 +39,21 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
             })
             setLinkedUsers(list)
             setshowLinkedUserModal(true)
-            setuserName(response.name)
-            setaccess_token(response.access_token)
+            setuserName("name")
+            setaccess_token(access_token)
+            setrefresh_token_token(refresh_token)
         }
     }
 
-    let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
-    let id = localStorage.getItem('id')
-    let userExist = logedInUsers[id]
 
-    const handleRowLogout = () => {
-        delete userExist?.google;
-        logedInUsers[id] = userExist
-        localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+    let id = localStorage.getItem('id')
+
+    const handleRowLogout =async () => {
+
+        await GetServerCall('/google-ads-apis/logout-user/'+userData.email)
+        getdata()
         // check is indicator exists
         handleLogoutIndicator(id, "google")
-
         handleOk()
     }
 
@@ -79,11 +88,11 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
             return
         let customer_ids = selectedRow.customer_ids.join(",");
         setshowLinkedUserModal(false)
-        fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
+        fetchAdsData({access_token,refresh_token}, 'google', userName, customer_ids, selectedRow.manager_id)
         setSeacrhedName('')
     }
 
-    if (userExist?.google?.name)
+    if (userData?.is_google_login == '1')
         return (
             <div style={{ display: 'flex', flexFlow: 'column', gap: '1%' }}>
                 <Button disabled className="ModalBtn" style={{ color: '#fff', backgroundColor: '#018F0F' }}>
@@ -92,9 +101,12 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                 <Button onClick={handleRowLogout}>Logout Google</Button>
             </div>
         )
+
+
     return (
         <>
-            {!showLinkedUserModal && <LoginSocialGoogle
+            <div><Button className="ModalBtn" type="primary" onClick={() => login()}>google Ads</Button></div>
+            {/* {!showLinkedUserModal && <LoginSocialGoogle
                 // client_id={'828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com'} client account
                 client_id={'828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com'}
                 scope="openid profile email https://www.googleapis.com/auth/adwords"
@@ -111,10 +123,10 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                 <Button className="ModalBtn" type="primary">
                     google Ads
                 </Button>
-            </LoginSocialGoogle>}
+            </LoginSocialGoogle>} */}
 
             <Modal
-                title={<h5 style={{     padding: "2.5% 0% 0px 2.5%"}} >Select Google ad Accounts to link</h5>}
+                title={<h5 style={{ padding: "2.5% 0% 0px 2.5%" }} >Select Google ad Accounts to link</h5>}
                 width={"67%"}
                 className='responsive_warper'
                 open={showLinkedUserModal}
@@ -123,7 +135,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                 bodyStyle={{ padding: "2.5% 3.5%" }}
                 footer={null}
             >
-                
+
                 <Table
                     scroll={{ x: 700 }}
                     bordered
@@ -152,7 +164,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                             title: "AUTO TRACKING",
                             dataIndex: "status",
                             key: "status",
-                            width:'15%',
+                            width: '15%',
                             render: (text, record) => <Switch checked={record.auto_track} onChange={
                                 () => {
                                     setLinkedUsers(
@@ -183,7 +195,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk }) => {
                             ),
                             dataIndex: "",
                             key: "",
-                            width:'20%'
+                            width: '20%'
                         },
                     ]}
                     dataSource={seacrhedName != '' ? filteredLinkedUsers : linkedUsers}

@@ -9,8 +9,9 @@ export class CreateGoogleAdsApiDto {
 
 
 export class ObtainAdsDataDto {
-    accessToken:string
     customer_ids:string
     email:string
     manager_id:string
+    refresh_token : string
+    access_token : string
 }

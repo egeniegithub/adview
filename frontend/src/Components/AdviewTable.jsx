@@ -70,8 +70,9 @@ const AdviewTable = () => {
     switch (provider_name) {
       case 'google':
         {
+          let {refresh_token,access_token } = accessToken
           // console.log("check uri ", email, accessToken)
-          const res = await PostServerCall(`/google-ads-apis/ObtainAdsData`, { email, customer_ids, accessToken, manager_id })
+          const res = await PostServerCall(`/google-ads-apis/ObtainAdsData`, { email, customer_ids, access_token, manager_id,refresh_token })
           handleResponse(res, provider_name, user_name)
           // close buttons popup in google case 
           handleOk()
@@ -264,21 +265,13 @@ const AdviewTable = () => {
   ];
   // console.log('rendered')
   const antIcon = <LoadingOutlined style={{ fontSize: 22 }} spin />;
-  let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
-  let id = localStorage.getItem('id')
-  let userExist = logedInUsers[id]
+
   const getIfUserExits = () => {
-    if (userExist?.google?.name)
-      return userExist?.google?.name
-    else if (userExist?.facebook?.name)
-      return userExist?.facebook?.name
-    else if (userExist?.linkedin?.name)
-      return userExist?.linkedin?.name
-    else if (userExist?.bing?.name)
-      return userExist?.bing?.name
+    let {is_bing_login,is_meta_login,is_linkedin_login,is_google_login,client} =  tableData.find(e => e.email == email)
+    if (is_bing_login == '1' || is_meta_login == '1'  || is_linkedin_login == '1' || is_google_login == '1' )
+      return client
     else
       return null
-
   }
 
   return (
@@ -309,7 +302,7 @@ const AdviewTable = () => {
       >
         <div style={{ display: 'flex', flexFlow: 'column' }}>
           <div className="buttons_wrapper">
-            <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
+            <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)} />
             <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
             <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
             <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)} />
