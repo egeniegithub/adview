@@ -50,10 +50,10 @@ const AdviewTable = () => {
       for (let i = 0; i < data.length; i++) {
         let { facebook = 0, bing = 0, linkedin = 0, google = 0 } = data[i]
         data[i]["key"] = i + 1;
-        data[i]["Link"] = "Link"; 
+        data[i]["Link"] = "Link";
         data[i].monthly_spent = (facebook > 0 ? parseInt(facebook) : 0) + (google > 0 ? parseInt(google) : 0) + (bing > 0 ? parseInt(bing) : 0) + (linkedin > 0 ? parseInt(linkedin) : 0)
         data[i].remaining = parseInt(data[i].monthly_budget) - data[i].monthly_spent
-        data[i].status = getStatus(data[i].remaining) 
+        data[i].status = getStatus(data[i].remaining)
       }
       setTableData(data)
       setIsloading(false)
@@ -81,8 +81,8 @@ const AdviewTable = () => {
 
       case 'facebook':
         {
-          let {refresh_token,access_token } = accessToken
-          const res = await PostServerCall(`/meta-ads/ObtainMetaAdsData`, { email, customer_ids, access_token, customer_names: manager_id ,refresh_token})
+          let { refresh_token, access_token } = accessToken
+          const res = await PostServerCall(`/meta-ads/ObtainMetaAdsData`, { email, customer_ids, access_token, customer_names: manager_id, refresh_token })
           handleResponse(res, provider_name, user_name)
           handleOk()
         }
@@ -198,7 +198,7 @@ const AdviewTable = () => {
       title: "Over/Under",
       dataIndex: "remaining",
       key: "TotalOverUnder",
-      render: (text) => text> 0 ? '$' + parseInt(text).toLocaleString(): <p style={{color: `red`}}>${parseInt(text).toLocaleString()}</p>,
+      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : <p style={{ color: `red` }}>${parseInt(text).toLocaleString()}</p>,
       sorter: (a, b) => a.remaining - b.remaining,
       // onFilter: (value, record) => record.remaining.toString().startsWith(value.toString()),
       // filterIcon: filtered => <SearchOutlined className="ant-table-filter-icon" />,
@@ -251,7 +251,7 @@ const AdviewTable = () => {
       key: "Remaining",
       render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-',
       sorter: (a, b) => a.remaining - b.remaining,
-    },      
+    },
     {
       title: "Status",
       dataIndex: "status",
@@ -382,7 +382,7 @@ const AdviewTable = () => {
             pagination={false}
           />
           {!isloading && tableData.length == 0 ? <div style={{ display: 'flex', justifyContent: 'center', marginLeft: '4vw' }} >
-            {<Button style={{width:'10vh'}} onClick={() => { getdata() }}>Retry</Button>}
+            {<Button style={{ width: '10vh' }} onClick={() => { getdata() }}>Retry</Button>}
           </div> : ''}
 
         </div>
