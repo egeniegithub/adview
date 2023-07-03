@@ -9,5 +9,6 @@ import { ClientDataModule } from 'src/client-data/client-data.module';
   imports: [ClientDataModule,],
   controllers: [GoogleAdsApisController],
   providers: [GoogleAdsApisService],
+  exports:[GoogleAdsApisService]
 })
 export class GoogleAdsApisModule { }
