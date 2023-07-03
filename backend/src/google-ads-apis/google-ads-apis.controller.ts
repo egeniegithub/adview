@@ -33,6 +33,21 @@ export class GoogleAdsApisController {
       return error;
     }
   }
+
+  @Post('/generate-tokens')
+  genrateTokens(@Body() code: string) {
+    try {
+      return this.googleAdsApisService.genrateTokens(code);
+    } catch (error) {
+      return error;
+    }
+  }
+  
+  @Get('/logout-user/:email')
+  hanldeGoogleLogout(@Param('email') email: string) {
+    return this.googleAdsApisService.hanldeGoogleLogout(email);
+  }
+
   @Get('/unlink-customer/:id/:email')
   hanldeUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
     return this.googleAdsApisService.hanldeUnlinkCustomer(id,email);

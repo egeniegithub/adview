@@ -7,9 +7,12 @@ import { BingBtn } from './Components/BingBtn';
 import Success from './Components/success';
 import Login from './screens/Login';
 import ProtectedRoute from './ProtectedRoute';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 
 function App() {
   return (
+    <GoogleOAuthProvider clientId="828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com">
     <Router>
       <Routes>
         <Route exact path="/login" element={<Login />} />
@@ -26,6 +29,7 @@ function App() {
         <Route path="/OverUnderlog" element={<U_OTableScreen />} />
       </Routes>
     </Router>
+    </GoogleOAuthProvider>
   );
 }
 
