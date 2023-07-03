@@ -160,16 +160,39 @@ const AdviewTable = () => {
       title: "Client",
       dataIndex: "client",
       key: "Client",
+      sorter: (a, b) => a.client.length - b.client.length,
     },
     {
       title: "Buyer",
       dataIndex: "buyer",
       key: "Buyer",
+      filters: [
+        {
+          text: 'Agency',
+          value: 'Agency',
+        },
+        {
+          text: 'Client',
+          value: 'Client',
+        },
+      ],
+      onFilter: (value, record) => record.buyer.indexOf(value) === 0,
     },
     {
       title: "Frequency",
       dataIndex: "frequency",
       key: "Frequency",
+      filters: [
+        {
+          text: 'Month-to-Month',
+          value: 'Month-to-Month',
+        },
+        {
+          text: 'One-Time',
+          value: 'One-Time',
+        },
+      ],
+      onFilter: (value, record) => record.frequency.indexOf(value) === 0,
     },
     {
       title: "Over/Under",
@@ -177,84 +200,57 @@ const AdviewTable = () => {
       key: "TotalOverUnder",
       render: (text) => text> 0 ? '$' + parseInt(text).toLocaleString(): <p style={{color: `red`}}>${parseInt(text).toLocaleString()}</p>,
       sorter: (a, b) => a.remaining - b.remaining,
-      onFilter: (value, record) => record.remaining.toString().startsWith(value.toString()),
-      filterIcon: filtered => <SearchOutlined className="ant-table-filter-icon" />,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search remaining"
-            value={selectedKeys[0]}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-            onPressEnter={() => confirm()}
-            style={{ width: 188, marginBottom: 8, display: 'block' }}
-          />
-          <Space>
-            <Button
-              type="primary"
-              onClick={() => confirm()}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Search
-            </Button>
-            <Button onClick={() => {
-              clearFilters();
-              setSelectedKeys([]); // Clear selected keys
-              confirm();
-            }} size="small" style={{ width: 90 }}>
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
+      // onFilter: (value, record) => record.remaining.toString().startsWith(value.toString()),
+      // filterIcon: filtered => <SearchOutlined className="ant-table-filter-icon" />,
+      // filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Filter Over/Under"
+      //       value={selectedKeys[0]}
+      //       onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+      //       onPressEnter={() => confirm()}
+      //       style={{ width: 188, marginBottom: 8, display: 'block' }}
+      //     />
+      //     <Space>
+      //       <Button
+      //         type="primary"
+      //         onClick={() => confirm()}
+      //         size="small"
+      //         style={{ width: 90 }}
+      //       >
+      //         Filter
+      //       </Button>
+      //       <Button onClick={() => {
+      //         clearFilters();
+      //         setSelectedKeys([]); // Clear selected keys
+      //         confirm();
+      //       }} size="small" style={{ width: 90 }}>
+      //         Reset
+      //       </Button>
+      //     </Space>
+      //   </div>
+      // ),
     },
     {
       title: "Monthly Budget",
       dataIndex: "monthly_budget",
       key: "MonthlyBudget",
-      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-'
+      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-',
+      sorter: (a, b) => a.monthly_budget - b.monthly_budget,
     },
     {
       title: "Month-to-Date Spent",
       dataIndex: "monthly_spent",
       key: "Month_to_DateSpent",
-      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-'
+      render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-',
+      sorter: (a, b) => a.monthly_spent - b.monthly_spent,
     },
     {
       title: "Remaining",
       dataIndex: "remaining",
       key: "Remaining",
       render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-',
-      onFilter: (value, record) => record.remaining.toString().startsWith(value.toString()),
-      filterIcon: filtered => <SearchOutlined className="ant-table-filter-icon" />,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search remaining"
-            value={selectedKeys[0]}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-            onPressEnter={() => confirm()}
-            style={{ width: 188, marginBottom: 8, display: 'block' }}
-          />
-          <Space>
-            <Button
-              type="primary"
-              onClick={() => confirm()}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Search
-            </Button>
-            <Button onClick={() => {
-              clearFilters();
-              setSelectedKeys([]); // Clear selected keys
-              confirm();
-            }} size="small" style={{ width: 90 }}>
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
+      sorter: (a, b) => a.remaining - b.remaining,
     },      
     {
       title: "Status",
@@ -275,6 +271,22 @@ const AdviewTable = () => {
           </Tag>
         );
       },
+      sorter: (a, b) => a.status.length - b.status.length,
+      filters: [
+        {
+          text: 'Good',
+          value: 'Good',
+        },
+        {
+          text: 'Monitor',
+          value: 'Monitor',
+        },
+        {
+          text: 'Take Action',
+          value: 'Take Action',
+        },
+      ],
+      onFilter: (value, record) => record.status.indexOf(value) === 0,
     },
     {
       title: "Google",
@@ -290,6 +302,7 @@ const AdviewTable = () => {
           return val > 0 ? '$' + parseInt(val).toLocaleString() : '-'
         }
       },
+      sorter: (a, b) => a.google - b.google,
     },
     {
       title: "Bing",
@@ -304,6 +317,7 @@ const AdviewTable = () => {
           return val > 0 ? '$' + parseInt(val).toLocaleString() : '-'
         }
       },
+      sorter: (a, b) => a.bing - b.bing,
     },
     {
       title: "LinkedIn",
@@ -318,6 +332,7 @@ const AdviewTable = () => {
           return val > 0 ? '$' + parseInt(val).toLocaleString() : '-'
         }
       },
+      sorter: (a, b) => a.linkedin - b.linkedin,
     },
     {
       title: "Meta",
@@ -332,6 +347,7 @@ const AdviewTable = () => {
           return val > 0 ? '$' + parseInt(val).toLocaleString() : '-'
         }
       },
+      sorter: (a, b) => a.facebook - b.facebook,
     }
   ];
   // console.log('rendered')

@@ -1,7 +1,9 @@
-import { Spin, Table } from 'antd'
+import { Button, Input, Space, Spin, Table } from 'antd'
 import React, { Fragment, useEffect, useState } from 'react'
 import { GetServerCall } from '../Services/apiCall'
-import { LoadingOutlined } from '@ant-design/icons'
+import { FilterFilled, LoadingOutlined } from '@ant-design/icons'
+import { SearchOutlined } from '@ant-design/icons';
+import Search from 'antd/es/transfer/search';
 
 
 const UnderOverTable = () => {
@@ -41,34 +43,90 @@ const UnderOverTable = () => {
             title: "Frequency",
             dataIndex: "frequency",
             key: "frequency",
+            filters: [
+                {
+                  text: 'Month-to-Month',
+                  value: 'Month-to-Month',
+                },
+                {
+                  text: 'One-Time',
+                  value: 'One-Time',
+                },
+              ],
+              onFilter: (value, record) => record.frequency.indexOf(value) === 0,
         },
         {
             title: "Account",
             dataIndex: "client",
             key: "client",
+            sorter: (a, b) => a.client.length - b.client.length,
+            onFilter: (value, record) => record.client.toString().startsWith(value.toString()),
+      filterIcon: filtered => <FilterFilled />,
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Filter Account"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Filter
+            </Button>
+            <Button onClick={() => {
+              clearFilters();
+              setSelectedKeys([]); // Clear selected keys
+              confirm();
+            }} size="small" style={{ width: 90 }}>
+              Reset
+            </Button>
+          </Space>
+        </div>
+      ),
         },
         {
             title: "Buyer",
             dataIndex: "buyer",
             key: "buyer",
+            filters: [
+                {
+                  text: 'Agency',
+                  value: 'Agency',
+                },
+                {
+                  text: 'Client',
+                  value: 'Client',
+                },
+              ],
+              onFilter: (value, record) => record.buyer.indexOf(value) === 0,
         },
         {
             title: "Budget",
             dataIndex: "monthly_budget",
             key: "monthly_budget",
-            render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-'
+            render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-',
+            sorter: (a, b) => a.monthly_budget - b.monthly_budget,
         },
         {
             title: "Spend",
             dataIndex: "monthly_spent",
             key: "monthly_spent",
-            render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-'
+            render: (text) => text > 0 ? '$' + parseInt(text).toLocaleString() : '-',
+            sorter: (a, b) => a.monthly_spent - b.monthly_spent,
         },
         {
             title: "Under/Over",
             dataIndex: "remaining",
             key: "remaining",
-            render: (text) => !isNaN(text) ? '$' + parseInt(text).toLocaleString() : '-'
+            render: (text) => !isNaN(text) ? '$' + parseInt(text).toLocaleString() : '-',
+            sorter: (a, b) => a.remaining - b.remaining,
         },
     ]
 
