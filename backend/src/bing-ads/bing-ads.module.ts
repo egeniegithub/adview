@@ -6,6 +6,7 @@ import { ClientDataModule } from 'src/client-data/client-data.module';
 @Module({
   imports: [ClientDataModule],
   controllers: [BingAdsController],
-  providers: [BingAdsService]
+  providers: [BingAdsService],
+  exports : [BingAdsService]
 })
 export class BingAdsModule {}

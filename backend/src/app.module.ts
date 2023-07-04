@@ -13,6 +13,7 @@ import { ClientDatum } from './client-data/entities/client-datum.entity';
 import { PlatformToken } from './platform-tokens/entities/platform-token.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ClientMonthlyDatum } from './client-data/entities/client-monthly-datum.entity';
+import { AdsDataCronJobModule } from './ads-data-cron-job/ads-data-cron-job.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ClientMonthlyDatum } from './client-data/entities/client-monthly-datum.
     PlatformTokensModule,
     LinkedinAdsModule,
     MetaAdsModule,
+    AdsDataCronJobModule
   ],
   controllers: [AppController],
   providers: [AppService],

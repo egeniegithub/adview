@@ -81,7 +81,7 @@ export class BingAdsService {
 
 
 
-  async ObtainBingAdsData({ email, accessToken, customer_ids, customer_names }: any) {
+  async ObtainBingAdsData({ email, refresh_token, access_token, customer_ids, customer_names }: any) {
 
     let ids = customer_ids.split(',')
     let cust_names = customer_names.split(',')
@@ -92,13 +92,13 @@ export class BingAdsService {
       const id = ids[i];
       const name = cust_names[i]
       try {
-        const data: any = await this.getMonthlySpend(parseInt(id), accessToken);
+        const data: any = await this.getMonthlySpend(parseInt(id), access_token);
         alldata.push({ list: data, id })
         total_amount += parseFloat(data.calculated) || 0
         connected_accounts.push({ id: id, amount_spend: data.calculated || 0, descriptiveName: name })
       } catch (error) { return error; }
     }
-    const updated = await this.ClientDataService.updateByClient(email, { 'bing': `${total_amount}`, bing_client_linked_accounts: JSON.stringify(connected_accounts) })
+    const updated = await this.ClientDataService.updateByClient(email, { 'bing': `${total_amount}`, bing_client_linked_accounts: JSON.stringify(connected_accounts), bing_refresh_token: refresh_token, is_bing_login: '1' })
     return ({ data: alldata, updated, calculated: { amount_spent: total_amount } })
   }
 
@@ -145,6 +145,27 @@ export class BingAdsService {
     }
   }
 
+
+  async ObtainBingAdsDataWithCrone({ email, refresh_token,access_token, customers }: any) {
+    let total_amount = 0
+    let all = []
+    let alldata = []
+    // Logger.log("cehck ",email, refresh_token, customers)
+    // return {email, refresh_token, customers}
+    for (let i = 0; i < customers.length; i++) {
+      const { id } = customers[i];
+      try {
+        const data: any = await this.getMonthlySpend(parseInt(id), access_token);
+        total_amount += parseFloat(data.calculated) || 0
+      } catch (error) {
+        await this.ClientDataService.updateByClient(email, {is_bing_login : '0'})
+        return error;
+      }
+    }
+    const updated = await this.ClientDataService.updateByClient(email, { 'bing': `${total_amount}`,bing_refresh_token:refresh_token, is_bing_login : '1'})
+    return ({ data: alldata, calculated: { amount_spent: total_amount } })
+
+  }
 
 
   async GetMangerActInfo(access_token) {
@@ -202,6 +223,19 @@ export class BingAdsService {
     const json: any = await func(resultElement)
     return json
   }
+
+  async hanldeBingLogout(email: string) {
+    try {
+      const user = await this.ClientDataService.findByEmail(email)
+      if (!user[0]?.google_client_linked_accounts)
+        return ({ error: "user not found" })
+      const updated = await this.ClientDataService.updateByClient(email, { is_bing_login: `0` })
+      return ({ status: 'success' })
+    } catch (error) {
+      return ({ error: "Something went wrong" })
+    }
+  }
+
 }
 
 
@@ -221,8 +255,8 @@ function getPreviousMonthDate() {
   var currentDate = new Date();
   currentDate.setMonth(currentDate.getMonth() - 1);
   var year = currentDate.getFullYear();
-  var month:any = currentDate.getMonth() + 1;
-  if(month < 10)
-    month = "0"+month
-  return   year + "-" + month;
+  var month: any = currentDate.getMonth() + 1;
+  if (month < 10)
+    month = "0" + month
+  return year + "-" + month;
 }

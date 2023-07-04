@@ -52,6 +52,12 @@ export class ClientDataController {
     return this.clientDataService.findOne(+id);
   }
 
+  @Get('update-names-call')
+  TestCall() {
+    return this.clientDataService.TestCall();
+  }
+
+
   @Patch(':id')
   update(
     @Param('id') id: string,

@@ -8,7 +8,7 @@ import { LinkedinAdsService } from 'src/linkedin-ads/linkedin-ads.service';
 import { BingAdsService } from 'src/bing-ads/bing-ads.service';
 import axios from 'axios';
 import { GoogleAdsApisService } from 'src/google-ads-apis/google-ads-apis.service';
-// const { PublicClientApplication, TokenCachePersistenceOptions } = require('@azure/msal-node');
+
 
 @Injectable()
 export class AdsDataCronJobService {
@@ -22,7 +22,8 @@ export class AdsDataCronJobService {
     @Inject(BingAdsService)
     private readonly BingAdsService: BingAdsService,
     @Inject(GoogleAdsApisService)
-    private readonly GoogleAdsApisService: GoogleAdsApisService
+    private readonly GoogleAdsApisService: GoogleAdsApisService,
+    
   ) { }
 
 
@@ -81,6 +82,7 @@ export class AdsDataCronJobService {
       }
 
     })
+        // meta users ads computation
     meta_Linked_users.forEach(async (e) => {
       await this.MetaAdsService.ObtainMetaAdsDataWithCrone(e)
     })
@@ -90,76 +92,62 @@ export class AdsDataCronJobService {
     //   dd = await this.LinkedinAdsService.ObtainLinkedinAdsDataWithCrone(linkedin_Linked_users[i])
     // }
 
-
-
+    // bing users ads computation
     for (let i = 0; i < bing_Linked_users.length; i++) {
-      // dd = await this.BingAdsService.ObtainBingAdsDataWithCrone(linkedin_Linked_users[i])
+      let tokens =await this.CovertBingRefreshToken(bing_Linked_users[i].refresh_token)
+      if(tokens.access_token)
+      {
+        await this.BingAdsService.ObtainBingAdsDataWithCrone({...bing_Linked_users[i],access_token:tokens.access_token,refresh_token:tokens.refresh_token})
+      } 
+      // logout row if failed to get refresh token 
+      // else{
+      //   let {email} = bing_Linked_users[i]
+      //   await this.ClientDataService.updateByClient(email,{is_bing_login: '0'})
+      // }
     }
 
+    // google users ads computation
     for (let i = 0; i < google_Linked_users.length; i++) {
       let token = google_Linked_users[i].refresh_token
       let access_token = await this.GoogleExchangeRefreshToken(token)
-      await this.GoogleAdsApisService.ObtainGoogleAdsDataWithCrone({...google_Linked_users[i],access_token: access_token.token})
+      if(access_token.token)
+        await this.GoogleAdsApisService.ObtainGoogleAdsDataWithCrone({...google_Linked_users[i],access_token: access_token.token})
+      // else {
+      //   // logout google is response failed
+      //   let {email} = google_Linked_users[i]
+      //   await this.ClientDataService.updateByClient(email,{is_google_login: '0'})
+      // }
     }
 
-
-    // let refresh_token =await this.CovertBingRefreshToken(bing_Linked_users[0].refresh_token)
-    // let d = await this.CovertBingRefreshToken(bing_Linked_users[0].refresh_token)
-    // return ({ dd:dd })
+    return ({ status:"success"})
   }
 
 
-
-  // async  BingExchangeRefreshToken(refreshToken) {
-    // const msalConfig = {
-    //   auth: {
-    //     clientId: 'b2d7eb5f-e889-4f34-a297-7221ce6c26e7',
-    //     authority: 'https://login.microsoftonline.com/0bed3f84-9143-4f82-9513-d2a74f5ca754', // Replace {tenant} with your Azure AD tenant ID or name
-    //   }
-    // };
-    
-    // const pca = new PublicClientApplication(msalConfig);
-    
-  //   try {
-  //     const tokenRequest = {
-  //       scopes: ['https://ads.microsoft.com/msads.manage'],
-  //       refreshToken: 'M.C106_BL2.-CT41e58xIJO7T8rKHI!0HNJu7T*F7iN8eh9JjAYsrCrnD0A2zyL0GE12rPe3UTTsYCbkAbBJ7VFoWGA0kHrWzBw0Aa00ODxcHoIgsPnWOPPbjTTWTfL1kiL60kJ8c1icYC0gZornabTNvMJROIrXhvGg834c*fcTQsMWk0KZsM*Crghvck862!y4hgGbxCrx1scJ7gE8kCzUo0jau6M6pYaBTbfcw5S9UWHkgk5nXnlAlXZuGSrqvDWqM2nXrALs5CibeWPt8gZsClhIfOClKeKbzTkU9yUO33QZcR7MOXyNQLaJMznwf8oImqWucLpM!Kk1HkHnsbLHRifv0lNHG5IJ9uKLWfyFilKG!2GMXXM8*Q9nc4hV6TDFTjG!jNcfjQ$$',
-  //     };
-
-  //     const response = await pca.acquireTokenByRefreshToken(tokenRequest);
-  
-  //     // Use the response.accessToken as your new access token
-  //     const accessToken = response.accessToken;
-  //     return ({accessToken});
-  //   } catch (error) {
-  //     return ({error});
-
-  //     console.log('Error exchanging refresh token:', error);
-  //     // Handle the error appropriately
-  //   }
-  // }
-
   async GoogleExchangeRefreshToken(refresh_token){
-    let token = await this.GoogleAdsApisService.generateAccessToken(refresh_token)
+    try {
+      let token = await this.GoogleAdsApisService.generateAccessToken(refresh_token)
     return ({token})
+    } catch (error) {
+      return ({error})
+    }
+    
   }
 
   async CovertBingRefreshToken(refresh_token) {
-    const url = `https://login.microsoftonline.com/0bed3f84-9143-4f82-9513-d2a74f5ca754/oauth2/v2.0/token`;
+    const url = `https://login.microsoftonline.com/common/oauth2/v2.0/token`;
     const clientId = 'b2d7eb5f-e889-4f34-a297-7221ce6c26e7';
-    const clientSecret = '4-C8Q~zaIKCrqrnAS3YHNyUZAmIlygfnCCWWscJ5';
-    // secret_value = '4-C8Q~zaIKCrqrnAS3YHNyUZAmIlygfnCCWWscJ5'
-    // sceretId= 'c942f74b-ea00-43a4-8a95-bb7476d5dd59'
+    // const clientSecret = '4-C8Q~zaIKCrqrnAS3YHNyUZAmIlygfnCCWWscJ5';
     const params = {
       scope:'https://ads.microsoft.com/msads.manage',
       client_id :clientId,
       grant_type: 'refresh_token',
-      refresh_token:'M.C106_BL2.-CT41e58xIJO7T8rKHI!0HNJu7T*F7iN8eh9JjAYsrCrnD0A2zyL0GE12rPe3UTTsYCbkAbBJ7VFoWGA0kHrWzBw0Aa00ODxcHoIgsPnWOPPbjTTWTfL1kiL60kJ8c1icYC0gZornabTNvMJROIrXhvGg834c*fcTQsMWk0KZsM*Crghvck862!y4hgGbxCrx1scJ7gE8kCzUo0jau6M6pYaBTbfcw5S9UWHkgk5nXnlAlXZuGSrqvDWqM2nXrALs5CibeWPt8gZsClhIfOClKeKbzTkU9yUO33QZcR7MOXyNQLaJMznwf8oImqWucLpM!Kk1HkHnsbLHRifv0lNHG5IJ9uKLWfyFilKG!2GMXXM8*Q9nc4hV6TDFTjG!jNcfjQ$$',
-      // client_secret:clientSecret
+      refresh_token:refresh_token,
     };
+    
+    const originUrl = 'https://adview.io'
     const headers = new Headers({
       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      'Origin': 'http://localhost'
+      'Origin': `${originUrl}`
     });
 
     try {
@@ -168,14 +156,14 @@ export class AdsDataCronJobService {
         headers,
         body: new URLSearchParams(params),
       })
-      let a =await res.json()
-      return ({data:a})
+      let data =await res.json()
+        return ({access_token:data.access_token,refresh_token:data.refresh_token})
+      
     } catch (error) {
       return ({error :error})
     }
     
   }
-
 
 
   create(createAdsDataCronJobDto: CreateAdsDataCronJobDto) {
