@@ -4,11 +4,13 @@ import { CreateBingAdDto } from './dto/create-bing-ad.dto';
 import { UpdateBingAdDto } from './dto/update-bing-ad.dto';
 
 export class ObtainBingAdsDataDto {
-  accessToken:string
+  // accessToken:string
   customer_ids:string
   email:string
   customer_names:string
   manager_id:string
+  refresh_token:string
+  access_token:string 
 }
 
 @Controller('bing-ads')
@@ -26,10 +28,17 @@ export class BingAdsController {
     }
   }
 
+  @Get('/logout-user/:email')
+  hanldeBingLogout(@Param('email') email: string) {
+    return this.bingAdsService.hanldeBingLogout(email);
+  }
+
+
   @Post()
   create(@Body() createBingAdDto: CreateBingAdDto) {
     return this.bingAdsService.create(createBingAdDto);
   }
+
   @Get('/getManagerActDetails/:token')
   GetMangerActInfo(@Param('token') token:string) {
     return this.bingAdsService.GetMangerActInfo(token);
@@ -65,4 +74,7 @@ export class BingAdsController {
   remove(@Param('id') id: string) {
     return this.bingAdsService.remove(+id);
   }
+
+  
+  
 }

@@ -4,9 +4,10 @@ import { LoginSocialMicrosoft } from "reactjs-social-login";
 import { handleLogoutIndicator } from '../utils/helper';
 import { getAccountDetails } from '../Services/BingLinkedUsers';
 import { SearchOutlined } from '@ant-design/icons';
+import { GetServerCall } from '../Services/apiCall';
 
 
-export const BingBtn = ({ fetchAdsData, handleOk }) => {
+export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
   let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
   const [linkedUsers, setLinkedUsers] = useState([])
   const [seacrhedName, setSeacrhedName] = useState([])
@@ -15,6 +16,7 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
   const [userName, setuserName] = useState('')
   const [access_token, setaccess_token] = useState('')
   const [selectedRow, setselectedRow] = useState({})
+  const [refresh_token, setrefresh_token_token] = useState('')
   let id = localStorage.getItem('id')
   let userExist = logedInUsers[id]
 
@@ -38,15 +40,14 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
       let manager_id=selectedRow.manager_id
     setshowLinkedUserModal(false)
     // fetchAdsData(access_token, 'bing', userName, customer_ids)
-    fetchAdsData(access_token, 'bing', userName, customer_ids,customer_names,manager_id )
+    fetchAdsData({access_token,refresh_token}, 'bing', userName, customer_ids,customer_names,manager_id )
     setSeacrhedName('')
   }
 
-  const handleRowLogout = () => {
-    delete userExist?.bing;
-    logedInUsers[id] = userExist
-    localStorage.setItem("LOGED_IN_USERS", JSON.stringify(logedInUsers));
+  const handleRowLogout =async () => {
 
+    await GetServerCall('/bing-ads/logout-user/'+userData.email)
+        getdata()
     // check is indicator exists
     handleLogoutIndicator(id, "bing")
 
@@ -72,7 +73,7 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
     }),
   };
 
-  if (userExist?.bing?.name)
+  if (userData?.is_bing_login =='1')
     return (
       <div style={{ display: 'flex', flexFlow: 'column' }}>
         <Button disabled className="ModalBtn" style={{ color: '#fff', backgroundColor: '#018F0F' }}>
@@ -103,6 +104,7 @@ export const BingBtn = ({ fetchAdsData, handleOk }) => {
             if (connected_accounts.length)
               setshowLinkedUserModal(true)
               setaccess_token(data.access_token)
+              setrefresh_token_token(data.refresh_token)
               setuserName(name)
           }
         }}

@@ -91,7 +91,8 @@ const AdviewTable = () => {
 
       case 'bing':
         {
-          const res = await PostServerCall(`/bing-ads/ObtainBingAdsData`, { email, customer_ids, accessToken, customer_names: manager_id })
+          let {refresh_token,access_token } = accessToken
+          const res = await PostServerCall(`/bing-ads/ObtainBingAdsData`, { email, customer_ids, access_token,refresh_token, customer_names: manager_id })
           handleResponse(res, provider_name, user_name)
           handleOk()
         }
@@ -355,7 +356,7 @@ const AdviewTable = () => {
   const antIcon = <LoadingOutlined style={{ fontSize: 22 }} spin />;
 
   const getIfUserExits = () => {
-    let {is_bing_login,is_meta_login,is_linkedin_login,is_google_login,client} =  tableData.find(e => e.email == email)
+    let {is_bing_login,is_meta_login,is_linkedin_login,is_google_login,client} =  tableData.find(e => e.email == email) || {}
     if (is_bing_login == '1' || is_meta_login == '1'  || is_linkedin_login == '1' || is_google_login == '1' )
       return client
     else
@@ -392,7 +393,7 @@ const AdviewTable = () => {
         <div style={{ display: 'flex', flexFlow: 'column' }}>
           <div className="buttons_wrapper">
             <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)} />
-            <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
+            <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)} />
             <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
             <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)} />
           </div>

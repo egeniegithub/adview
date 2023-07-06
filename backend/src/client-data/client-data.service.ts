@@ -165,7 +165,7 @@ export class ClientDataService {
         uniqueArray.forEach(e => {
           let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule, media_buyer_option_media_buyer: buyer }: any = e
           // find corresponding user 
-          const { email: bub_email, facebook, bing, linkedin, google } = savedUsers.find((u) => u.email == email) || {};
+          const { email: bub_email, facebook, bing, linkedin, google, client: adview_client_name } = savedUsers.find((u) => u.email == email) || {};
           if (!bub_email)
             return
 
@@ -184,7 +184,7 @@ export class ClientDataService {
               }
             })
           }
-          let obj = { email, client: name_text, buyer: buyer, month, year, frequency: billing_schedule_option_billing_schedule, remaining: `` + (budget_number - total) || `0`, monthly_spent: `` + total, monthly_budget: `` + budget_number }
+          let obj = { email, client: adview_client_name, buyer: buyer, month, year, frequency: billing_schedule_option_billing_schedule, remaining: `` + (budget_number - total) || `0`, monthly_spent: `` + total, monthly_budget: `` + budget_number }
           arr.push(obj)
         });
         // insert list in monthly table 
@@ -202,8 +202,8 @@ export class ClientDataService {
 
   // handle bubble user update budget 
   async HandleWebhookUpdateUser(payload) {
-    let { account_custom_account: email, name_text, budget_number }: any = payload
-    let obj = { monthly_budget: budget_number }
+    let { account_custom_account: email, name_text, budget_number,billing_schedule_option_billing_schedule }: any = payload
+    let obj = { monthly_budget: budget_number,frequency: billing_schedule_option_billing_schedule }
     try {
       await this.clientDataRepository.update({ email }, obj)
       return { status: 'success' }
@@ -263,9 +263,9 @@ export class ClientDataService {
       const list = res.data.response.results || []
       // map data
       list.forEach(e => {
-        let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule = '',media_buyer_option_media_buyer: buyer  }: any = e
+        let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule = '', media_buyer_option_media_buyer: buyer }: any = e
 
-        let obj = { email, client: name_text,buyer:buyer, frequency: billing_schedule_option_billing_schedule, monthly_budget: budget_number, updated_at: getCurrentTimeForUpdateField() }
+        let obj = { email, client: name_text, buyer: buyer, frequency: billing_schedule_option_billing_schedule, monthly_budget: budget_number, updated_at: getCurrentTimeForUpdateField() }
         arr.push(obj)
       });
       // update list in client table 
@@ -278,6 +278,22 @@ export class ClientDataService {
       return { error: error }
     }
 
+  }
+
+
+  // test api call just for update client name in logs table 
+  async TestCall() {
+    let savedUsers = await this.clientDataRepository.find()
+    let logsTUsers = await this.clientMonthlyDataRepository.find()
+    let arr = []
+    logsTUsers.forEach(e => {
+      let obj = { ...e }
+      const { client: adview_client_name } = savedUsers.find((u) => u.email == obj.email) || {};
+      obj.client = adview_client_name
+      arr.push(obj)
+    })
+    let data = await this.clientMonthlyDataRepository.upsert(arr, ['id'])
+    return ({data})
   }
 
   async remove(id: number) {

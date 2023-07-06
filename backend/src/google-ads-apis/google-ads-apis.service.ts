@@ -87,7 +87,8 @@ export class GoogleAdsApisService {
     let total_amount = 0
     let connected_accounts = []
     alldata.forEach(el => {
-      total_amount += parseInt(el.calculated.amount_spent)
+      if(el.calculated)
+        total_amount += parseInt(el.calculated.amount_spent)
       connected_accounts.push({ id: el.id, descriptiveName: el.calculated.descriptiveName, amount_spend: el.calculated.amount_spent,manager_id })
     })
     // save data in db
