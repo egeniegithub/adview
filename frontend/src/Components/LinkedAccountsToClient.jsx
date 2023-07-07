@@ -6,7 +6,7 @@ import { BingIcon, GoogleIcon, LinkedinIcon, MetaIcon } from '../icons/Icons';
 const { Panel } = Collapse;
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, client_name = '', userData: { google_client_linked_accounts, email,facebook_client_linked_accounts,linkedin_client_linked_accounts,bing_client_linked_accounts }, refreshData }) => {
+export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal, isMainLoading, client_name = '', userData: { google_client_linked_accounts, email,facebook_client_linked_accounts,linkedin_client_linked_accounts,bing_client_linked_accounts,is_meta_login,is_google_login,is_bing_login,is_linkedin_login }, refreshData }) => {
     const [isloading, setIsloading] = useState(isMainLoading)
     const gLinkedAccountsToClient = google_client_linked_accounts ? JSON.parse(google_client_linked_accounts) : []
     const fLinkedAccountsToClient = facebook_client_linked_accounts ? JSON.parse(facebook_client_linked_accounts) : []
@@ -87,7 +87,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                                         </Button>
                                     },
                                 ]}
-                                dataSource={userExist?.google?.name ? gLinkedAccountsToClient :[]}
+                                dataSource={is_google_login == "1" ? gLinkedAccountsToClient :[]}
                             />
                         </div>
                     </Panel>
@@ -121,7 +121,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                                         </Button>
                                     },
                                 ]}
-                                dataSource={userExist?.bing?.name ? BingLinkedAccountsToClient :[]}
+                                dataSource={is_bing_login == "1" ? BingLinkedAccountsToClient :[]}
                             />
                         </div>
                     </Panel>
@@ -155,7 +155,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                                         </Button>
                                     },
                                 ]}
-                                dataSource={userExist?.linkedin?.name ? LLinkedAccountsToClient :[]}
+                                dataSource={is_linkedin_login == '1'? LLinkedAccountsToClient :[]}
                             
                             />
                         </div>
@@ -190,7 +190,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                                         </Button>
                                     },
                                 ]}
-                                dataSource={userExist?.facebook?.name ? fLinkedAccountsToClient :[]}
+                                dataSource={is_meta_login == '1' ? fLinkedAccountsToClient :[]}
                             />
                         </div>
                     </Panel>

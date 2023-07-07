@@ -23,7 +23,7 @@ export class AdsDataCronJobService {
     private readonly BingAdsService: BingAdsService,
     @Inject(GoogleAdsApisService)
     private readonly GoogleAdsApisService: GoogleAdsApisService,
-    
+
   ) { }
 
 
@@ -36,14 +36,14 @@ export class AdsDataCronJobService {
     let meta_Linked_users: any = []
     let linkedin_Linked_users: any = []
     let bing_Linked_users: any = []
-    let google_Linked_users:any =[]
+    let google_Linked_users: any = []
     let usersList = await this.ClientDataService.findAllWithQuery({ where: [{ is_meta_login: '1' }, { is_bing_login: '1' }, { is_linkedin_login: '1' }, { is_google_login: '1' }] })
     usersList.forEach(e => {
-      let { meta_refresh_token = '', bing_refresh_token, google_refresh_token,linkedin_refresh_token, facebook_client_linked_accounts = '', linkedin_client_linked_accounts = '', bing_client_linked_accounts = '',google_client_linked_accounts,
-        email
+      let { meta_refresh_token = '', bing_refresh_token, google_refresh_token, linkedin_refresh_token, facebook_client_linked_accounts = '', linkedin_client_linked_accounts = '', bing_client_linked_accounts = '', google_client_linked_accounts,
+        email, is_linkedin_login, is_bing_login, is_meta_login, is_google_login
       } = e
       // get linkedin user object
-      if (facebook_client_linked_accounts.length && meta_refresh_token) {
+      if (facebook_client_linked_accounts.length && meta_refresh_token && is_meta_login == '1') {
         let meta_clients = JSON.parse(facebook_client_linked_accounts)
         let meta_Data: any = {}
         meta_Data.customers = meta_clients.filter(e => !e.unlinked)
@@ -53,7 +53,7 @@ export class AdsDataCronJobService {
       }
 
       // get linkedin user object
-      if (linkedin_client_linked_accounts.length && linkedin_refresh_token) {
+      if (linkedin_client_linked_accounts.length && linkedin_refresh_token && is_linkedin_login == '1') {
         let clients = JSON.parse(linkedin_client_linked_accounts)
         let data: any = {}
         data.customers = clients.filter(e => !e.unlinked)
@@ -63,7 +63,7 @@ export class AdsDataCronJobService {
       }
 
       //get Bing user object 
-      if (bing_client_linked_accounts.length && bing_refresh_token) {
+      if (bing_client_linked_accounts.length && bing_refresh_token && is_bing_login == '1') {
         let clients = JSON.parse(bing_client_linked_accounts)
         let data: any = {}
         data.customers = clients.filter(e => !e.unlinked)
@@ -72,7 +72,7 @@ export class AdsDataCronJobService {
         bing_Linked_users.push(data)
       }
       //get google user object 
-      if (google_client_linked_accounts.length && google_refresh_token) {
+      if (google_client_linked_accounts.length && google_refresh_token && is_google_login == '1') {
         let clients = JSON.parse(google_client_linked_accounts)
         let data: any = {}
         data.customers = clients.filter(e => !e.unlinked)
@@ -82,15 +82,17 @@ export class AdsDataCronJobService {
       }
 
     })
-        // meta users ads computation
+    // meta users ads computation
     meta_Linked_users.forEach(async (e) => {
       await this.MetaAdsService.ObtainMetaAdsDataWithCrone(e)
     })
 
-    let dd = []
-    // for (let i = 0; i < linkedin_Linked_users.length; i++) {
-    //   dd = await this.LinkedinAdsService.ObtainLinkedinAdsDataWithCrone(linkedin_Linked_users[i])
-    // }
+    for (let i = 0; i < linkedin_Linked_users.length; i++) {
+      let tokens = await this.LinkedinAdsService.ExchnageRefreshToAccess(linkedin_Linked_users[i].refresh_token)
+      if (tokens.data?.access_token)
+        await this.LinkedinAdsService.ObtainLinkedinAdsDataWithCrone({ ...linkedin_Linked_users[i], access_token: tokens.data.access_token })
+    }
+
 
     // bing users ads computation
     for (let i = 0; i < bing_Linked_users.length; i++) {
@@ -118,19 +120,19 @@ export class AdsDataCronJobService {
       //   await this.ClientDataService.updateByClient(email,{is_google_login: '0'})
       // }
     }
+    // return ({ data: dd })
 
-    return ({ status:"success"})
   }
 
 
-  async GoogleExchangeRefreshToken(refresh_token){
+  async GoogleExchangeRefreshToken(refresh_token) {
     try {
       let token = await this.GoogleAdsApisService.generateAccessToken(refresh_token)
-    return ({token})
+      return ({ token })
     } catch (error) {
-      return ({error})
+      return ({ error })
     }
-    
+
   }
 
   async CovertBingRefreshToken(refresh_token) {
@@ -138,12 +140,12 @@ export class AdsDataCronJobService {
     const clientId = 'b2d7eb5f-e889-4f34-a297-7221ce6c26e7';
     // const clientSecret = '4-C8Q~zaIKCrqrnAS3YHNyUZAmIlygfnCCWWscJ5';
     const params = {
-      scope:'https://ads.microsoft.com/msads.manage',
-      client_id :clientId,
+      scope: 'https://ads.microsoft.com/msads.manage',
+      client_id: clientId,
       grant_type: 'refresh_token',
-      refresh_token:refresh_token,
+      refresh_token: refresh_token,
     };
-    
+
     const originUrl = 'https://adview.io'
     const headers = new Headers({
       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -156,13 +158,13 @@ export class AdsDataCronJobService {
         headers,
         body: new URLSearchParams(params),
       })
-      let data =await res.json()
-        return ({access_token:data.access_token,refresh_token:data.refresh_token})
-      
+      let data = await res.json()
+      return ({ access_token: data.access_token, refresh_token: data.refresh_token })
+
     } catch (error) {
-      return ({error :error})
+      return ({ error: error })
     }
-    
+
   }
 
 
