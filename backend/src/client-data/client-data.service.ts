@@ -40,6 +40,11 @@ export class ClientDataService {
     return data;
   }
 
+  async findsActives() {
+    const data = await this.clientDataRepository.find({ where: { is_active_from_bubble: '1' } });
+    return data;
+  }
+
   async findAllWithQuery(query) {
     const data = await this.clientDataRepository.find(query);
     return data;
@@ -98,7 +103,7 @@ export class ClientDataService {
 
   async GetMonthlyClientsData() {
     try {
-      let data = await this.clientMonthlyDataRepository.find()
+      let data = await this.clientMonthlyDataRepository.find({ order: { created_at: 'DESC' } })
       return { list: data }
     } catch (error) {
       return { error: "error while getting Monthly Data" }
@@ -156,10 +161,10 @@ export class ClientDataService {
       let arr = []
       if (list.length) {
         // filter out duplicate frequency 
+        const freqSet = new Set();
         const uniqueArray = list.filter((obj) => {
-          const frequency = new Set();
-          if (frequency.has(obj.billing_schedule_option_billing_schedule)) return false; // Skip this object if it's a duplicate
-          frequency.add(obj.billing_schedule_option_billing_schedule);
+          if (freqSet.has(obj.billing_schedule_option_billing_schedule)) return false; // Skip this object if it's a duplicate
+          freqSet.add(obj.billing_schedule_option_billing_schedule);
           return true; // Include this object in the filtered array
         });
         uniqueArray.forEach(e => {
@@ -189,6 +194,8 @@ export class ClientDataService {
         });
         // insert list in monthly table 
         await this.clientMonthlyDataRepository.insert(arr)
+        this.UpdateBubbleStatusForUser(savedUsers, arr)
+
         return ('Cron job success')
       }
 
@@ -202,8 +209,8 @@ export class ClientDataService {
 
   // handle bubble user update budget 
   async HandleWebhookUpdateUser(payload) {
-    let { account_custom_account: email, name_text, budget_number,billing_schedule_option_billing_schedule }: any = payload
-    let obj = { monthly_budget: budget_number,frequency: billing_schedule_option_billing_schedule }
+    let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule }: any = payload
+    let obj = { monthly_budget: budget_number, frequency: billing_schedule_option_billing_schedule }
     try {
       await this.clientDataRepository.update({ email }, obj)
       return { status: 'success' }
@@ -281,19 +288,25 @@ export class ClientDataService {
   }
 
 
-  // test api call just for update client name in logs table 
-  async TestCall() {
-    let savedUsers = await this.clientDataRepository.find()
-    let logsTUsers = await this.clientMonthlyDataRepository.find()
+  // update user bubble_status if he/she will be active from current month 
+  async UpdateBubbleStatusForUser(savedUsers, bubbleActiveUsers) {
     let arr = []
-    logsTUsers.forEach(e => {
+    savedUsers.forEach(e => {
       let obj = { ...e }
-      const { client: adview_client_name } = savedUsers.find((u) => u.email == obj.email) || {};
-      obj.client = adview_client_name
+      const { client: adview_client_name,monthly_budget} = bubbleActiveUsers.find((u) => u.email == obj.email) || {};
+      if (!adview_client_name){
+        obj.monthly_budget = monthly_budget
+        obj.is_active_from_bubble = '0'
+      }
       arr.push(obj)
     })
-    let data = await this.clientMonthlyDataRepository.upsert(arr, ['id'])
-    return ({data})
+    try {
+      await this.clientDataRepository.upsert(arr, ['id'])
+      Logger.log("bubble Status Updated Success")
+    } catch (error) {
+      Logger.log("bubble Status Updation Error" , Error)
+    }
+    
   }
 
   async remove(id: number) {
@@ -301,7 +314,30 @@ export class ClientDataService {
     return { message: "Record deleted successfully", res: deletedData }
   }
 
+  // async testCall(){
+  //   let users:any =await this.clientDataRepository.find()
+  //   let users2:any =await this.clientMonthlyDataRepository.find({where:{month : '6'}})
+  //   let arr = []
+  //   users.forEach(e => {
+  //     let obj = { ...e }
+  //     const { client: adview_client_name } = users2.find((u) => u.email == obj.email) || {};
+  //     if(!adview_client_name)
+  //       obj.is_active_from_bubble = '0'
+  //     arr.push(obj)
+  //   })
+  //   try {
+  //     let upd = await this.clientDataRepository.upsert(arr, ["id"])
+  //     return {data:upd}
+  //   } catch (error) {
+  //     return {error:error}
+  //   }
+    
+  // }
+
+
 }
+
+
 
 
 function getPreviousMonthYear() {

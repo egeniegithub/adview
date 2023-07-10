@@ -47,14 +47,14 @@ export class ClientDataController {
     return this.clientDataService.findAll();
   }
 
+  @Get('/actives')
+  findsActives() {
+    return this.clientDataService.findsActives();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.clientDataService.findOne(+id);
-  }
-
-  @Get('update-names-call')
-  TestCall() {
-    return this.clientDataService.TestCall();
   }
 
 

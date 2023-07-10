@@ -46,12 +46,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
         refreshData()
     }
 
-
-
-    let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
-    let id = localStorage.getItem('id')
-    let userExist = logedInUsers[id]
-    if (!userExist?.google?.name && !userExist?.facebook?.name && !userExist?.linkedin?.name)
+    if (is_linkedin_login == '0' && is_google_login == '0' && is_bing_login == '0' && is_meta_login == '0')
         return null
     return (
         <div style={{ marginTop: '2vh' }} >
