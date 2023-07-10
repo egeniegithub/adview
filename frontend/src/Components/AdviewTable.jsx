@@ -99,10 +99,10 @@ const AdviewTable = () => {
         break
       case 'linkedin':
         {
-          const res = await PostServerCall(`/linkedin-ads/ObtainLinkedinAdsData`, { email, customer_ids, accessToken, customer_names: manager_id })
+          let {refresh_token,access_token } = accessToken
+          const res = await PostServerCall(`/linkedin-ads/ObtainLinkedinAdsData`, { email, customer_ids, refresh_token,access_token, customer_names: manager_id })
           handleResponse(res, provider_name, user_name)
           handleOk()
-          linkedMultiLogin(linkedinCode)
         }
         break
       default:
@@ -394,7 +394,7 @@ const AdviewTable = () => {
           <div className="buttons_wrapper">
             <GoogleBtn fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)} />
             <BingBtn fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)} />
-            <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} />
+            <LinkedinBtn fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)}  />
             <Facebook fetchAdsData={fetchAdsData} handleOk={handleOk} getdata={getdata} userData={tableData.find(e => e.email == email)} />
           </div>
           <LinkedAccountsToClient showClientLinkedActsModal={showClientLinkedActsModal} setshowModal={setShowClientLinkedActsModal} userData={tableData.find(e => e.email == email)} refreshData={getdata} isMainLoading={isloading} />

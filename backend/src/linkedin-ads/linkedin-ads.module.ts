@@ -7,6 +7,8 @@ import { ClientDataModule } from 'src/client-data/client-data.module';
 @Module({
   imports: [ClientDataModule],
   controllers: [LinkedinAdsController],
-  providers: [LinkedinAdsService]
+  providers: [LinkedinAdsService],
+  exports : [LinkedinAdsService]
+
 })
 export class LinkedinAdsModule {}

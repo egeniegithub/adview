@@ -5,10 +5,11 @@ import { UpdateLinkedinAdDto } from './dto/update-linkedin-ad.dto';
 
 
 export class ObtainLinkedinAdsDataDto {
-  accessToken:string
   customer_ids:string
   email:string
   customer_names:string
+  refresh_token:string
+  access_token:string
 }
 
 
@@ -24,6 +25,23 @@ export class LinkedinAdsController {
       return error;
     }
   }
+
+  @Get('/logout-user/:email')
+  hanldeLinkedinLogout(@Param('email') email: string) {
+    return this.linkedinAdsService.hanldeLinkedinLogout(email);
+  }
+
+  // @Get('/handle-auth/:token')
+  // handleAuth(@Param('token') token:string) {
+  //   return this.linkedinAdsService.handleAuth(token);
+  // }
+
+  // @Get('/exchange-refresh')
+  // ExchnageRefreshToAccess() {
+  //   return this.linkedinAdsService.ExchnageRefreshToAccess();
+  // }
+
+  
 
   @Get('/getManagerActDetails/:token')
   GetMangerActInfo(@Param('token') token:string) {
