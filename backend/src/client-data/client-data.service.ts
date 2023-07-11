@@ -294,9 +294,11 @@ export class ClientDataService {
     savedUsers.forEach(e => {
       let obj = { ...e }
       const { client: adview_client_name,monthly_budget} = bubbleActiveUsers.find((u) => u.email == obj.email) || {};
-      if (!adview_client_name){
-        obj.monthly_budget = monthly_budget
+      if (!adview_client_name)
         obj.is_active_from_bubble = '0'
+      else{
+        obj.monthly_budget = monthly_budget
+        obj.is_active_from_bubble = '1'
       }
       arr.push(obj)
     })
