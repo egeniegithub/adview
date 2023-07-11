@@ -11,7 +11,11 @@
 .NavList{
     display: flex;
     justify-content: space-evenly;
+    gap: 1vh;
 }
 .nav_items{
     color: grey !important;
+}
+.nav_items >p{
+    white-space: nowrap;
 }

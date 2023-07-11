@@ -13,7 +13,7 @@ export class ClientDatum {
     id: number;
 
     // email is used as bubble_id cuz actual email is not provided by api  
-    @Column({ name: "email" })
+    @Column({ name: "email" ,nullable:false})
     email: string
 
     @Column()
@@ -55,6 +55,9 @@ export class ClientDatum {
 
     @Column({ default: true })
     status: string;
+
+    @Column({ default: '1' })
+    is_active_from_bubble: string;
 
     @Column({ type: 'longtext', default: '' })
     google_client_linked_accounts: string;

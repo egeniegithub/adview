@@ -8,6 +8,7 @@ import Success from './Components/success';
 import Login from './screens/Login';
 import ProtectedRoute from './ProtectedRoute';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import AccountsTableScreen from './screens/AccountsTableScreen';
 
 
 function App() {
@@ -23,6 +24,14 @@ function App() {
           element={
             <ProtectedRoute>
               <OversightTable />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/accounts"
+          element={
+            <ProtectedRoute>
+              <AccountsTableScreen />
             </ProtectedRoute>
           }
         />

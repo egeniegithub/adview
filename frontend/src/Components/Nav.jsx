@@ -17,12 +17,16 @@ const Nav = () => {
                 <Col md={9} sm={4} xs={4}></Col>
                 <Col md={5} sm={12} xs={15} className="NavList">
                     <Link to="/" className='nav_items'>
-                        <p>Home</p>
+                        <p>This Month</p>
+                    </Link>
+                    <Link to="/accounts" className='nav_items'>
+                        <p>Accounts</p>
                     </Link>
                     <Link to="/OverUnderlog" className='nav_items'>
-                        <p>Over/Under Log</p>
+                        <p>Monthly Log</p>
                     </Link>
-                    <p><u><button onClick={()=>{localStorage.removeItem('token');navigate('/login')}}>Log out</button></u></p>
+                    
+                    <p className='nav_items'><u><button onClick={()=>{localStorage.removeItem('token');navigate('/login')}} style={{whiteSpace:"nowrap"}}>Log out</button></u></p>
                 </Col>
             </Row>
         </div>

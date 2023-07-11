@@ -8,7 +8,6 @@ import { GetServerCall } from '../Services/apiCall';
 
 
 export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
-  let logedInUsers = JSON.parse(localStorage.getItem('LOGED_IN_USERS')) || {}
   const [linkedUsers, setLinkedUsers] = useState([])
   const [seacrhedName, setSeacrhedName] = useState([])
   const [filteredLinkedUsers, setfilteredLinkedUsers] = useState([])
@@ -18,8 +17,6 @@ export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
   const [selectedRow, setselectedRow] = useState({})
   const [refresh_token, setrefresh_token_token] = useState('')
   let id = localStorage.getItem('id')
-  let userExist = logedInUsers[id]
-
 
   useEffect(() => {
     let temp = [...linkedUsers]
