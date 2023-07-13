@@ -156,18 +156,21 @@ export class ClientDataService {
       };
 
       let res = await axios.get(apiUrl, config)
-      const list = res.data.response.results || []
+      let list = res.data.response.results || []
       // Calculate the date one month ago
       let arr = []
       if (list.length) {
         // filter out duplicate frequency 
-        const freqSet = new Set();
-        const uniqueArray = list.filter((obj) => {
-          if (freqSet.has(obj.billing_schedule_option_billing_schedule)) return false; // Skip this object if it's a duplicate
-          freqSet.add(obj.billing_schedule_option_billing_schedule);
-          return true; // Include this object in the filtered array
-        });
-        uniqueArray.forEach(e => {
+        for (let i = 0; i < list.length; i++) {
+          const ele = list[i];
+          for(let j = i+1; j < list.length; j++){
+            if(ele.account_custom_account == list[j].account_custom_account && ele.billing_schedule_option_billing_schedule == 'Month-to-Month' && list[j].billing_schedule_option_billing_schedule == 'Month-to-Month'){
+              // remove from list if duplicate
+              list.splice(j, 1); 
+            }
+          }
+        }
+        list.forEach(e => {
           let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule, media_buyer_option_media_buyer: buyer }: any = e
           // find corresponding user 
           const { email: bub_email, facebook, bing, linkedin, google, client: adview_client_name } = savedUsers.find((u) => u.email == email) || {};
@@ -176,7 +179,7 @@ export class ClientDataService {
 
           const total = (facebook > '0' ? parseInt(facebook) : 0) + (google > '0' ? parseInt(google) : 0) + (bing > '0' ? parseInt(bing) : 0) + (linkedin > '0' ? parseInt(linkedin) : 0)
           // check if client have multiple repeat for different frequency 
-          let duplicateArr = list.filter(e => e[email] == email)
+          let duplicateArr = list.filter(e => e['account_custom_account'] == email)
 
           // if parent frequency is one-time and have duplicate id it mean its already been calculated and skip this iteration 
           if (duplicateArr.length > 1 && billing_schedule_option_billing_schedule == 'One-Time')
@@ -294,8 +297,13 @@ export class ClientDataService {
     savedUsers.forEach(e => {
       let obj = { ...e }
       const { client: adview_client_name,monthly_budget} = bubbleActiveUsers.find((u) => u.email == obj.email) || {};
-      if (!adview_client_name)
+      if (!adview_client_name){
         obj.is_active_from_bubble = '0'
+        obj.is_meta_login = '0'
+        obj.is_linkedin_login = '0'
+        obj.is_google_login = '0'
+        obj.is_bing_login = '0'
+      }
       else{
         obj.monthly_budget = monthly_budget
         obj.is_active_from_bubble = '1'
