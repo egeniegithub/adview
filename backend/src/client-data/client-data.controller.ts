@@ -21,6 +21,11 @@ export class ClientDataController {
   handleWebhook(@Body() payload: any) {
     return this.clientDataService.HandleWebhookUpdateUser(payload);
   }
+  @Post('webhook-call/user-status-update')
+  HandleWebhookUpdateUserStatus(@Body() payload: any) {
+    return this.clientDataService.HandleWebhookUpdateUserStatus(payload);
+  }
+  
 
   @Post('webhook-call/create')
   HandleWebhookCreateUser(@Body() payload: any) {
