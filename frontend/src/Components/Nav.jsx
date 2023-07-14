@@ -22,7 +22,7 @@ const Nav = () => {
                     <Link to="/accounts" className='nav_items'>
                         <p>Accounts</p>
                     </Link>
-                    <Link to="/OverUnderlog" className='nav_items'>
+                    <Link to="/monthly-log" className='nav_items'>
                         <p>Monthly Log</p>
                     </Link>
                     

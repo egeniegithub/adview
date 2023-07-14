@@ -35,7 +35,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/OverUnderlog" element={<U_OTableScreen />} />
+        <Route path="/monthly-log" element={<U_OTableScreen />} />
       </Routes>
     </Router>
     </GoogleOAuthProvider>

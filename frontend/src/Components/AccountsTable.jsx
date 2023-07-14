@@ -163,8 +163,13 @@ const AccountsTable = () => {
       width: '30%',
       key: "Status",
       render: (val, arg) => {
+        let color = "green";
+        if (val === "0") 
+          color = "red";
         return (
-          val == '1' ? "Acitve" : "Inactive"
+          <Tag color={color} key={val}>
+            {val === '1' ? "Active" : "Inactive"}
+          </Tag>
         );
       }
     }
