@@ -125,7 +125,7 @@ export class ClientDataService {
   async ComputeMonthlyData() {
     try {
       const apiUrl = 'https://account.215marketing.com/version-live/api/1.1/obj/Work';
-      const accessToken = '3bf2d433d7db4b76e663f78faefccbab';
+      const accessToken = process.env.BUBBLE_TOKEN
       let { month, year } = getPreviousMonthYear()
       let currentDate = getCurrentIOSDate()
       let savedUsers = await this.clientDataRepository.find()
@@ -215,12 +215,31 @@ export class ClientDataService {
     let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule }: any = payload
     let obj = { monthly_budget: budget_number, frequency: billing_schedule_option_billing_schedule }
     try {
+      let user =  await this.clientDataRepository.findOneBy({ email })
+      if(!user)
+        return { status: 'error', message: "User Not Found" }
+        await this.clientDataRepository.update({ email }, obj)
+      return { status: 'success' }
+    } catch (error) {
+      return { status: 'error', message: error }
+    }
+  }
+
+   // handle bubble user update Reactivate 
+  async HandleWebhookUpdateUserStatus(payload) {
+    let { account_custom_account: email, budget_number, is_active }: any = payload
+    let obj = { monthly_budget: budget_number, is_active_from_bubble : is_active == 1 ? '1' : '0' }
+    try {
+      let user =  await this.clientDataRepository.findOneBy({ email })
+      if(!user)
+        return { status: 'error', message: "User Not Found" }
       await this.clientDataRepository.update({ email }, obj)
       return { status: 'success' }
     } catch (error) {
       return { status: 'error', message: error }
     }
   }
+
 
   // handle bubble new user call
   async HandleWebhookCreateUser(payload) {

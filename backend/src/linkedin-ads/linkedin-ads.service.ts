@@ -37,7 +37,7 @@ export class LinkedinAdsService {
 
   async ExchnageRefreshToAccess(refresh_token) {
     let client_id = '78zrt5co4u4vmi'
-    let client_secret = 'YfqgKcH9LZJIbHjC'
+    let client_secret = process.env.LINKEDIN_CLIENT_SECRET
     const params = {
       refresh_token: refresh_token,
       grant_type: 'refresh_token',

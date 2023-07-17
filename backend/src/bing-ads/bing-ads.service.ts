@@ -107,7 +107,7 @@ export class BingAdsService {
         <s:Envelope xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
         <s:Header xmlns="https://bingads.microsoft.com/Billing/v13">
           <AuthenticationToken i:nil="false">${access_token}</AuthenticationToken>
-          <DeveloperToken i:nil="false">107A59125Z900953</DeveloperToken>
+          <DeveloperToken i:nil="false">${process.env.BING_DEV_TOKEN}</DeveloperToken>
         </s:Header>
         <s:Body>
           <GetAccountMonthlySpendRequest xmlns="https://bingads.microsoft.com/Billing/v13"> 
@@ -170,7 +170,7 @@ export class BingAdsService {
 
   async GetMangerActInfo(access_token) {
 
-    let data = `<?xml version="1.0" encoding="utf-8"?>\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">\n  <s:Header>\n    <h:ApplicationToken i:nil="true" xmlns:h="https://bingads.microsoft.com/Customer/v13" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" />\n    <h:AuthenticationToken xmlns:h="https://bingads.microsoft.com/Customer/v13">${access_token}</h:AuthenticationToken>\n    <h:DeveloperToken xmlns:h="https://bingads.microsoft.com/Customer/v13">107A59125Z900953</h:DeveloperToken>\n  </s:Header>\n  <s:Body>\n    <GetUserRequest xmlns="https://bingads.microsoft.com/Customer/v13">\n      <UserId i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" />\n    </GetUserRequest>\n  </s:Body>\n</s:Envelope>`;
+    let data = `<?xml version="1.0" encoding="utf-8"?>\n<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">\n  <s:Header>\n    <h:ApplicationToken i:nil="true" xmlns:h="https://bingads.microsoft.com/Customer/v13" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" />\n    <h:AuthenticationToken xmlns:h="https://bingads.microsoft.com/Customer/v13">${access_token}</h:AuthenticationToken>\n    <h:DeveloperToken xmlns:h="https://bingads.microsoft.com/Customer/v13">${process.env.BING_DEV_TOKEN}</h:DeveloperToken>\n  </s:Header>\n  <s:Body>\n    <GetUserRequest xmlns="https://bingads.microsoft.com/Customer/v13">\n      <UserId i:nil="true" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" />\n    </GetUserRequest>\n  </s:Body>\n</s:Envelope>`;
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
@@ -197,7 +197,7 @@ export class BingAdsService {
       <s:Header xmlns="https://bingads.microsoft.com/Customer/v13">
         <Action mustUnderstand="1">GetLinkedAccountsAndCustomersInfo</Action>
         <AuthenticationToken i:nil="false">${access_token}</AuthenticationToken>
-        <DeveloperToken i:nil="false">107A59125Z900953</DeveloperToken>
+        <DeveloperToken i:nil="false">${process.env.BING_DEV_TOKEN}</DeveloperToken>
       </s:Header>
       <s:Body>
         <GetLinkedAccountsAndCustomersInfoRequest xmlns="https://bingads.microsoft.com/Customer/v13">
