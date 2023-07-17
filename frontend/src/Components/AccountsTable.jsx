@@ -177,12 +177,9 @@ const AccountsTable = () => {
   // console.log('rendered')
   const antIcon = <LoadingOutlined style={{ fontSize: 22 }} spin />;
 
-  const getIfUserExits = () => {
-    let { is_bing_login, is_meta_login, is_linkedin_login, is_google_login, client } = tableData.find(e => e.email == email) || {}
-    if (is_bing_login == '1' || is_meta_login == '1' || is_linkedin_login == '1' || is_google_login == '1')
+  const getUserName = () => {
+    let { client } = tableData.find(e => e.email == email) || {}
       return client
-    else
-      return null
   }
 
   return (
@@ -204,7 +201,7 @@ const AccountsTable = () => {
         </div>
       </Spin>
       <Modal
-        title={getIfUserExits() ? `Link Account to ${getIfUserExits()}` : "Link Accounts to GoldenGate Partners"}
+        title={`Link Accounts to ${getUserName()}`}
         width={"100%"}
         open={isModalOpen}
         onOk={handleOk}
