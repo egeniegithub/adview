@@ -125,7 +125,7 @@ export class ClientDataService {
   async ComputeMonthlyData() {
     try {
       const apiUrl = 'https://account.215marketing.com/version-live/api/1.1/obj/Work';
-      const accessToken = '3bf2d433d7db4b76e663f78faefccbab';
+      const accessToken = process.env.BUBBLE_TOKEN
       let { month, year } = getPreviousMonthYear()
       let currentDate = getCurrentIOSDate()
       let savedUsers = await this.clientDataRepository.find()

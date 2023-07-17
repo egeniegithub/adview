@@ -14,16 +14,18 @@ import { PlatformToken } from './platform-tokens/entities/platform-token.entity'
 import { ScheduleModule } from '@nestjs/schedule';
 import { ClientMonthlyDatum } from './client-data/entities/client-monthly-datum.entity';
 import { AdsDataCronJobModule } from './ads-data-cron-job/ads-data-cron-job.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '172.104.29.37',
+      host: process.env.DB_HOST,
       port: 3306,
-      username: 'adviewio_api',
-      password: '-p(MX?D.pmxx',
-      database: 'adviewio_api',
+      username: `${process.env.DB_USERNAME}`,
+      password: `${process.env.DB_PASSWORD}`,
+      database: `${process.env.DB_USERNAME}`,
       entities: [ClientDatum, PlatformToken,ClientMonthlyDatum],
       synchronize: true,
     }),
@@ -47,4 +49,5 @@ import { AdsDataCronJobModule } from './ads-data-cron-job/ads-data-cron-job.modu
   controllers: [AppController],
   providers: [AppService],
 })
+
 export class AppModule { }

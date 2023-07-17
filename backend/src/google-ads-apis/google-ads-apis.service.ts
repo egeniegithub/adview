@@ -76,7 +76,7 @@ export class GoogleAdsApisService {
       const id = ids[i];
       try {
         Logger.log("check in loop ", id)
-        const developer_token = 'BSed2TGB27BPgmlMSYlCJw'
+        const developer_token = process.env.GOOGLE_DEV_TOKEN
         const data = await this.getMonthlySpend(email, parseInt(id), developer_token, access_token, manager_id);
         alldata.push({ ...data, id })
         // return ({ ...data })
@@ -146,7 +146,7 @@ export class GoogleAdsApisService {
     for (let i = 0; i < customers.length; i++) {
       const {id,manager_id} = customers[i];
       try {
-        const developer_token = 'BSed2TGB27BPgmlMSYlCJw'
+        const developer_token = process.env.GOOGLE_DEV_TOKEN
         const data: any = await this.getMonthlySpend(email,parseInt(id),developer_token, access_token,manager_id);
         alldata.push({ ...data })
       } catch (error) { 
