@@ -86,8 +86,6 @@ export class MetaAdsService {
 
   async ObtainMetaAdsDataWithCrone({ email, refresh_token, customers }: ObtainMetaAdsDataDto) {
     let total_amount = 0
-    let connected_accounts = []
-    // return {email, refresh_token, customers}
     for (let i = 0; i < customers.length; i++) {
       const {id} = customers[i];
       try {
@@ -103,7 +101,7 @@ export class MetaAdsService {
 
   }
 
-  async hanldeUnlinkCustomer(id: string, email: string) {
+  async handleUnlinkCustomer(id: string, email: string) {
 
     try {
       const user = await this.ClientDataService.findByEmail(email)
@@ -127,7 +125,7 @@ export class MetaAdsService {
 
   }
 
-  async hanldeRelinkCustomer(id: string, email: string) {
+  async handleRelinkCustomer(id: string, email: string) {
 
     try {
       const user = await this.ClientDataService.findByEmail(email)
@@ -151,7 +149,7 @@ export class MetaAdsService {
     }
   }
 
-  async hanldeMetaLogout(email: string) {
+  async handleMetaLogout(email: string) {
     try {
       const user = await this.ClientDataService.findByEmail(email)
       if (!user[0]?.facebook_client_linked_accounts)

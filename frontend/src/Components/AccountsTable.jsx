@@ -11,7 +11,6 @@ import "../styles/table.css";
 import { LinkedinBtn, linkedMultiLogin } from "./Linkdin";
 import { BingBtn } from "./BingBtn";
 import { Facebook } from "./Facebook";
-import { getBubbleUsers } from "../Services/BubbleIo";
 import { GoogleBtn } from "./GoogleBtn";
 import { GetServerCall, PostServerCall } from "../Services/apiCall";
 import { LinkedAccountsToClient } from "./LinkedAccountsToClient";
@@ -23,7 +22,7 @@ const AccountsTable = () => {
   const [tableData, setTableData] = useState([]);
   const [isloading, setIsloading] = useState(true)
   const [showClientLinkedActsModal, setShowClientLinkedActsModal] = useState(false)
-  const [timmerCount, settimmerCount] = useState(0)
+  const [timerCount, settimerCount] = useState(0)
   useEffect(() => {
     getdata()
   }, [])
@@ -31,11 +30,11 @@ const AccountsTable = () => {
   // refresh data after 2 sec must track api calls to prevent infinite calls 
   useEffect(() => {
     let timer
-    if (!isloading && tableData.length == 0 && timmerCount < 30)
+    if (!isloading && tableData.length == 0 && timerCount < 30)
       timer = setTimeout(() => {
         getdata()
-        let t = timmerCount
-        settimmerCount(t + 1)
+        let t = timerCount
+        settimerCount(t + 1)
       }, 2000)
     return () => clearTimeout(timer);
   }, [isloading, tableData])

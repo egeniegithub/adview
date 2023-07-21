@@ -4,7 +4,24 @@ import { CreateBingAdDto } from './dto/create-bing-ad.dto';
 import { UpdateBingAdDto } from './dto/update-bing-ad.dto';
 import { ClientDataService } from 'src/client-data/client-data.service';
 import { parseString } from "xml2js";
+import { ObtainBingAdsDataDto } from './bing-ads.controller';
 const { DOMParser } = require('xmldom');
+
+type CalculatedReturned = {
+  calculated ?: string
+  err?: string; 
+  updation_status?: boolean;
+}
+
+type BingReturns = {
+  GetAccountMonthlySpendResponse ?: {
+    Amount : number
+  },
+  User ?:{
+    'a:CustomerId' : []
+  }
+}
+
 
 @Injectable()
 export class BingAdsService {
@@ -32,7 +49,7 @@ export class BingAdsService {
     return `This action removes a #${id} bingAd`;
   }
 
-  async hanldeUnlinkCustomer(id: string, email: string) {
+  async handleUnlinkCustomer(id: string, email: string) {
 
     try {
       const user = await this.ClientDataService.findByEmail(email)
@@ -55,7 +72,7 @@ export class BingAdsService {
     }
   }
 
-  async hanldeRelinkCustomer(id: string, email: string) {
+  async handleRelinkCustomer(id: string, email: string) {
 
     try {
       const user = await this.ClientDataService.findByEmail(email)
@@ -81,7 +98,7 @@ export class BingAdsService {
 
 
 
-  async ObtainBingAdsData({ email, refresh_token, access_token, customer_ids, customer_names }: any) {
+  async ObtainBingAdsData({ email, refresh_token, access_token, customer_ids, customer_names }: ObtainBingAdsDataDto) {
 
     let ids = customer_ids.split(',')
     let cust_names = customer_names.split(',')
@@ -92,7 +109,7 @@ export class BingAdsService {
       const id = ids[i];
       const name = cust_names[i]
       try {
-        const data: any = await this.getMonthlySpend(parseInt(id), access_token);
+        const data: CalculatedReturned = await this.getMonthlySpend(parseInt(id), access_token);
         alldata.push({ list: data, id })
         total_amount += parseFloat(data.calculated) || 0
         connected_accounts.push({ id: id, amount_spend: data.calculated || 0, descriptiveName: name })
@@ -135,7 +152,7 @@ export class BingAdsService {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(res.data, 'text/xml');
       const resultElement = xmlDoc.getElementsByTagName('GetAccountMonthlySpendResponse')[0];
-      const json: any = await func(resultElement)
+      const json: BingReturns = await func(resultElement)
       let total = json.GetAccountMonthlySpendResponse.Amount || 0
       let obj = {}
       obj['calculated'] = total
@@ -146,16 +163,15 @@ export class BingAdsService {
   }
 
 
-  async ObtainBingAdsDataWithCrone({ email, refresh_token,access_token, customers }: any) {
+  async ObtainBingAdsDataWithCrone({ email, refresh_token,access_token, customers }: ObtainBingAdsDataDto) {
     let total_amount = 0
     let all = []
     let alldata = []
-    // Logger.log("cehck ",email, refresh_token, customers)
     // return {email, refresh_token, customers}
     for (let i = 0; i < customers.length; i++) {
       const { id } = customers[i];
       try {
-        const data: any = await this.getMonthlySpend(parseInt(id), access_token);
+        const data: CalculatedReturned = await this.getMonthlySpend(parseInt(id), access_token);
         total_amount += parseFloat(data.calculated) || 0
       } catch (error) {
         await this.ClientDataService.updateByClient(email, {is_bing_login : '0'})
@@ -185,7 +201,7 @@ export class BingAdsService {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(res.data, 'text/xml');
     const resultElement = xmlDoc.getElementsByTagName('User')[0];
-    const json: any = await func(resultElement)
+    const json: BingReturns = await func(resultElement)
     let linked_accounts = await this.getLinkedActs(json.User['a:CustomerId'], access_token)
     return ({ data: json, linked_accounts })
   }
@@ -220,11 +236,11 @@ export class BingAdsService {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(res.data, 'text/xml');
     const resultElement = xmlDoc.getElementsByTagName('AccountsInfo')[0];
-    const json: any = await func(resultElement)
+    const json = await func(resultElement)
     return json
   }
 
-  async hanldeBingLogout(email: string) {
+  async handleBingLogout(email: string) {
     try {
       const user = await this.ClientDataService.findByEmail(email)
       if (!user[0]?.google_client_linked_accounts)
@@ -255,8 +271,9 @@ function getPreviousMonthDate() {
   var currentDate = new Date();
   currentDate.setMonth(currentDate.getMonth() - 1);
   var year = currentDate.getFullYear();
-  var month: any = currentDate.getMonth() + 1;
+  var month :number = currentDate.getMonth() + 1;
+  let monthStr = ''
   if (month < 10)
-    month = "0" + month
-  return year + "-" + month;
+    monthStr = "0" + month
+  return year + "-" + monthStr;
 }

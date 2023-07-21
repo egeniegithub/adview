@@ -8,6 +8,9 @@ import { ClientMonthlyDatum } from './entities/client-monthly-datum.entity';
 import { Cron } from '@nestjs/schedule';
 import e from 'express';
 import axios from 'axios';
+import { WebHookPayload } from './client-data.controller';
+
+
 
 @Injectable()
 export class ClientDataService {
@@ -77,7 +80,7 @@ export class ClientDataService {
     }
   }
 
-  async updateByClient(email: string, updateClientData: any) {
+  async updateByClient(email: string, updateClientData: UpdateClientDatumDto) {
     try {
       return this.clientDataRepository.update({ email }, updateClientData)
     }
@@ -171,7 +174,7 @@ export class ClientDataService {
           }
         }
         list.forEach(e => {
-          let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule, media_buyer_option_media_buyer: buyer }: any = e
+          let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule, media_buyer_option_media_buyer: buyer }: WebHookPayload = e
           // find corresponding user 
           const { email: bub_email, facebook, bing, linkedin, google, client: adview_client_name } = savedUsers.find((u) => u.email == email) || {};
           if (!bub_email)
@@ -186,7 +189,7 @@ export class ClientDataService {
             return
 
           if (duplicateArr.length > 1) {
-            duplicateArr.forEach((e: any) => {
+            duplicateArr.forEach((e: WebHookPayload) => {
               if (e.billing_schedule_option_billing_schedule == 'One-Time') {
                 budget_number += e.budget_number
               }
@@ -212,8 +215,8 @@ export class ClientDataService {
 
   // handle bubble user update budget 
   async HandleWebhookUpdateUser(payload) {
-    let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule }: any = payload
-    let obj = { monthly_budget: budget_number, frequency: billing_schedule_option_billing_schedule }
+    let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule }: WebHookPayload = payload
+    let obj = { monthly_budget: `${budget_number}`, frequency: billing_schedule_option_billing_schedule }
     try {
       let user =  await this.clientDataRepository.findOneBy({ email })
       if(!user)
@@ -227,8 +230,8 @@ export class ClientDataService {
 
    // handle bubble user update Reactivate 
   async HandleWebhookUpdateUserStatus(payload) {
-    let { account_custom_account: email, budget_number, is_active }: any = payload
-    let obj = { monthly_budget: budget_number, is_active_from_bubble : is_active == 1 ? '1' : '0' }
+    let { account_custom_account: email, budget_number, is_active }: WebHookPayload = payload
+    let obj = { monthly_budget: `${budget_number}`, is_active_from_bubble : is_active == '1' ? '1' : '0' }
     try {
       let user =  await this.clientDataRepository.findOneBy({ email })
       if(!user)
@@ -243,9 +246,9 @@ export class ClientDataService {
 
   // handle bubble new user call
   async HandleWebhookCreateUser(payload) {
-    const { account_custom_account: email, name_text, budget_number }: any = payload
+    const { account_custom_account: email, name_text, budget_number }: WebHookPayload = payload
     try {
-      let obj = { email, client: name_text, monthly_budget: budget_number }
+      let obj = { email, client: name_text, monthly_budget: `${budget_number}` }
       await this.clientDataRepository.insert(obj)
       return { status: 'success', message: 'user created successfully' }
     } catch (error) {
@@ -292,7 +295,7 @@ export class ClientDataService {
       const list = res.data.response.results || []
       // map data
       list.forEach(e => {
-        let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule = '', media_buyer_option_media_buyer: buyer }: any = e
+        let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule = '', media_buyer_option_media_buyer: buyer }: WebHookPayload = e
 
         let obj = { email, client: name_text, buyer: buyer, frequency: billing_schedule_option_billing_schedule, monthly_budget: budget_number, updated_at: getCurrentTimeForUpdateField() }
         arr.push(obj)
@@ -344,8 +347,8 @@ export class ClientDataService {
   }
 
   // async testCall(){
-  //   let users:any =await this.clientDataRepository.find()
-  //   let users2:any =await this.clientMonthlyDataRepository.find({where:{month : '6'}})
+  //   let users:WebHookPayload =await this.clientDataRepository.find()
+  //   let users2:WebHookPayload =await this.clientMonthlyDataRepository.find({where:{month : '6'}})
   //   let arr = []
   //   users.forEach(e => {
   //     let obj = { ...e }

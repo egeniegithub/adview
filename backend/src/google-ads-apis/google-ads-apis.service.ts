@@ -3,10 +3,8 @@ import { CreateGoogleAdsApiDto, ObtainAdsDataDto } from './dto/create-google-ads
 import { UpdateGoogleAdsApiDto } from './dto/update-google-ads-api.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleAdsApi, enums } from 'google-ads-api';
-import { Repository } from 'typeorm';
-import { google } from 'googleapis';
 import axios from 'axios';
-const { OAuth2 } = google.auth;
+
 import { ClientDataService } from '../client-data/client-data.service'
 
 
@@ -26,10 +24,10 @@ export class GoogleAdsApisService {
   //   const data = await this.exportedDataRepository.find({ where: { email: email } });
   //   return data;
   // }
-  async genrateTokens(code:string){
+  async generateTokens(code:string){
     const oAuth2Client = new OAuth2Client(
       '828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com',
-      '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',
+      `${process.env.GOOGLE_CLIENT_SECRET}`,
       'postmessage',
     );
     try {
@@ -46,7 +44,7 @@ export class GoogleAdsApisService {
       return { message: 'Refresh Token should have a value to proceed.' };
     }
     const CLIENT_ID = '828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com';
-    const CLIENT_SECRET = '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'
+    const CLIENT_SECRET = `${process.env.GOOGLE_CLIENT_SECRET}`
     const REDIRECT_URI = 'postmessage';
     const oAuth2Client = new OAuth2Client(
       CLIENT_ID,
@@ -123,7 +121,7 @@ export class GoogleAdsApisService {
     };
     try {
       let res = await axios(options)
-      let total: number | any = { amount_spent: 0, descriptiveName: '' }
+      let total: any = { amount_spent: 0, descriptiveName: '' }
       let { results = [] } = res.data
       results.forEach(e => {
         total.amount_spent += parseInt(e.metrics.costMicros)
@@ -138,16 +136,14 @@ export class GoogleAdsApisService {
     }
   }
 
-  async ObtainGoogleAdsDataWithCrone({ email, access_token, customers }: any) {
+  async ObtainGoogleAdsDataWithCrone({ email, access_token, customers }: ObtainAdsDataDto) {
     let total_amount = 0
     let alldata=[]
-    // Logger.log("cehck ",email, refresh_token, customers)
-    // return {email, refresh_token, customers}
     for (let i = 0; i < customers.length; i++) {
       const {id,manager_id} = customers[i];
       try {
         const developer_token = process.env.GOOGLE_DEV_TOKEN
-        const data: any = await this.getMonthlySpend(email,parseInt(id),developer_token, access_token,manager_id);
+        const data = await this.getMonthlySpend(email,parseInt(id),developer_token, access_token,manager_id);
         alldata.push({ ...data })
       } catch (error) { 
         await this.ClientDataService.updateByClient(email, {is_google_login : '0'})
@@ -161,13 +157,12 @@ export class GoogleAdsApisService {
         total_amount += parseInt(el.calculated.amount_spent)
     })
       await this.ClientDataService.updateByClient(email, { 'google': `${total_amount}`,is_google_login : '1' })
-    // const updated = await this.ClientDataService.updateByClient(email, { 'bing': `${total_amount}`, is_bing_login : '1'})
     return ({ data: alldata,})
 
   }
 
 
-  async hanldeUnlinkCustomer(id: string, email: string) {
+  async handleUnlinkCustomer(id: string, email: string) {
 
     try {
       const user = await this.ClientDataService.findByEmail(email)
@@ -191,7 +186,7 @@ export class GoogleAdsApisService {
 
   }
 
-  async hanldeRelinkCustomer(id: string, email: string) {
+  async handleRelinkCustomer(id: string, email: string) {
 
     try {
       const user = await this.ClientDataService.findByEmail(email)
@@ -217,7 +212,7 @@ export class GoogleAdsApisService {
 
   }
 
-  async hanldeGoogleLogout(email: string) {
+  async handleGoogleLogout(email: string) {
     try {
       const user = await this.ClientDataService.findByEmail(email)
       if (!user[0]?.google_client_linked_accounts)

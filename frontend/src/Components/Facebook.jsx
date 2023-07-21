@@ -8,7 +8,7 @@ import { GetServerCall } from '../Services/apiCall';
 
 export const Facebook = ({ fetchAdsData, handleOk ,userData,getdata}) => {
     const [linkedUsers, setLinkedUsers] = useState([])
-    const [seacrhedName, setSeacrhedName] = useState([])
+    const [searchedName, setSearchedName] = useState([])
     const [filteredLinkedUsers, setfilteredLinkedUsers] = useState([])
     const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
     const [userName, setuserName] = useState('')
@@ -48,17 +48,17 @@ export const Facebook = ({ fetchAdsData, handleOk ,userData,getdata}) => {
         setshowLinkedUserModal(false)
         fetchAdsData({access_token,refresh_token}, 'facebook', userName, customer_ids,customer_names)
         // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
-        setSeacrhedName('')
+        setSearchedName('')
     }
 
     useEffect(() => {
         let temp = [...linkedUsers]
         let filterArr = temp.filter(el => {
-            if (el.name?.toLowerCase().includes(seacrhedName))
+            if (el.name?.toLowerCase().includes(searchedName))
                 return { ...el }
         })
         setfilteredLinkedUsers(filterArr)
-    }, [seacrhedName])
+    }, [searchedName])
 
     const rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
@@ -102,7 +102,7 @@ export const Facebook = ({ fetchAdsData, handleOk ,userData,getdata}) => {
     return (
         <>
             <LoginSocialFacebook
-                appId={process.env.REACT_APP_FB_CLIENT_ID || 266566095742191}
+                appId={process.env.REACT_APP_FB_CLIENT_ID}
                 fieldsProfile={
                     'id,name'
                 }
@@ -135,7 +135,7 @@ export const Facebook = ({ fetchAdsData, handleOk ,userData,getdata}) => {
                 <Table
                     bordered
                     scroll={{ x: 700 }}
-                    className='rowCustomeClassName2'
+                    className='rowCustomerClassName2'
                     rowSelection={{
                         type: 'checkbox',
                         ...rowSelection,
@@ -181,7 +181,7 @@ export const Facebook = ({ fetchAdsData, handleOk ,userData,getdata}) => {
                         },
                         {
                             title: () => (<div style={{ position: 'relative' }}>
-                                <Input onChange={({ target }) => { setSeacrhedName(target.value) }} placeholder="Search by name.." style={{ width: "90%", marginBottom: '.3rem', borderRadius: '30px' }} />
+                                <Input onChange={({ target }) => { setSearchedName(target.value) }} placeholder="Search by name.." style={{ width: "90%", marginBottom: '.3rem', borderRadius: '30px' }} />
                                 <SearchOutlined
                                     style={{
                                         color: '#0c0808', position: 'absolute', right: "13%", top: '25%',
@@ -194,7 +194,7 @@ export const Facebook = ({ fetchAdsData, handleOk ,userData,getdata}) => {
                             width: '20%'
                         },
                     ]}
-                    dataSource={seacrhedName != '' ? filteredLinkedUsers : linkedUsers}
+                    dataSource={searchedName != '' ? filteredLinkedUsers : linkedUsers}
                 />
                 <div style={{ display: 'flex', gap: '2%' }}>
                     <Button style={{ flexBasis: '20%' }} type='primary' onClick={handleConnect}>Connect</Button>

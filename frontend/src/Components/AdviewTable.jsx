@@ -12,7 +12,7 @@ import { getStatus } from "../utils/helper";
 const AdviewTable = () => {
   const [tableData, setTableData] = useState([]);
   const [isloading, setIsloading] = useState(true)
-  const [timmerCount, settimmerCount] = useState(0)
+  const [timerCount, settimerCount] = useState(0)
   useEffect(() => {
     getdata()
   }, [])
@@ -20,11 +20,11 @@ const AdviewTable = () => {
   // refresh data after 2 sec must track api calls to prevent infinite calls 
   useEffect(() => {
     let timer
-    if (!isloading && tableData.length == 0 && timmerCount < 10)
+    if (!isloading && tableData.length == 0 && timerCount < 10)
       timer = setTimeout(() => {
         getdata()
-        let t = timmerCount
-        settimmerCount(t + 1)
+        let t = timerCount
+        settimerCount(t + 1)
       }, 5000)
     return () => clearTimeout(timer);
   }, [isloading, tableData])

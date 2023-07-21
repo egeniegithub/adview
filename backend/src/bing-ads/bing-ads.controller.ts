@@ -11,6 +11,7 @@ export class ObtainBingAdsDataDto {
   manager_id:string
   refresh_token:string
   access_token:string 
+  customers ?:[]
 }
 
 @Controller('bing-ads')
@@ -29,8 +30,8 @@ export class BingAdsController {
   }
 
   @Get('/logout-user/:email')
-  hanldeBingLogout(@Param('email') email: string) {
-    return this.bingAdsService.hanldeBingLogout(email);
+  handleBingLogout(@Param('email') email: string) {
+    return this.bingAdsService.handleBingLogout(email);
   }
 
 
@@ -45,13 +46,13 @@ export class BingAdsController {
   }
 
   @Get('/unlink-customer/:id/:email')
-  hanldeUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
-    return this.bingAdsService.hanldeUnlinkCustomer(id,email);
+  handleUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.bingAdsService.handleUnlinkCustomer(id,email);
   }
 
   @Get('/relink-customer/:id/:email')
-  hanldeRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
-    return this.bingAdsService.hanldeRelinkCustomer(id,email);
+  handleRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.bingAdsService.handleRelinkCustomer(id,email);
   }
   
 
