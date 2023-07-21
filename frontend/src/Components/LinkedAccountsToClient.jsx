@@ -56,7 +56,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                         <h5>Accounts Currently Linked </h5>
                         <div style={{ border: "1px",borderColor:'#3e3e3e2e', borderBottom: "0px", borderStyle: 'solid' }}>
                             <Table
-                                className='rowCustomeClassName'
+                                className='rowCustomerClassName'
                                 pagination={false}
                                 columns={[
                                     {
@@ -90,7 +90,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                         <h5>Accounts Currently Bing </h5>
                         <div style={{ border: "1px", borderBottom: "0px", borderStyle: 'solid' }}>
                             <Table
-                                className='rowCustomeClassName'
+                                className='rowCustomerClassName'
                                 pagination={false}
                                 columns={[
                                     {
@@ -124,7 +124,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                         <h5>Accounts Currently Linked </h5>
                         <div style={{ border: "1px", borderBottom: "0px", borderStyle: 'solid' }}>
                             <Table
-                                className='rowCustomeClassName'
+                                className='rowCustomerClassName'
                                 pagination={false}
                                 columns={[
                                     {
@@ -159,7 +159,7 @@ export const LinkedAccountsToClient = ({ showClientLinkedActsModal, setshowModal
                         <h5>Accounts Currently Linked </h5>
                         <div style={{ border: "1px", borderBottom: "0px", borderStyle: 'solid' }}>
                             <Table
-                                className='rowCustomeClassName'
+                                className='rowCustomerClassName'
                                 pagination={false}
                                 columns={[
                                     {

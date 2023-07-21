@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LoginSocialFacebook, LoginSocialGoogle } from "reactjs-social-login";
 import { Button, Modal, Switch, Table } from 'antd';
-import { getAccosiatedUstomers } from '../Services/googleLinkedUsers';
+import { getAssociatedCustomers } from '../Services/googleLinkedUsers';
 import { Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { handleLogoutIndicator } from '../utils/helper';
@@ -10,7 +10,7 @@ import { GetServerCall, PostServerCall } from '../Services/apiCall';
 
 export const GoogleBtn = ({ fetchAdsData, handleOk,userData,getdata }) => {
     const [linkedUsers, setLinkedUsers] = useState([])
-    const [seacrhedName, setSeacrhedName] = useState([])
+    const [searchedName, setSearchedName] = useState([])
     const [filteredLinkedUsers, setfilteredLinkedUsers] = useState([])
     const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
     const [userName, setuserName] = useState('')
@@ -30,7 +30,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk,userData,getdata }) => {
         if (!response.data.tokens)
             return
         let {access_token, refresh_token} = response.data.tokens
-        let list = await getAccosiatedUstomers(access_token)
+        let list = await getAssociatedCustomers(access_token)
         if (list?.length) {
             // loop through list and add key 
             list.forEach((ele, i) => {
@@ -60,11 +60,11 @@ export const GoogleBtn = ({ fetchAdsData, handleOk,userData,getdata }) => {
     useEffect(() => {
         let temp = [...linkedUsers]
         let filterArr = temp.filter(el => {
-            if (el.descriptiveName?.toLowerCase().includes(seacrhedName))
+            if (el.descriptiveName?.toLowerCase().includes(searchedName))
                 return { ...el }
         })
         setfilteredLinkedUsers(filterArr)
-    }, [seacrhedName])
+    }, [searchedName])
 
     const rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
@@ -89,7 +89,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk,userData,getdata }) => {
         let customer_ids = selectedRow.customer_ids.join(",");
         setshowLinkedUserModal(false)
         fetchAdsData({access_token,refresh_token}, 'google', userName, customer_ids, selectedRow.manager_id)
-        setSeacrhedName('')
+        setSearchedName('')
     }
 
     if (userData?.is_google_login == '1')
@@ -106,25 +106,6 @@ export const GoogleBtn = ({ fetchAdsData, handleOk,userData,getdata }) => {
     return (
         <>
             <div><Button className="ModalBtn" type="primary" onClick={() => login()}>google Ads</Button></div>
-            {/* {!showLinkedUserModal && <LoginSocialGoogle
-                // client_id={'828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com'} client account
-                client_id={'828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com'}
-                scope="openid profile email https://www.googleapis.com/auth/adwords"
-                discoveryDocs="claims_supported"
-                access_type="offline"
-                redirect_uri={`https://adview.io/`}
-                onResolve={({ provider, data }) => {
-                    GResponseHandler(data)
-                }}
-                onReject={err => {
-                    GResponseHandler(err)
-                }}
-            >
-                <Button className="ModalBtn" type="primary">
-                    google Ads
-                </Button>
-            </LoginSocialGoogle>} */}
-
             <Modal
                 title={<h5 style={{ padding: "2.5% 0% 0px 2.5%" }} >Select Google ad Accounts to link</h5>}
                 width={"67%"}
@@ -139,7 +120,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk,userData,getdata }) => {
                 <Table
                     scroll={{ x: 700 }}
                     bordered
-                    className='rowCustomeClassName2'
+                    className='rowCustomerClassName2'
                     rowSelection={{
                         type: 'checkbox',
                         ...rowSelection,
@@ -185,7 +166,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk,userData,getdata }) => {
                         },
                         {
                             title: () => (<div style={{ position: 'relative' }}>
-                                <Input onChange={({ target }) => { setSeacrhedName(target.value) }} placeholder="Search by name.." style={{ width: "90%", marginBottom: '.3rem', borderRadius: '30px' }} />
+                                <Input onChange={({ target }) => { setSearchedName(target.value) }} placeholder="Search by name.." style={{ width: "90%", marginBottom: '.3rem', borderRadius: '30px' }} />
                                 <SearchOutlined
                                     style={{
                                         color: '#0c0808', position: 'absolute', right: "13%", top: '25%',
@@ -198,7 +179,7 @@ export const GoogleBtn = ({ fetchAdsData, handleOk,userData,getdata }) => {
                             width: '20%'
                         },
                     ]}
-                    dataSource={seacrhedName != '' ? filteredLinkedUsers : linkedUsers}
+                    dataSource={searchedName != '' ? filteredLinkedUsers : linkedUsers}
                 />
                 <div style={{ display: 'flex', gap: '2%' }}>
                     <Button style={{ flexBasis: '20%' }} type='primary' onClick={handleConnect}>Connect</Button>

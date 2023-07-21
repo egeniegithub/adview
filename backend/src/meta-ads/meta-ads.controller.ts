@@ -9,7 +9,7 @@ export class ObtainMetaAdsDataDto {
   email:string
   customer_names:string
   refresh_token:string
-  customers ?: Array<any>
+  customers ?: []
 }
 
 @Controller('meta-ads')
@@ -27,18 +27,18 @@ export class MetaAdsController {
   }
 
   @Get('/unlink-customer/:id/:email')
-  hanldeUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
-    return this.metaAdsService.hanldeUnlinkCustomer(id,email);
+  handleUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.metaAdsService.handleUnlinkCustomer(id,email);
   }
 
   @Get('/relink-customer/:id/:email')
-  hanldeRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
-    return this.metaAdsService.hanldeRelinkCustomer(id,email);
+  handleRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.metaAdsService.handleRelinkCustomer(id,email);
   }
 
   @Get('/logout-user/:email')
-  hanldeMetaLogout(@Param('email') email: string) {
-    return this.metaAdsService.hanldeMetaLogout(email);
+  handleMetaLogout(@Param('email') email: string) {
+    return this.metaAdsService.handleMetaLogout(email);
   }
 
 

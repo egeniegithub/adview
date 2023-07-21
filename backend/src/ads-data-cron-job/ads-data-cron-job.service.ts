@@ -33,10 +33,10 @@ export class AdsDataCronJobService {
     timeZone: 'EST',
   })
   async ClientadsUpdateCroneJob() {
-    let meta_Linked_users: any = []
-    let linkedin_Linked_users: any = []
-    let bing_Linked_users: any = []
-    let google_Linked_users: any = []
+    let meta_Linked_users = []
+    let linkedin_Linked_users = []
+    let bing_Linked_users = []
+    let google_Linked_users = []
     let usersList = await this.ClientDataService.findAllWithQuery({ where: [{ is_meta_login: '1' }, { is_bing_login: '1' }, { is_linkedin_login: '1' }, { is_google_login: '1' }] })
     usersList.forEach(e => {
       let { meta_refresh_token = '', bing_refresh_token, google_refresh_token, linkedin_refresh_token, facebook_client_linked_accounts = '', linkedin_client_linked_accounts = '', bing_client_linked_accounts = '', google_client_linked_accounts,
@@ -88,7 +88,7 @@ export class AdsDataCronJobService {
     })
 
     for (let i = 0; i < linkedin_Linked_users.length; i++) {
-      let tokens = await this.LinkedinAdsService.ExchnageRefreshToAccess(linkedin_Linked_users[i].refresh_token)
+      let tokens = await this.LinkedinAdsService.ExchangeRefreshToAccess(linkedin_Linked_users[i].refresh_token)
       if (tokens.data?.access_token)
         await this.LinkedinAdsService.ObtainLinkedinAdsDataWithCrone({ ...linkedin_Linked_users[i], access_token: tokens.data.access_token })
     }
@@ -96,7 +96,7 @@ export class AdsDataCronJobService {
 
     // bing users ads computation
     for (let i = 0; i < bing_Linked_users.length; i++) {
-      let tokens =await this.CovertBingRefreshToken(bing_Linked_users[i].refresh_token)
+      let tokens =await this.ConvertBingRefreshToken(bing_Linked_users[i].refresh_token)
       if(tokens.access_token)
       {
         await this.BingAdsService.ObtainBingAdsDataWithCrone({...bing_Linked_users[i],access_token:tokens.access_token,refresh_token:tokens.refresh_token})
@@ -135,10 +135,9 @@ export class AdsDataCronJobService {
 
   }
 
-  async CovertBingRefreshToken(refresh_token) {
+  async ConvertBingRefreshToken(refresh_token) {
     const url = `https://login.microsoftonline.com/common/oauth2/v2.0/token`;
     const clientId = 'b2d7eb5f-e889-4f34-a297-7221ce6c26e7';
-    // const clientSecret = '4-C8Q~zaIKCrqrnAS3YHNyUZAmIlygfnCCWWscJ5';
     const params = {
       scope: 'https://ads.microsoft.com/msads.manage',
       client_id: clientId,

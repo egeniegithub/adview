@@ -13,7 +13,7 @@ import AccountsTableScreen from './screens/AccountsTableScreen';
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId="828028257241-vhnmormtqapi8j744f086ee5shoc5380.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
     <Router>
       <Routes>
         <Route exact path="/login" element={<Login />} />

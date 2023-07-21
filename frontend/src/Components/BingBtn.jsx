@@ -9,7 +9,7 @@ import { GetServerCall } from '../Services/apiCall';
 
 export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
   const [linkedUsers, setLinkedUsers] = useState([])
-  const [seacrhedName, setSeacrhedName] = useState([])
+  const [searchedName, setSearchedName] = useState([])
   const [filteredLinkedUsers, setfilteredLinkedUsers] = useState([])
   const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
   const [userName, setuserName] = useState('')
@@ -21,11 +21,11 @@ export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
   useEffect(() => {
     let temp = [...linkedUsers]
     let filterArr = temp.filter(el => {
-      if (el.name?.toLowerCase().includes(seacrhedName))
+      if (el.name?.toLowerCase().includes(searchedName))
         return { ...el }
     })
     setfilteredLinkedUsers(filterArr)
-  }, [seacrhedName])
+  }, [searchedName])
 
 
 
@@ -38,7 +38,7 @@ export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
     setshowLinkedUserModal(false)
     // fetchAdsData(access_token, 'bing', userName, customer_ids)
     fetchAdsData({access_token,refresh_token}, 'bing', userName, customer_ids,customer_names,manager_id )
-    setSeacrhedName('')
+    setSearchedName('')
   }
 
   const handleRowLogout =async () => {
@@ -83,7 +83,7 @@ export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
   return (
     <>
       <LoginSocialMicrosoft
-        client_id={`b2d7eb5f-e889-4f34-a297-7221ce6c26e7`}
+        client_id={process.env.REACT_APP_BING_CLIENT_ID}
         // redirect_uri={`http://localhost:3000/bing`}
         redirect_uri={`https://adview.io/bing`}
         scope={'https://ads.microsoft.com/msads.manage'}
@@ -128,7 +128,7 @@ export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
         <Table
           bordered
           scroll={{ x: 700 }}
-          className='rowCustomeClassName2'
+          className='rowCustomerClassName2'
           rowSelection={{
             type: 'checkbox',
             ...rowSelection,
@@ -174,7 +174,7 @@ export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
             },
             {
               title: () => (<div style={{ position: 'relative' }}>
-                <Input onChange={({ target }) => { setSeacrhedName(target.value) }} placeholder="Search by name.." style={{ width: "90%", marginBottom: '.3rem', borderRadius: '30px' }} />
+                <Input onChange={({ target }) => { setSearchedName(target.value) }} placeholder="Search by name.." style={{ width: "90%", marginBottom: '.3rem', borderRadius: '30px' }} />
                 <SearchOutlined
                   style={{
                     color: '#0c0808', position: 'absolute', right: "13%", top: '25%',
@@ -187,7 +187,7 @@ export const BingBtn = ({ fetchAdsData, handleOk,getdata,userData }) => {
               width: '20%'
             },
           ]}
-          dataSource={seacrhedName != '' ? filteredLinkedUsers : linkedUsers}
+          dataSource={searchedName != '' ? filteredLinkedUsers : linkedUsers}
         />
         <div style={{ display: 'flex', gap: '2%' }}>
           <Button style={{ flexBasis: '20%' }} type='primary' onClick={handleConnect}>Connect</Button>

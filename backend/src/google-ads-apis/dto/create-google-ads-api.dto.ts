@@ -14,4 +14,5 @@ export class ObtainAdsDataDto {
     manager_id:string
     refresh_token : string
     access_token : string
+    customers ?: []
 }

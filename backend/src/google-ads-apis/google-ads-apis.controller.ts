@@ -35,27 +35,27 @@ export class GoogleAdsApisController {
   }
 
   @Post('/generate-tokens')
-  genrateTokens(@Body() code: string) {
+  generateTokens(@Body() code: string) {
     try {
-      return this.googleAdsApisService.genrateTokens(code);
+      return this.googleAdsApisService.generateTokens(code);
     } catch (error) {
       return error;
     }
   }
   
   @Get('/logout-user/:email')
-  hanldeGoogleLogout(@Param('email') email: string) {
-    return this.googleAdsApisService.hanldeGoogleLogout(email);
+  handleGoogleLogout(@Param('email') email: string) {
+    return this.googleAdsApisService.handleGoogleLogout(email);
   }
 
   @Get('/unlink-customer/:id/:email')
-  hanldeUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
-    return this.googleAdsApisService.hanldeUnlinkCustomer(id,email);
+  handleUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.googleAdsApisService.handleUnlinkCustomer(id,email);
   }
 
   @Get('/relink-customer/:id/:email')
-  hanldeRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
-    return this.googleAdsApisService.hanldeRelinkCustomer(id,email);
+  handleRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.googleAdsApisService.handleRelinkCustomer(id,email);
   }
 
   @Get(':id')

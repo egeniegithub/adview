@@ -5,17 +5,18 @@ import { UpdateLinkedinAdDto } from './dto/update-linkedin-ad.dto';
 
 
 export class ObtainLinkedinAdsDataDto {
-  customer_ids:string
-  email:string
-  customer_names:string
-  refresh_token:string
-  access_token:string
+  customer_ids: string
+  email: string
+  customer_names: string
+  refresh_token: string
+  access_token: string
+  customers ?: []
 }
 
 
 @Controller('linkedin-ads')
 export class LinkedinAdsController {
-  constructor(private readonly linkedinAdsService: LinkedinAdsService) {}
+  constructor(private readonly linkedinAdsService: LinkedinAdsService) { }
 
   @Post('/ObtainLinkedinAdsData')
   ObtainAdsData(@Body() ObtainLinkedinAdsDataDto: ObtainLinkedinAdsDataDto) {
@@ -27,37 +28,25 @@ export class LinkedinAdsController {
   }
 
   @Get('/logout-user/:email')
-  hanldeLinkedinLogout(@Param('email') email: string) {
-    return this.linkedinAdsService.hanldeLinkedinLogout(email);
+  handleLinkedinLogout(@Param('email') email: string) {
+    return this.linkedinAdsService.handleLinkedinLogout(email);
   }
 
-  // @Get('/handle-auth/:token')
-  // handleAuth(@Param('token') token:string) {
-  //   return this.linkedinAdsService.handleAuth(token);
-  // }
-
-  // @Get('/exchange-refresh')
-  // ExchnageRefreshToAccess() {
-  //   return this.linkedinAdsService.ExchnageRefreshToAccess();
-  // }
-
-  
-
   @Get('/getManagerActDetails/:token')
-  GetMangerActInfo(@Param('token') token:string) {
+  GetMangerActInfo(@Param('token') token: string) {
     return this.linkedinAdsService.getLinkedActs(token);
   }
 
   @Get('/unlink-customer/:id/:email')
-  hanldeUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
-    return this.linkedinAdsService.hanldeUnlinkCustomer(id,email);
+  handleUnlinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.linkedinAdsService.handleUnlinkCustomer(id, email);
   }
 
   @Get('/relink-customer/:id/:email')
-  hanldeRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
-    return this.linkedinAdsService.hanldeRelinkCustomer(id,email);
+  handleRelinkCustomer(@Param('id') id: string, @Param('email') email: string) {
+    return this.linkedinAdsService.handleRelinkCustomer(id, email);
   }
-  
+
 
   @Post()
   create(@Body() createLinkedinAdDto: CreateLinkedinAdDto) {

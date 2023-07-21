@@ -8,6 +8,12 @@ import { Repository } from 'typeorm';
 import { ClientDataService } from 'src/client-data/client-data.service';
 import { ObtainLinkedinAdsDataDto } from './linkedin-ads.controller';
 
+type CalculatedReturned = {
+  calculated ?: string
+  err?: string; 
+  updation_status?: boolean;
+}
+
 
 @Injectable()
 export class LinkedinAdsService {
@@ -35,7 +41,7 @@ export class LinkedinAdsService {
     return `This action removes a #${id} linkedinAd`;
   }
 
-  async ExchnageRefreshToAccess(refresh_token) {
+  async ExchangeRefreshToAccess(refresh_token) {
     let client_id = '78zrt5co4u4vmi'
     let client_secret = process.env.LINKEDIN_CLIENT_SECRET
     const params = {
@@ -80,7 +86,7 @@ export class LinkedinAdsService {
   }
 
   // obtains ads data
-  async ObtainLinkedInAdsData({ email, access_token, refresh_token, customer_ids, customer_names }: any) {
+  async ObtainLinkedInAdsData({ email, access_token, refresh_token, customer_ids, customer_names }: ObtainLinkedinAdsDataDto) {
 
     let ids = customer_ids.split(',')
     let cust_names = customer_names.split(',')
@@ -92,7 +98,7 @@ export class LinkedinAdsService {
       const name = cust_names[i]
       try {
         let first_date = getCurrentMonthFirstDate()
-        const data: any = await this.getMonthlySpend(parseInt(id), access_token, first_date);
+        const data: CalculatedReturned = await this.getMonthlySpend(parseInt(id), access_token, first_date);
         alldata.push({ list: data, id })
         total_amount += parseFloat(data.calculated)
         connected_accounts.push({ id: id, amount_spend: data.calculated, descriptiveName: name })
@@ -129,13 +135,13 @@ export class LinkedinAdsService {
   }
 
   // called by daily cron job
-  async ObtainLinkedinAdsDataWithCrone({ email, refresh_token, customers }: any) {
+  async ObtainLinkedinAdsDataWithCrone({ email, refresh_token, customers }: ObtainLinkedinAdsDataDto) {
     let total_amount = 0
     let first_date = getCurrentMonthFirstDate()
     for (let i = 0; i < customers.length; i++) {
       const { id } = customers[i];
       try {
-        const data: any = await this.getMonthlySpend(parseInt(id), refresh_token, first_date);
+        const data: CalculatedReturned = await this.getMonthlySpend(parseInt(id), refresh_token, first_date);
         if (data.calculated)
           total_amount += parseFloat(data.calculated)
       } catch (error) {
@@ -148,7 +154,7 @@ export class LinkedinAdsService {
   }
 
 
-  async hanldeUnlinkCustomer(id: string, email: string) {
+  async handleUnlinkCustomer(id: string, email: string) {
 
     try {
       const user = await this.ClientDataService.findByEmail(email)
@@ -171,7 +177,7 @@ export class LinkedinAdsService {
     }
   }
 
-  async hanldeRelinkCustomer(id: string, email: string) {
+  async handleRelinkCustomer(id: string, email: string) {
 
     try {
       const user = await this.ClientDataService.findByEmail(email)
@@ -196,7 +202,7 @@ export class LinkedinAdsService {
   }
 
   // logout linked from row
-  async hanldeLinkedinLogout(email: string) {
+  async handleLinkedinLogout(email: string) {
     try {
       const user = await this.ClientDataService.findByEmail(email)
       if (!user[0]?.linkedin_client_linked_accounts)

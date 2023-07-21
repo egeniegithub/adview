@@ -17,15 +17,6 @@ export class AdsDataCronJobController {
     return this.adsDataCronJobService.ClientadsUpdateCroneJob();
   }
 
-  @Post('get-refresh-token')
-  GoogleExchangeRefreshToken(@Body() token: any) {
-    return this.adsDataCronJobService.GoogleExchangeRefreshToken(token.text);
-  }
-
-  @Post('covert-bing-refresh-token')
-  CovertBingRefreshToken(@Body() token: any) {
-    return this.adsDataCronJobService.CovertBingRefreshToken(token.text);
-  }
   
   @Get(':id')
   findOne(@Param('id') id: string) {

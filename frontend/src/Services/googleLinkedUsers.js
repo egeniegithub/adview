@@ -1,12 +1,11 @@
 import axios from "axios";
 
-export const getAccosiatedUstomers =async (token)=>{
+export const getAssociatedCustomers =async (token)=>{
 var config = {
   method: 'get',
   url: 'https://googleads.googleapis.com/v13/customers:listAccessibleCustomers',
   headers: { 
-    'developer-token': 'BSed2TGB27BPgmlMSYlCJw', 
-    // 'developer-token': 'BSed2TGB27BPgmlMSYlCJw', client dev_token
+    'developer-token': `${process.env.REACT_APP_GOOGLE_DEV_TOKEN}`, 
     'Authorization': `Bearer ${token}`}
 };
   try {
@@ -32,8 +31,7 @@ const getActDetails  =async(list,token) =>{
           method: 'post',
           url: `https://googleads.googleapis.com/v13/customers/${id}/googleAds:search`,
           headers: { 
-            'developer-token': 'BSed2TGB27BPgmlMSYlCJw', 
-            // 'developer-token': 'BSed2TGB27BPgmlMSYlCJw', client dev_token
+            'developer-token': `${process.env.REACT_APP_GOOGLE_DEV_TOKEN}`, 
             'login-customer-id': id, 
             'Authorization': `Bearer ${token}`
           },

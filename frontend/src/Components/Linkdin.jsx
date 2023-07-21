@@ -11,9 +11,9 @@ import { GetServerCall } from '../Services/apiCall';
 const redirect_uri_ver = 'https://adview.io/linkedin'
 // const redirect_uri_ver = 'http://localhost:3000/linkedin'
 
-export const LinkedinBtn = ({ fetchAdsData, handleOk ,userData,getdata}) => {
+export const LinkedinBtn = ({ fetchAdsData, handleOk, userData, getdata }) => {
   const [linkedUsers, setLinkedUsers] = useState([])
-  const [seacrhedName, setSeacrhedName] = useState([])
+  const [searchedName, setSearchedName] = useState([])
   const [filteredLinkedUsers, setfilteredLinkedUsers] = useState([])
   const [showLinkedUserModal, setshowLinkedUserModal] = useState(false)
   const [userName, setuserName] = useState('linkedUnser')
@@ -22,26 +22,24 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk ,userData,getdata}) => {
   const [selectedRow, setselectedRow] = useState({})
   const [authCodeMultiLogin, setAuthCodeMultiLogin] = useState('')
 
-
-
   const handleConnect = () => {
     if (!selectedRow.customer_ids.length)
       return
     let customer_ids = selectedRow.customer_ids.join(",");
     let customer_names = selectedRow.customer_names.join(",")
     setshowLinkedUserModal(false)
-    fetchAdsData({access_token,refresh_token}, 'linkedin', userName, customer_ids, customer_names, authCodeMultiLogin)
+    fetchAdsData({ access_token, refresh_token }, 'linkedin', userName, customer_ids, customer_names, authCodeMultiLogin)
     // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
-    setSeacrhedName('')
+    setSearchedName('')
   }
   useEffect(() => {
     let temp = [...linkedUsers]
     let filterArr = temp.filter(el => {
-      if (el.name?.toLowerCase().includes(seacrhedName))
+      if (el.name?.toLowerCase().includes(searchedName))
         return { ...el }
     })
     setfilteredLinkedUsers(filterArr)
-  }, [seacrhedName])
+  }, [searchedName])
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -64,7 +62,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk ,userData,getdata}) => {
 
 
   const { linkedInLogin } = useLinkedIn({
-    clientId: '78zrt5co4u4vmi',
+    clientId: `${process.env.REACT_APP_LI_CLIENT_ID}`,
     redirectUri: `${window.location.origin}/linkedin`,
     scope: 'r_liteprofile,rw_ads,r_ads,r_ads_reporting',
     onSuccess: (code) => {
@@ -84,8 +82,8 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk ,userData,getdata}) => {
 
   const handleAuth = (code) => {
     let redirect_uri = redirect_uri_ver
-    let client_id = '78zrt5co4u4vmi'
-    let client_secret = 'YfqgKcH9LZJIbHjC'
+    let client_id = `${process.env.REACT_APP_LI_CLIENT_ID}`
+    let client_secret = `${process.env.REACT_APP_LI_CLIENT_SECRET}`
     const params = {
       code,
       grant_type: 'authorization_code',
@@ -130,7 +128,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk ,userData,getdata}) => {
     }
     fetch(
       `https://api.allorigins.win/get?url=${encodeURIComponent('https://api.linkedin.com/v2/me?oauth2_access_token=' +
-      tokens.refresh_token +
+        tokens.refresh_token +
         '&projection=(id,profilePicture(displayImage~digitalmediaAsset:playableStreams),localizedLastName, firstName,lastName,localizedFirstName)',
       )}`,
       {
@@ -151,8 +149,8 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk ,userData,getdata}) => {
   }
 
 
-  const handleRowLogout =async () => {
-    await GetServerCall('/linkedin-ads/logout-user/'+userData.email)
+  const handleRowLogout = async () => {
+    await GetServerCall('/linkedin-ads/logout-user/' + userData.email)
     // check is indicator exists
     let id = localStorage.getItem('id')
     handleLogoutIndicator(id, "linkedin")
@@ -196,7 +194,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk ,userData,getdata}) => {
         <Table
           scroll={{ x: 700 }}
           bordered
-          className='rowCustomeClassName2'
+          className='rowCustomerClassName2'
           rowSelection={{
             type: 'checkbox',
             ...rowSelection,
@@ -242,7 +240,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk ,userData,getdata}) => {
             },
             {
               title: () => (<div style={{ position: 'relative' }}>
-                <Input onChange={({ target }) => { setSeacrhedName(target.value) }} placeholder="Search by name.." style={{ width: "90%", marginBottom: '.3rem', borderRadius: '30px' }} />
+                <Input onChange={({ target }) => { setSearchedName(target.value) }} placeholder="Search by name.." style={{ width: "90%", marginBottom: '.3rem', borderRadius: '30px' }} />
                 <SearchOutlined
                   style={{
                     color: '#0c0808', position: 'absolute', right: "13%", top: '25%',
@@ -255,7 +253,7 @@ export const LinkedinBtn = ({ fetchAdsData, handleOk ,userData,getdata}) => {
               width: '20%'
             },
           ]}
-          dataSource={seacrhedName != '' ? filteredLinkedUsers : linkedUsers}
+          dataSource={searchedName != '' ? filteredLinkedUsers : linkedUsers}
         />
         <div style={{ display: 'flex', gap: '2%' }}>
           <Button style={{ flexBasis: '20%' }} type='primary' onClick={handleConnect}>Connect</Button>
@@ -286,8 +284,8 @@ export const linkedMultiLogin = () => {
     `https://linkedin.com/m/logout`,
     'linkedin-login',
     'width=1,height=1'
-  ); 
-  
+  );
+
   setTimeout(() => {
     popup.close()
   }, 5000);
