@@ -118,9 +118,9 @@ export class MetaAdsService {
       })
       const updated = await this.ClientDataService.updateByClient(email, { 'facebook': `${total_amount}`, facebook_client_linked_accounts: JSON.stringify(connected_accounts) })
 
-      return ({ success: updated })
+      return ({ status: "success" })
     } catch (error) {
-      return ({ error: "Something went wrong" })
+      return ({ status: "Something went wrong" })
     }
 
   }
@@ -142,10 +142,10 @@ export class MetaAdsService {
           if (!el.unlinked)
             total_amount += parseInt(el.amount_spend)
       })
-      const updated = await this.ClientDataService.updateByClient(email, { 'facebook': `${total_amount}`, facebook_client_linked_accounts: JSON.stringify(connected_accounts) })
-      return ({ success: updated })
+      await this.ClientDataService.updateByClient(email, { 'facebook': `${total_amount}`, facebook_client_linked_accounts: JSON.stringify(connected_accounts) })
+      return ({ status: 'success' })
     } catch (error) {
-      return ({ error: "Something went wrong" })
+      return ({ status: "Something went wrong" })
     }
   }
 
@@ -154,7 +154,7 @@ export class MetaAdsService {
       const user = await this.ClientDataService.findByEmail(email)
       if (!user[0]?.facebook_client_linked_accounts)
         return ({ error: "user not found" })
-      const updated = await this.ClientDataService.updateByClient(email, { is_meta_login: `0` })
+      await this.ClientDataService.updateByClient(email, { is_meta_login: `0` })
       return ({ status: 'success' })
     } catch (error) {
       return ({ error: "Something went wrong" })

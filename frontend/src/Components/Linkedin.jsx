@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { LoginSocialFacebook } from "reactjs-social-login";
 import { Button, Input, Modal, Switch, Table } from "antd";
+import React, { useEffect, useState } from "react";
+import { LinkedInCallback } from "react-linkedin-login-oauth2";
+import { useLinkedIn } from "react-linkedin-login-oauth2";
 import { handleLogoutIndicator } from "../utils/helper";
-import {
-  getLinkedAdsAccounts,
-  getMetaRefreshToken,
-} from "../Services/MetaLinkedUsers";
+import { getLinkedAdsAccountsWithLinkedin } from "../Services/LinkedinLinkedUsers";
 import { SearchOutlined } from "@ant-design/icons";
 import { GetServerCall } from "../Services/apiCall";
 
-export const Facebook = ({
+const redirect_uri_ver = 'https://adview.io/linkedin'
+// const redirect_uri_ver = "http://localhost:3000/linkedin";
+
+export const LinkedinBtn = ({
   fetchAdsData,
   handleOk,
   userData,
@@ -20,32 +21,11 @@ export const Facebook = ({
   const [searchedName, setSearchedName] = useState("");
   const [filteredLinkedUsers, setFilteredLinkedUsers] = useState([]);
   const [showLinkedUserModal, setShowLinkedUserModal] = useState(false);
-  const [userName, setUserName] = useState("");
+  const [userName, setUserName] = useState("linkedUser");
   const [access_token, setAccess_token] = useState("");
   const [refresh_token, setRefresh_token_token] = useState("");
   const [selectedRow, setSelectedRow] = useState({});
-
-  const FbResponseHandler = async (response) => {
-    // console.log("facebook", response)
-    if (!response.accessToken) return;
-    let list = await getLinkedAdsAccounts(response.accessToken);
-    let refreshToken = await getMetaRefreshToken(response.accessToken);
-    if (!refreshToken) return;
-    if (list?.length) {
-      // loop through list and add key
-      list.forEach((ele, i) => {
-        ele.key = i + 1;
-        ele.auto_track = false;
-        ele.account_status = ele.account_status === 1 ? "Active" : "Disabled";
-      });
-      setLinkedUsers(list);
-      setShowLinkedUserModal(true);
-      setUserName(response.name);
-      setAccess_token(response.accessToken);
-      setRefresh_token_token(refreshToken);
-    }
-    // fetchAdsData(response.accessToken, 'facebook', response.name)
-  };
+  const [authCodeMultiLogin, setAuthCodeMultiLogin] = useState("");
 
   const handleConnect = () => {
     if (!selectedRow.customer_ids.length) return;
@@ -54,15 +34,15 @@ export const Facebook = ({
     setShowLinkedUserModal(false);
     fetchAdsData(
       { access_token, refresh_token },
-      "facebook",
+      "linkedin",
       userName,
       customer_ids,
-      customer_names
+      customer_names,
+      authCodeMultiLogin
     );
     // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
     setSearchedName("");
   };
-
   useEffect(() => {
     let temp = [...linkedUsers];
     let filterArr = temp.filter((el) => {
@@ -80,7 +60,6 @@ export const Facebook = ({
         namesArr.push(el.name);
       });
       if (!tempArr.length) return setSelectedRow({});
-      // pick manager id form any of selected row
       setSelectedRow({
         customer_ids: [...tempArr],
         customer_names: [...namesArr],
@@ -91,22 +70,114 @@ export const Facebook = ({
     }),
   };
 
-  let id = localStorage.getItem("id");
+  const { linkedInLogin } = useLinkedIn({
+    clientId: `${process.env.REACT_APP_LI_CLIENT_ID}`,
+    redirectUri: `${window.location.origin}/linkedin`,
+    scope: "r_liteprofile,rw_ads,r_ads,r_ads_reporting",
+    onSuccess: (code) => {
+      throttledFunction(code);
+    },
+    onError: (error) => {
+      // console.log("error",error);
+    },
+  });
+
+  function doSomething(code) {
+    handleAuth(code);
+  }
+  // throttled used to prevent multi api calls
+  const throttledFunction = throttle(doSomething, 1000);
+
+  const handleAuth = (code) => {
+    let redirect_uri = redirect_uri_ver;
+    let client_id = `${process.env.REACT_APP_LI_CLIENT_ID}`;
+    let client_secret = `${process.env.REACT_APP_LI_CLIENT_SECRET}`;
+    const params = {
+      code,
+      grant_type: "authorization_code",
+      redirect_uri,
+      client_id,
+      client_secret,
+    };
+    const headers = new Headers({
+      "Content-Type": "application/x-www-form-urlencoded",
+      "x-cors-grida-api-key": "875c0462-6309-4ddf-9889-5227b1acc82c",
+    });
+
+    fetch(
+      `https://cors.bridged.cc/https://www.linkedin.com/oauth/v2/accessToken`,
+      {
+        method: "POST",
+        headers,
+        body: new URLSearchParams(params),
+      }
+    )
+      .then((response) => response.json())
+      .then(function (response) {
+        getUserInfo(response, code);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
+  // getUserInfo from linkedin via access token
+  const getUserInfo = async (tokens, code) => {
+    linkedMultiLogin();
+    let LinkedUsers = await getLinkedAdsAccountsWithLinkedin(
+      tokens.access_token
+    );
+    if (LinkedUsers.list.length) {
+      LinkedUsers.list.forEach((ele, i) => {
+        ele.key = i + 1;
+        ele.auto_track = false;
+        ele.account_status = ele.status;
+      });
+      setLinkedUsers(LinkedUsers.list);
+      setShowLinkedUserModal(true);
+      setAccess_token(tokens.access_token);
+      setRefresh_token_token(tokens.refresh_token);
+      setAuthCodeMultiLogin(code);
+    }
+    fetch(
+      `https://api.allorigins.win/get?url=${encodeURIComponent(
+        "https://api.linkedin.com/v2/me?oauth2_access_token=" +
+          tokens.refresh_token +
+          "&projection=(id,profilePicture(displayImage~digitalmediaAsset:playableStreams),localizedLastName, firstName,lastName,localizedFirstName)"
+      )}`,
+      {
+        method: "GET",
+      }
+    )
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.contents) {
+          const response = JSON.parse(res.contents);
+          let name =
+            response.localizedFirstName + " " + response.localizedLastName;
+          setUserName(name);
+        }
+      })
+      .catch((err) => {});
+  };
 
   const handleRowLogout = async () => {
     try {
-      let res = await GetServerCall("/meta-ads/logout-user/" + userData.email);
+      let res = await GetServerCall(
+        "/linkedin-ads/logout-user/" + userData.email
+      );
       if (res.data.status !== "success") return handleError();
+      // check is indicator exists
+      let id = localStorage.getItem("id");
+      handleLogoutIndicator(id, "linkedin");
       getData();
-      handleLogoutIndicator(id, "facebook");
       handleOk();
-      notify.success({
+      return notify.success({
         description: "Logout Success.",
       });
     } catch (error) {
       handleError();
     }
-    // check is indicator exists
   };
 
   const handleError = () => {
@@ -115,7 +186,7 @@ export const Facebook = ({
     });
   };
 
-  if (userData?.is_meta_login === "1")
+  if (userData?.is_linkedin_login === "1")
     return (
       <div style={{ display: "flex", flexFlow: "column" }}>
         <Button
@@ -123,35 +194,26 @@ export const Facebook = ({
           className="ModalBtn"
           style={{ color: "#fff", backgroundColor: "#018F0F" }}
         >
-          Meta Ads
+          LI Ads
         </Button>
-        <Button onClick={handleRowLogout}>Logout Meta</Button>
+        <Button onClick={handleRowLogout}>Logout Linkedin</Button>
       </div>
     );
 
+  const popupWindowURL = new URL(window.location.href);
+  const code = popupWindowURL.searchParams.get("code");
+  if (code) return <LinkedInCallback />;
   return (
     <>
-      <LoginSocialFacebook
-        appId={process.env.REACT_APP_FB_CLIENT_ID}
-        fieldsProfile={"id,name"}
-        scope="ads_read,read_insights,ads_management"
-        redirect_uri={`https://adview.io/`}
-        onResolve={({ provider, data }) => {
-          FbResponseHandler(data);
-        }}
-        onReject={(err) => {
-          FbResponseHandler(err);
-        }}
-      >
-        <Button className="ModalBtn" type="primary">
-          Meta Ads
+      <div>
+        <Button onClick={linkedInLogin} className="ModalBtn" type="primary">
+          LI Ads
         </Button>
-      </LoginSocialFacebook>
-
+      </div>
       <Modal
         title={
           <h5 style={{ padding: "2.5% 0% 0px 2.5%" }}>
-            Select Meta ad Accounts to link
+            Select Linkedin ad Accounts to link
           </h5>
         }
         width={"67%"}
@@ -165,8 +227,8 @@ export const Facebook = ({
         footer={null}
       >
         <Table
-          bordered
           scroll={{ x: 700 }}
+          bordered
           className="rowCustomerClassName2"
           rowSelection={{
             type: "checkbox",
@@ -263,4 +325,27 @@ export const Facebook = ({
       </Modal>
     </>
   );
+};
+
+function throttle(func, delay) {
+  let lastExecTime = 0;
+  return function () {
+    const now = new Date().getTime();
+    if (now - lastExecTime >= delay) {
+      lastExecTime = now;
+      func.apply(this, arguments);
+    }
+  };
+}
+
+export const linkedMultiLogin = () => {
+  const popup = window.open(
+    `https://linkedin.com/m/logout`,
+    "linkedin-login",
+    "width=1,height=1"
+  );
+
+  setTimeout(() => {
+    popup.close();
+  }, 5000);
 };

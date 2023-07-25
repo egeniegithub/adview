@@ -2,9 +2,8 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import OversightTable from "./screens/OversightTable"
 import U_OTableScreen from './screens/U_OTableScreen';
-import { LinkedinBtn } from './Components/Linkdin';
+import { LinkedinBtn } from './Components/Linkedin';
 import { BingBtn } from './Components/BingBtn';
-import Success from './Components/success';
 import Login from './screens/Login';
 import ProtectedRoute from './ProtectedRoute';
 import { GoogleOAuthProvider } from '@react-oauth/google';

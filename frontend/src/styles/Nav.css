@@ -1,27 +1,27 @@
-.Nav{
-    border-bottom: 2px solid #C3C3C3;
-    height: 7vh;
-    background-color: #EBEBEB;
-    color: grey !important;
-    font-weight: 600;
-    position: sticky;
-    top: 0vh;
-    z-index: 2;
+.Nav {
+  border-bottom: 2px solid #c3c3c3;
+  height: 7vh;
+  background-color: #ebebeb;
+  color: grey !important;
+  font-weight: 600;
+  position: sticky;
+  top: 0vh;
+  z-index: 2;
 }
-.NavText{
-    margin-left: 10px;
+.NavText {
+  margin-left: 10px;
 }
-.NavList{
-    display: flex;
-    justify-content: space-evenly;
-    gap: 1vh;
+.NavList {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 1vh;
 }
-.nav_items{
-    color: grey !important;
+.nav_items {
+  color: grey !important;
 }
-.nav_items >p{
-    white-space: nowrap;
+.nav_items > p {
+  white-space: nowrap;
 }
 .active {
-    color: #000 !important;
-  }
+  color: #026bff !important;
+}
