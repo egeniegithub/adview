@@ -1,34 +1,29 @@
 import React, { Fragment, useEffect } from "react";
-import AdviewTable from "../Components/AdviewTable";
-import Layout from "../Layout/Layout";
-import { Button, Checkbox, Form, Input,notification } from "antd";
+import { Button, Form, Input, notification } from "antd";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
   const navigate = useNavigate();
   const [api, contextHolder] = notification.useNotification();
-  useEffect(()=>{
-    let token = JSON.parse(localStorage.getItem('token')) 
-	    if(token)
-      navigate('/')
-  },[])
+  useEffect(() => {
+    let token = JSON.parse(localStorage.getItem("token"));
+    if (token) navigate("/");
+  }, []);
 
-  const onFinish = ({email,password}) => {
-		let user = {email, password }
-      if(user?.email=='admin' && user?.password == 'admin')
-      {
-        let token = Math.floor(1000 + Math.random() * 9000000);
-        localStorage.setItem('token',token)
-			  navigate('/')
-      }
-      else{
-        openNotification()
-      }
+  const onFinish = ({ email, password }) => {
+    let user = { email, password };
+    if (user?.email === "admin" && user?.password === "admin") {
+      let token = Math.floor(1000 + Math.random() * 9000000);
+      localStorage.setItem("token", token);
+      navigate("/");
+    } else {
+      openNotification();
+    }
   };
 
   const openNotification = () => {
     api.error({
-      description: 'Invalid Credentials'
+      description: "Invalid Credentials",
     });
   };
 
@@ -39,7 +34,15 @@ function Login() {
   return (
     <Fragment>
       {/* <Layout /> */}
-      <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: "#EBEBEB" }}>
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#EBEBEB",
+        }}
+      >
         <Form
           name="basic"
           labelCol={{ span: 8 }}
@@ -50,7 +53,7 @@ function Login() {
           onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
-          <h1 style={{ marginLeft: "15vw", color:"grey" }}>Adview</h1>
+          <h1 style={{ marginLeft: "15vw", color: "grey" }}>Adview</h1>
           <Form.Item
             label="Username"
             name="email"

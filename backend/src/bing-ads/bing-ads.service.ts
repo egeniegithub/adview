@@ -64,11 +64,10 @@ export class BingAdsService {
           if (!el.unlinked)
             total_amount += parseInt(el.amount_spend)
       })
-      const updated = await this.ClientDataService.updateByClient(email, { 'bing': `${total_amount}`, bing_client_linked_accounts: JSON.stringify(connected_accounts) })
-
-      return ({ success: updated })
+      await this.ClientDataService.updateByClient(email, { 'bing': `${total_amount}`, bing_client_linked_accounts: JSON.stringify(connected_accounts) })
+      return ({ status: 'success' })
     } catch (error) {
-      return ({ error: "Something went wrong" })
+      return ({ status: "Something went wrong" })
     }
   }
 
@@ -89,10 +88,10 @@ export class BingAdsService {
           if (!el.unlinked)
             total_amount += parseInt(el.amount_spend)
       })
-      const updated = await this.ClientDataService.updateByClient(email, { 'bing': `${total_amount}`, bing_client_linked_accounts: JSON.stringify(connected_accounts) })
-      return ({ success: updated })
+      await this.ClientDataService.updateByClient(email, { 'bing': `${total_amount}`, bing_client_linked_accounts: JSON.stringify(connected_accounts) })
+      return ({ status: 'success' })
     } catch (error) {
-      return ({ error: "Something went wrong" })
+      return ({ status: "Something went wrong" })
     }
   }
 

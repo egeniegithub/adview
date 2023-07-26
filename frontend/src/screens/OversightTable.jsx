@@ -1,14 +1,14 @@
-import React, { Fragment } from 'react'
-import AdviewTable from '../Components/AdviewTable'
-import Layout from '../Layout/Layout'
+import React, { Fragment } from "react";
+import AdViewTable from "../Components/AdviewTable";
+import Layout from "../Layout/Layout";
 
 function OversightTable() {
-    return (
-        <Fragment>
-            <Layout />
-            <AdviewTable/>
-        </Fragment>
-    )
+  return (
+    <Fragment>
+      <Layout />
+      <AdViewTable />
+    </Fragment>
+  );
 }
 
-export default OversightTable
+export default OversightTable;
