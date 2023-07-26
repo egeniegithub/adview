@@ -2,7 +2,7 @@ import React, { Fragment } from 'react'
 import UnderOverTable from '../Components/UnderOverTable'
 import Layout from '../Layout/Layout'
 
-const U_OTableScreen = () => {
+const UOTableScreen = () => {
     return (
         <Fragment>
             <Layout />
@@ -11,4 +11,4 @@ const U_OTableScreen = () => {
     )
 }
 
-export default U_OTableScreen
+export default UOTableScreen

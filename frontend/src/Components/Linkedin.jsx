@@ -47,6 +47,7 @@ export const LinkedinBtn = ({
     let temp = [...linkedUsers];
     let filterArr = temp.filter((el) => {
       if (el.name?.toLowerCase().includes(searchedName)) return { ...el };
+      else return false
     });
     setFilteredLinkedUsers(filterArr);
   }, [searchedName]);

@@ -76,6 +76,7 @@ export const GoogleBtn = ({
     let filterArr = temp.filter((el) => {
       if (el.descriptiveName?.toLowerCase().includes(searchedName))
         return { ...el };
+      else return false;
     });
     setFilteredLinkedUsers(filterArr);
   }, [searchedName]);
