@@ -207,7 +207,8 @@ const AccountsTable = () => {
       key: "Link",
       width: "30%",
       render: (text, record) => (
-        <a
+        <p
+          style={{ color: "#1677ff", cursor: "pointer" }}
           onClick={() => {
             localStorage.setItem("id", record.id);
             setEmail(record.email);
@@ -215,7 +216,7 @@ const AccountsTable = () => {
           }}
         >
           {text}
-        </a>
+        </p>
       ),
     },
     {
@@ -300,28 +301,28 @@ const AccountsTable = () => {
               handleOk={handleOk}
               getData={getData}
               userData={tableData.find((e) => e.email === email)}
-              notify = {notify}
+              notify={notify}
             />
             <BingBtn
               fetchAdsData={fetchAdsData}
               handleOk={handleOk}
               getData={getData}
               userData={tableData.find((e) => e.email === email)}
-              notify = {notify}
+              notify={notify}
             />
             <LinkedinBtn
               fetchAdsData={fetchAdsData}
               handleOk={handleOk}
               getData={getData}
               userData={tableData.find((e) => e.email === email)}
-              notify = {notify}
+              notify={notify}
             />
             <Facebook
               fetchAdsData={fetchAdsData}
               handleOk={handleOk}
               getData={getData}
               userData={tableData.find((e) => e.email === email)}
-              notify = {notify}
+              notify={notify}
             />
           </div>
           <LinkedAccountsToClient
