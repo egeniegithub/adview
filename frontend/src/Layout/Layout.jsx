@@ -1,5 +1,5 @@
 import React from "react";
-import Nav from "../Components/Nav";
+import Nav from "../Components/Common/Nav";
 
 const Layout = () => {
   return (

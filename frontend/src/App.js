@@ -2,8 +2,8 @@ import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import OversightTable from "./screens/OversightTable";
 import UOTableScreen from "./screens/UOTableScreen";
-import { LinkedinBtn } from "./Components/Linkedin";
-import { BingBtn } from "./Components/BingBtn";
+import { LinkedinBtn } from "./Components/SocialButtons/Linkedin";
+import { BingBtn } from "./Components/SocialButtons/BingBtn";
 import Login from "./screens/Login";
 import ProtectedRoute from "./ProtectedRoute";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -16,7 +16,7 @@ function App() {
         <Routes>
           <Route exact path="/login" element={<Login />} />
           <Route path="/linkedin" element={<LinkedinBtn />} />
-          <Route path="/bing" element={<BingBtn />} />
+          <Route path="/bing" element={<BingBtn/>} />
           <Route
             path="/"
             element={

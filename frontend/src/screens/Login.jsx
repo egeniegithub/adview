@@ -1,12 +1,13 @@
 import React, { Fragment, useEffect } from "react";
 import { Button, Form, Input, notification } from "antd";
 import { useNavigate } from "react-router-dom";
+import { getLocalStorage, setLocalStorage } from "../utils/helper";
 
 function Login() {
   const navigate = useNavigate();
   const [api, contextHolder] = notification.useNotification();
   useEffect(() => {
-    let token = JSON.parse(localStorage.getItem("token"));
+    let token = getLocalStorage("token");
     if (token) navigate("/");
   }, []);
 
@@ -14,7 +15,7 @@ function Login() {
     let user = { email, password };
     if (user?.email === "admin" && user?.password === "admin") {
       let token = Math.floor(1000 + Math.random() * 9000000);
-      localStorage.setItem("token", token);
+      setLocalStorage("token", token)
       navigate("/");
     } else {
       openNotification();
