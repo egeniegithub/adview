@@ -1,4 +1,5 @@
 import axios from "axios";
+import { PostServerCall } from "./apiCall";
 
 export const getAssociatedCustomers = async (token) => {
   var config = {
@@ -18,6 +19,15 @@ export const getAssociatedCustomers = async (token) => {
     // console.log(error);
   }
 };
+
+export const generateToken =async (code)=>{
+  let response = await PostServerCall("/google-ads-apis/generate-tokens", {
+    code,
+  });
+  if(response.data.tokens)
+  return response.data.tokens
+  else return null
+}
 
 const getActDetails = async (list, token) => {
   let details = [];

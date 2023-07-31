@@ -36,3 +36,20 @@ export const getStatus = (remaining) => {
     return "Good";
   }
 };
+
+export const setLocalStorage = (key, data) => {
+  if (typeof data === "object") {
+    localStorage.setItem(key, JSON.stringify(data));
+  } else {
+    localStorage.setItem(key, data);
+  }
+};
+
+export const getLocalStorage = (key) => {
+  let local = JSON.parse(localStorage.getItem(key)) 
+  return local
+};
+
+export const removeLocalStorage = (key) => {
+  localStorage.removeItem(key)
+}

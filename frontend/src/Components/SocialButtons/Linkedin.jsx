@@ -2,13 +2,9 @@ import { Button, Input, Modal, Switch, Table } from "antd";
 import React, { useEffect, useState } from "react";
 import { LinkedInCallback } from "react-linkedin-login-oauth2";
 import { useLinkedIn } from "react-linkedin-login-oauth2";
-import { handleLogoutIndicator } from "../utils/helper";
-import { getLinkedAdsAccountsWithLinkedin } from "../Services/LinkedinLinkedUsers";
+import { handleAuth } from "../../Services/LinkedinLinkedUsers";
 import { SearchOutlined } from "@ant-design/icons";
-import { GetServerCall } from "../Services/apiCall";
-
-const redirect_uri_ver = 'https://adview.io/linkedin'
-// const redirect_uri_ver = "http://localhost:3000/linkedin";
+import { handleLinkedinRowLogout } from "../../Services/socialMediaButtons";
 
 export const LinkedinBtn = ({
   fetchAdsData,
@@ -40,7 +36,6 @@ export const LinkedinBtn = ({
       customer_names,
       authCodeMultiLogin
     );
-    // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
     setSearchedName("");
   };
   useEffect(() => {
@@ -84,101 +79,21 @@ export const LinkedinBtn = ({
   });
 
   function doSomething(code) {
-    handleAuth(code);
+    handleAuth(code,setStates,setUserName);
   }
   // throttled used to prevent multi api calls
   const throttledFunction = throttle(doSomething, 1000);
 
-  const handleAuth = (code) => {
-    let redirect_uri = redirect_uri_ver;
-    let client_id = `${process.env.REACT_APP_LI_CLIENT_ID}`;
-    let client_secret = `${process.env.REACT_APP_LI_CLIENT_SECRET}`;
-    const params = {
-      code,
-      grant_type: "authorization_code",
-      redirect_uri,
-      client_id,
-      client_secret,
-    };
-    const headers = new Headers({
-      "Content-Type": "application/x-www-form-urlencoded",
-      "x-cors-grida-api-key": "875c0462-6309-4ddf-9889-5227b1acc82c",
-    });
-
-    fetch(
-      `https://cors.bridged.cc/https://www.linkedin.com/oauth/v2/accessToken`,
-      {
-        method: "POST",
-        headers,
-        body: new URLSearchParams(params),
-      }
-    )
-      .then((response) => response.json())
-      .then(function (response) {
-        getUserInfo(response, code);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  };
-
-  // getUserInfo from linkedin via access token
-  const getUserInfo = async (tokens, code) => {
-    linkedMultiLogin();
-    let LinkedUsers = await getLinkedAdsAccountsWithLinkedin(
-      tokens.access_token
-    );
-    if (LinkedUsers.list.length) {
-      LinkedUsers.list.forEach((ele, i) => {
-        ele.key = i + 1;
-        ele.auto_track = false;
-        ele.account_status = ele.status;
-      });
-      setLinkedUsers(LinkedUsers.list);
-      setShowLinkedUserModal(true);
-      setAccess_token(tokens.access_token);
-      setRefresh_token_token(tokens.refresh_token);
-      setAuthCodeMultiLogin(code);
-    }
-    fetch(
-      `https://api.allorigins.win/get?url=${encodeURIComponent(
-        "https://api.linkedin.com/v2/me?oauth2_access_token=" +
-          tokens.refresh_token +
-          "&projection=(id,profilePicture(displayImage~digitalmediaAsset:playableStreams),localizedLastName, firstName,lastName,localizedFirstName)"
-      )}`,
-      {
-        method: "GET",
-      }
-    )
-      .then((response) => response.json())
-      .then((res) => {
-        if (res.contents) {
-          const response = JSON.parse(res.contents);
-          let name =
-            response.localizedFirstName + " " + response.localizedLastName;
-          setUserName(name);
-        }
-      })
-      .catch((err) => {});
-  };
+  const setStates = (LinkedUsers,tokens,code)=>{
+    setLinkedUsers(LinkedUsers.list);
+    setShowLinkedUserModal(true);
+    setAccess_token(tokens.access_token);
+    setRefresh_token_token(tokens.refresh_token);
+    setAuthCodeMultiLogin(code);
+  }
 
   const handleRowLogout = async () => {
-    try {
-      let res = await GetServerCall(
-        "/linkedin-ads/logout-user/" + userData.email
-      );
-      if (res.data.status !== "success") return handleError();
-      // check is indicator exists
-      let id = localStorage.getItem("id");
-      handleLogoutIndicator(id, "linkedin");
-      getData();
-      handleOk();
-      return notify.success({
-        description: "Logout Success.",
-      });
-    } catch (error) {
-      handleError();
-    }
+    handleLinkedinRowLogout(getData,handleError,userData,handleOk,notify)
   };
 
   const handleError = () => {
@@ -338,15 +253,3 @@ function throttle(func, delay) {
     }
   };
 }
-
-export const linkedMultiLogin = () => {
-  const popup = window.open(
-    `https://linkedin.com/m/logout`,
-    "linkedin-login",
-    "width=1,height=1"
-  );
-
-  setTimeout(() => {
-    popup.close();
-  }, 5000);
-};

@@ -1,7 +1,8 @@
 import React from "react";
 import { Col, Row } from "antd";
 import { NavLink, useNavigate } from "react-router-dom";
-import "../styles/Nav.css";
+import "../../styles/Nav.css";
+import { removeLocalStorage } from "../../utils/helper";
 
 const Nav = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const Nav = () => {
             <u>
               <button
                 onClick={() => {
-                  localStorage.removeItem("token");
+                  removeLocalStorage("token");
                   navigate("/login");
                 }}
                 style={{ whiteSpace: "nowrap" }}

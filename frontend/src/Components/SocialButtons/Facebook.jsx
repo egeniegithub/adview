@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { LoginSocialFacebook } from "reactjs-social-login";
 import { Button, Input, Modal, Switch, Table } from "antd";
-import { handleLogoutIndicator } from "../utils/helper";
 import {
   getLinkedAdsAccounts,
   getMetaRefreshToken,
-} from "../Services/MetaLinkedUsers";
+} from "../../Services/MetaLinkedUsers";
 import { SearchOutlined } from "@ant-design/icons";
-import { GetServerCall } from "../Services/apiCall";
+import { handleFacebookRowLogout } from "../../Services/socialMediaButtons";
 
 export const Facebook = ({
   fetchAdsData,
@@ -59,7 +58,6 @@ export const Facebook = ({
       customer_ids,
       customer_names
     );
-    // fetchAdsData(access_token, 'google', userName, customer_ids, selectedRow.manager_id)
     setSearchedName("");
   };
 
@@ -92,22 +90,8 @@ export const Facebook = ({
     }),
   };
 
-  let id = localStorage.getItem("id");
-
   const handleRowLogout = async () => {
-    try {
-      let res = await GetServerCall("/meta-ads/logout-user/" + userData.email);
-      if (res.data.status !== "success") return handleError();
-      getData();
-      handleLogoutIndicator(id, "facebook");
-      handleOk();
-      notify.success({
-        description: "Logout Success.",
-      });
-    } catch (error) {
-      handleError();
-    }
-    // check is indicator exists
+    handleFacebookRowLogout(getData,handleError,userData,handleOk,notify)
   };
 
   const handleError = () => {

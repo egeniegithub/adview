@@ -1,16 +1,16 @@
-import { Button, Input, Modal, Switch, Table } from "antd";
 import React, { useEffect, useState } from "react";
-import { LoginSocialMicrosoft } from "reactjs-social-login";
-import { handleLogoutIndicator } from "../utils/helper";
-import { getAccountDetails } from "../Services/BingLinkedUsers";
+import { Button, Modal, Switch, Table } from "antd";
+import { generateToken, getAssociatedCustomers } from "../../Services/googleLinkedUsers";
+import { Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { GetServerCall } from "../Services/apiCall";
+import { useGoogleLogin } from "@react-oauth/google";
+import { handleGoogleRowLogout } from "../../Services/socialMediaButtons";
 
-export const BingBtn = ({
+export const GoogleBtn = ({
   fetchAdsData,
   handleOk,
-  getData,
   userData,
+  getData,
   notify,
 }) => {
   const [linkedUsers, setLinkedUsers] = useState([]);
@@ -19,51 +19,75 @@ export const BingBtn = ({
   const [showLinkedUserModal, setShowLinkedUserModal] = useState(false);
   const [userName, setUserName] = useState("");
   const [access_token, setAccess_token] = useState("");
-  const [selectedRow, setSelectedRow] = useState({});
   const [refresh_token, setRefresh_token_token] = useState("");
-  let id = localStorage.getItem("id");
+  const [selectedRow, setSelectedRow] = useState({});
+
+  const login = useGoogleLogin({
+    onSuccess: (codeResponse) => GResponseHandler(codeResponse.code),
+    flow: "auth-code",
+    scope: ["https://www.googleapis.com/auth/adwords"],
+  });
+
+  const GResponseHandler = async (code) => {
+    let tokens = await generateToken(code)
+    if (!tokens) return;
+    let { access_token, refresh_token } = tokens;
+    let list = await getAssociatedCustomers(access_token);
+    if (list?.length) {
+      list.forEach((ele, i) => {
+        ele.key = i + 1;
+        ele.auto_track = false;
+      });
+      setLinkedUsers(list);
+      setShowLinkedUserModal(true);
+      setUserName("name");
+      setAccess_token(access_token);
+      setRefresh_token_token(refresh_token);
+    }
+  };
+
+  const handleRowLogout = async () => {
+    handleGoogleRowLogout(getData,handleError,userData,handleOk,notify)
+  };
 
   useEffect(() => {
     let temp = [...linkedUsers];
     let filterArr = temp.filter((el) => {
-      if (el.name?.toLowerCase().includes(searchedName)) return { ...el };
+      if (el.descriptiveName?.toLowerCase().includes(searchedName))
+        return { ...el };
       else return false;
     });
     setFilteredLinkedUsers(filterArr);
   }, [searchedName]);
 
-  const handleConnect = () => {
-    if (!selectedRow.customer_ids.length) return;
-    let customer_ids = selectedRow.customer_ids.join(",");
-    let customer_names = selectedRow.customer_names.join(",");
-    let manager_id = selectedRow.manager_id;
-    setShowLinkedUserModal(false);
-    // fetchAdsData(access_token, 'bing', userName, customer_ids)
-    fetchAdsData(
-      { access_token, refresh_token },
-      "bing",
-      userName,
-      customer_ids,
-      customer_names,
-      manager_id
-    );
-    setSearchedName("");
+  const rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+      let tempArr = [];
+      selectedRows.forEach((el) => {
+        tempArr.push(el.id);
+      });
+      if (!tempArr.length) return setSelectedRow({});
+      // pick manager id form any of selected row
+      let { manager_id } = selectedRows[0];
+      setSelectedRow({ customer_ids: [...tempArr], manager_id });
+    },
+    getCheckboxProps: (record) => ({
+      name: record.descriptiveName,
+    }),
   };
 
-  const handleRowLogout = async () => {
-    try {
-      let res = await GetServerCall("/bing-ads/logout-user/" + userData.email);
-      if (res.data.status !== "success") return handleError();
-      getData();
-      // check is indicator exists
-      handleLogoutIndicator(id, "bing");
-      handleOk();
-      notify.success({
-        description: "Logout Success.",
-      });
-    } catch (error) {
-      handleError();
-    }
+  const handleConnect = () => {
+    if (!selectedRow.manager_id || !selectedRow.customer_ids.length) return;
+    let customer_ids = selectedRow.customer_ids.join(",");
+    setShowLinkedUserModal(false);
+    fetchAdsData(
+      { access_token, refresh_token },
+      "google",
+      userName,
+      customer_ids,
+      selectedRow.manager_id
+    );
+    setSearchedName("");
   };
 
   const handleError = () => {
@@ -72,85 +96,36 @@ export const BingBtn = ({
     });
   };
 
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      let tempArr = [];
-      let namesArr = [];
-      selectedRows.forEach((el) => {
-        tempArr.push(el.id);
-        namesArr.push(el.name);
-      });
-      if (!tempArr.length) return setSelectedRow({});
-      // pick manager id form any of selected row
-      let { manager_id = "" } = selectedRows[0];
-      setSelectedRow({
-        customer_ids: [...tempArr],
-        customer_names: [...namesArr],
-        manager_id,
-      });
-    },
-    getCheckboxProps: (record) => ({
-      name: record.name,
-    }),
-  };
-
-  if (userData?.is_bing_login === "1")
+  if (userData?.is_google_login === "1")
     return (
-      <div style={{ display: "flex", flexFlow: "column" }}>
+      <div style={{ display: "flex", flexFlow: "column", gap: "1%" }}>
         <Button
           disabled
           className="ModalBtn"
           style={{ color: "#fff", backgroundColor: "#018F0F" }}
         >
-          Bing Ads
+          Google Ads
         </Button>
-        <Button onClick={handleRowLogout}>Logout Bing</Button>
+        <Button onClick={handleRowLogout}>Logout Google</Button>
       </div>
     );
 
   return (
     <>
-      <LoginSocialMicrosoft
-        client_id={process.env.REACT_APP_BING_CLIENT_ID}
-        // redirect_uri={`http://localhost:3000/bing`}
-        redirect_uri={`https://adview.io/bing`}
-        scope={"https://ads.microsoft.com/msads.manage"}
-        // https://ads.microsoft.com/msads.manage}
-        onResolve={async ({ provider, data }) => {
-          if (data.access_token) {
-            let { name, connected_accounts, manager_id } =
-              await getAccountDetails(data.access_token);
-
-            connected_accounts.forEach((ele, i) => {
-              ele.key = i + 1;
-              ele.auto_track = false;
-              ele.manager_id = manager_id;
-            });
-            setLinkedUsers(connected_accounts);
-            if (connected_accounts.length) setShowLinkedUserModal(true);
-            setAccess_token(data.access_token);
-            setRefresh_token_token(data.refresh_token);
-            setUserName(name);
-          }
-        }}
-        onReject={(err) => {
-          handleOk();
-        }}
-      >
-        <Button className="ModalBtn" type="primary">
-          Bing Ads
+      <div>
+        <Button className="ModalBtn" type="primary" onClick={() => login()}>
+          google Ads
         </Button>
-      </LoginSocialMicrosoft>
-
+      </div>
       <Modal
         title={
           <h5 style={{ padding: "2.5% 0% 0px 2.5%" }}>
-            Select Meta ad Accounts to link
+            Select Google ad Accounts to link
           </h5>
         }
         width={"67%"}
-        open={showLinkedUserModal}
         className="responsive_warper"
+        open={showLinkedUserModal}
         onOk={() => {
           setShowLinkedUserModal(false);
         }}
@@ -159,8 +134,8 @@ export const BingBtn = ({
         footer={null}
       >
         <Table
-          bordered
           scroll={{ x: 700 }}
+          bordered
           className="rowCustomerClassName2"
           rowSelection={{
             type: "checkbox",
@@ -169,8 +144,8 @@ export const BingBtn = ({
           columns={[
             {
               title: "AD ACCOUNT",
-              dataIndex: "name",
-              key: "name",
+              dataIndex: "descriptiveName",
+              key: "descriptiveName",
             },
             {
               title: "AD ACCOUNT ID",
