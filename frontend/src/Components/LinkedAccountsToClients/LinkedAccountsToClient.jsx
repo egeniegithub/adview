@@ -1,8 +1,8 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { Button, Collapse, Spin, Table, notification } from "antd";
 import React, { useState } from "react";
-import { GetServerCall } from "../Services/apiCall";
-import { BingIcon, GoogleIcon, LinkedinIcon, MetaIcon } from "../icons/Icons";
+import { BingIcon, GoogleIcon, LinkedinIcon, MetaIcon } from "../../icons/Icons";
+import { HandleServerCall } from "../../Services/LinkedAccountsToClients";
 const { Panel } = Collapse;
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -42,7 +42,7 @@ export const LinkedAccountsToClient = ({
     let uri = isRelink
       ? "/google-ads-apis/relink-customer/"
       : "/google-ads-apis/unlink-customer/";
-    handleServerCall(item.id, uri, isRelink);
+    handleCall(item.id, uri, isRelink);
   };
 
   const handleLinkMeta = async (item, isRelink) => {
@@ -50,7 +50,7 @@ export const LinkedAccountsToClient = ({
     let uri = isRelink
       ? "/meta-ads/relink-customer/"
       : "/meta-ads/unlink-customer/";
-    handleServerCall(item.id, uri, isRelink);
+    handleCall(item.id, uri, isRelink);
   };
 
   const handleLinkLinkedin = async (item, isRelink) => {
@@ -58,30 +58,25 @@ export const LinkedAccountsToClient = ({
     let uri = isRelink
       ? "/linkedin-ads/relink-customer/"
       : "/linkedin-ads/unlink-customer/";
-    handleServerCall(item.id, uri, isRelink);
+    handleCall(item.id, uri, isRelink);
   };
   const handleLinkBing = async (item, isRelink) => {
     setIsLoading(true);
     let uri = isRelink
       ? "/bing-ads/relink-customer/"
       : "/bing-ads/unlink-customer/";
-    handleServerCall(item.id, uri, isRelink);
+    handleCall(item.id, uri, isRelink);
   };
 
-  const handleServerCall = async (id, uri, isRelink) => {
-    try {
-      let res = await GetServerCall(uri + id + "/" + email);
-      if (res.data.status !== "success") return handleError(isRelink);
-      refreshData();
-      setIsLoading(false)
-    } catch (error) {
-      handleError(isRelink);
-    }
+  const handleCall = async (id, uri, isRelink) => {
+    await HandleServerCall(id, uri, email, isRelink, handleError);
+    refreshData();
+    setIsLoading(false);
   };
 
   const handleError = (isRelink) => {
     setIsLoading(false);
-    const val= isRelink? `Unable to link`: `Unable to Unlink`
+    const val = isRelink ? `Unable to link` : `Unable to Unlink`;
     notify.error({
       description: val,
     });

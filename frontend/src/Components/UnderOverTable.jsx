@@ -1,7 +1,7 @@
 import { Button, Input, Space, Spin, Table, Tag } from "antd";
 import React, { Fragment, useEffect, useState } from "react";
-import { GetServerCall } from "../Services/apiCall";
 import { FilterFilled, LoadingOutlined } from "@ant-design/icons";
+import { underOverData } from "../Services/AdviewTables";
 
 const UnderOverTable = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -13,17 +13,8 @@ const UnderOverTable = () => {
   const getData = async () => {
     setIsLoading(true);
     try {
-      const response = await GetServerCall(
-        `/client-data/get-monthly-clients-data`
-      );
-      if (!response.data.error) {
-        let data = response.data.list || [];
-        for (let i = 0; i < data.length; i++) {
-          data[i]["key"] = i + 1;
-          data[i].month = monthNames[data[i].month - 1];
-        }
-        setList(data || []);
-      }
+      let data = await underOverData()
+      setList(data || []);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -186,17 +177,3 @@ const UnderOverTable = () => {
 
 export default UnderOverTable;
 
-var monthNames = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];

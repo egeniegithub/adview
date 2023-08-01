@@ -174,3 +174,32 @@ export const activeClients = async () => {
   return data;
 };
 
+export const underOverData =async ()=>{
+  let monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const response = await GetServerCall(
+    `/client-data/get-monthly-clients-data`
+  );
+  let data = []
+  if (!response.data.error) {
+    data = response.data.list
+    for (let i = 0; i < data.length; i++) {
+      data[i]["key"] = i + 1;
+      data[i].month = monthNames[data[i].month - 1];
+    }
+  }
+  return data
+}
+
