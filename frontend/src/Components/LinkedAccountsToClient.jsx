@@ -42,7 +42,7 @@ export const LinkedAccountsToClient = ({
     let uri = isRelink
       ? "/google-ads-apis/relink-customer/"
       : "/google-ads-apis/unlink-customer/";
-    handleServerCall(item.id, uri);
+    handleServerCall(item.id, uri, isRelink);
   };
 
   const handleLinkMeta = async (item, isRelink) => {
@@ -50,7 +50,7 @@ export const LinkedAccountsToClient = ({
     let uri = isRelink
       ? "/meta-ads/relink-customer/"
       : "/meta-ads/unlink-customer/";
-    handleServerCall(item.id, uri);
+    handleServerCall(item.id, uri, isRelink);
   };
 
   const handleLinkLinkedin = async (item, isRelink) => {
@@ -58,31 +58,32 @@ export const LinkedAccountsToClient = ({
     let uri = isRelink
       ? "/linkedin-ads/relink-customer/"
       : "/linkedin-ads/unlink-customer/";
-    handleServerCall(item.id, uri);
+    handleServerCall(item.id, uri, isRelink);
   };
   const handleLinkBing = async (item, isRelink) => {
     setIsLoading(true);
     let uri = isRelink
       ? "/bing-ads/relink-customer/"
       : "/bing-ads/unlink-customer/";
-    handleServerCall(item.id, uri);
+    handleServerCall(item.id, uri, isRelink);
   };
 
-  const handleServerCall = async (id, uri) => {
+  const handleServerCall = async (id, uri, isRelink) => {
     try {
       let res = await GetServerCall(uri + id + "/" + email);
-      if (res.data.status !== "success") return handleError();
+      if (res.data.status !== "success") return handleError(isRelink);
       refreshData();
       setIsLoading(false)
     } catch (error) {
-      handleError();
+      handleError(isRelink);
     }
   };
 
-  const handleError = () => {
+  const handleError = (isRelink) => {
     setIsLoading(false);
+    const val= isRelink? `Unable to link`: `Unable to Unlink`
     notify.error({
-      description: "Internal Server Error",
+      description: val,
     });
   };
 

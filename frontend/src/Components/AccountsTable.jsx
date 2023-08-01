@@ -62,7 +62,7 @@ const AccountsTable = () => {
     } catch (error) {
       setIsLoading(false);
       notify.error({
-        description: "Internal Server Error",
+        description: `Request Failed. Unable to load Updated Data. Error: ${error.message}`,
       });
     }
   };
