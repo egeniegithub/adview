@@ -7,7 +7,7 @@ import { LinkedinBtn } from "./SocialButtons/Linkedin";
 import { BingBtn } from "./SocialButtons/BingBtn";
 import { Facebook } from "./SocialButtons/Facebook";
 import { GoogleBtn } from "./SocialButtons/GoogleBtn";
-import { LinkedAccountsToClient } from "./LinkedAccountsToClient";
+import { LinkedAccountsToClient } from "./LinkedAccountsToClients/LinkedAccountsToClient";
 import { RenderRetryBtn } from "./Common/RetryBtn";
 import { AccountsTableColumns } from "./Common/TableColumns";
 
