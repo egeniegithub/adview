@@ -5,7 +5,9 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     Unique,
+    OneToMany,
 } from 'typeorm';
+import { ClientMonthlyDatum } from './client-monthly-datum.entity';
 @Entity()
 @Unique(["email"])
 export class ClientDatum {
@@ -99,6 +101,9 @@ export class ClientDatum {
 
     @Column({ default: '' })
     g_refresh: string;
+
+    @OneToMany(() => ClientMonthlyDatum, (monthly_datum) => monthly_datum.user)
+    monthly_datum: ClientMonthlyDatum[]
 
     @CreateDateColumn()
     created_at: Date;

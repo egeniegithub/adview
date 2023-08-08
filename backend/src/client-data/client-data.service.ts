@@ -106,9 +106,20 @@ export class ClientDataService {
 
   async GetMonthlyClientsData() {
     try {
-      let data = await this.clientMonthlyDataRepository.find({ order: { created_at: 'DESC' } })
-      return { list: data }
+      let data = await this.clientMonthlyDataRepository.find({ order: { created_at: 'DESC' }, relations: { user: true }, select: { user: { client: true } } })
+
+      // to prevent changes in frontend,here client name will be assigned from relation
+      let list = []
+      data.forEach(e => {
+        if (!e.user)
+          return;
+        let obj: any = { ...e }
+        obj.client = e.user.client
+        list.push(obj)
+      })
+      return { list }
     } catch (error) {
+      Logger.log("err ", error)
       return { error: "error while getting Monthly Data" }
     }
   }
@@ -166,17 +177,17 @@ export class ClientDataService {
         // filter out duplicate frequency 
         for (let i = 0; i < list.length; i++) {
           const ele = list[i];
-          for(let j = i+1; j < list.length; j++){
-            if(ele.account_custom_account == list[j].account_custom_account && ele.billing_schedule_option_billing_schedule == 'Month-to-Month' && list[j].billing_schedule_option_billing_schedule == 'Month-to-Month'){
+          for (let j = i + 1; j < list.length; j++) {
+            if (ele.account_custom_account == list[j].account_custom_account && ele.billing_schedule_option_billing_schedule == 'Month-to-Month' && list[j].billing_schedule_option_billing_schedule == 'Month-to-Month') {
               // remove from list if duplicate
-              list.splice(j, 1); 
+              list.splice(j, 1);
             }
           }
         }
         list.forEach(e => {
           let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule, media_buyer_option_media_buyer: buyer }: WebHookPayload = e
           // find corresponding user 
-          const { email: bub_email, facebook, bing, linkedin, google, client: adview_client_name } = savedUsers.find((u) => u.email == email) || {};
+          const { email: bub_email, facebook, bing, linkedin, google } = savedUsers.find((u) => u.email == email) || {};
           if (!bub_email)
             return
 
@@ -195,10 +206,12 @@ export class ClientDataService {
               }
             })
           }
-          let obj = { email, client: adview_client_name, buyer: buyer, month, year, frequency: billing_schedule_option_billing_schedule, remaining: `` + (budget_number - total) || `0`, monthly_spent: `` + total, monthly_budget: `` + budget_number }
+          // find user to make relation with client table
+          let user = savedUsers.find((u) => u.email == email) || {};
+          let obj = { email, buyer: buyer, month, year, frequency: billing_schedule_option_billing_schedule, remaining: `` + (budget_number - total) || `0`, monthly_spent: `` + total, monthly_budget: `` + budget_number, user }
           arr.push(obj)
         });
-        // insert list in monthly table 
+        // insert list in monthly table         
         await this.clientMonthlyDataRepository.insert(arr)
         this.UpdateBubbleStatusForUser(savedUsers, arr)
 
@@ -216,25 +229,27 @@ export class ClientDataService {
   // handle bubble user update budget 
   async HandleWebhookUpdateUser(payload) {
     let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule }: WebHookPayload = payload
-    let obj = { monthly_budget: `${budget_number}`, frequency: billing_schedule_option_billing_schedule }
+    let obj: any = { monthly_budget: `${budget_number}`, frequency: billing_schedule_option_billing_schedule }
+    if (name_text)
+      obj.client = name_text;
     try {
-      let user =  await this.clientDataRepository.findOneBy({ email })
-      if(!user)
+      let user = await this.clientDataRepository.findOneBy({ email })
+      if (!user)
         return { status: 'error', message: "User Not Found" }
-        await this.clientDataRepository.update({ email }, obj)
+      await this.clientDataRepository.update({ email }, obj)
       return { status: 'success' }
     } catch (error) {
       return { status: 'error', message: error }
     }
   }
 
-   // handle bubble user update Reactivate 
+  // handle bubble user update Reactivate 
   async HandleWebhookUpdateUserStatus(payload) {
     let { account_custom_account: email, budget_number, is_active }: WebHookPayload = payload
-    let obj = { monthly_budget: `${budget_number}`, is_active_from_bubble : is_active == '1' ? '1' : '0' }
+    let obj = { monthly_budget: `${budget_number}`, is_active_from_bubble: is_active == '1' ? '1' : '0' }
     try {
-      let user =  await this.clientDataRepository.findOneBy({ email })
-      if(!user)
+      let user = await this.clientDataRepository.findOneBy({ email })
+      if (!user)
         return { status: 'error', message: "User Not Found" }
       await this.clientDataRepository.update({ email }, obj)
       return { status: 'success' }
@@ -318,15 +333,15 @@ export class ClientDataService {
     let arr = []
     savedUsers.forEach(e => {
       let obj = { ...e }
-      const { client: adview_client_name,monthly_budget} = bubbleActiveUsers.find((u) => u.email == obj.email) || {};
-      if (!adview_client_name){
+      const { email, monthly_budget } = bubbleActiveUsers.find((u) => u.email == obj.email) || {};
+      if (!email) {
         obj.is_active_from_bubble = '0'
         obj.is_meta_login = '0'
         obj.is_linkedin_login = '0'
         obj.is_google_login = '0'
         obj.is_bing_login = '0'
       }
-      else{
+      else {
         obj.monthly_budget = monthly_budget
         obj.is_active_from_bubble = '1'
       }
@@ -336,9 +351,9 @@ export class ClientDataService {
       await this.clientDataRepository.upsert(arr, ['id'])
       Logger.log("bubble Status Updated Success")
     } catch (error) {
-      Logger.log("bubble Status Updation Error" , Error)
+      Logger.log("bubble Status Updation Error", Error)
     }
-    
+
   }
 
   async remove(id: number) {
@@ -363,7 +378,7 @@ export class ClientDataService {
   //   } catch (error) {
   //     return {error:error}
   //   }
-    
+
   // }
 
 

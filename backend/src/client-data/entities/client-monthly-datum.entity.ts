@@ -4,7 +4,9 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
+    ManyToOne,
 } from 'typeorm';
+import { ClientDatum } from './client-datum.entity';
 
 @Entity()
 export class ClientMonthlyDatum {
@@ -13,9 +15,6 @@ export class ClientMonthlyDatum {
 
     @Column()
     email: string;
-
-    @Column()
-    client: string;
 
     @Column()
     frequency: string;
@@ -37,6 +36,9 @@ export class ClientMonthlyDatum {
 
     @Column()
     year: string;
+
+    @ManyToOne(() => ClientDatum, (clientDatum) => clientDatum.monthly_datum)
+    user: ClientDatum
 
     @CreateDateColumn()
     created_at: Date;
