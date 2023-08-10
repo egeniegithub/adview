@@ -253,7 +253,7 @@ export class ClientDataService {
         return { status: 'error', message: "User Not Found" }
       let data =  await this.clientDataRepository.update({ email }, obj)
       if(data.affected == 0)
-        return { status: 'error', message: "Nothing to update" }
+        return { status: 'error', message: "unable to update" }
       return { status: 'success',data }
     } catch (error) {
       return { status: 'error', message: error }
