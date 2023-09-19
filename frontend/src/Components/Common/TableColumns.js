@@ -1,5 +1,6 @@
-import { Tag } from "antd";
-import { WarningOutlined } from "@ant-design/icons";
+import { Button, Input, Space, Tag, Tooltip } from "antd";
+import { WarningOutlined, FilterFilled, CheckCircleTwoTone, CloseCircleOutlined } from "@ant-design/icons";
+
 export const adviewTableColumns = [
   {
     title: "Client",
@@ -40,16 +41,76 @@ export const adviewTableColumns = [
     onFilter: (value, record) => record.frequency.indexOf(value) === 0,
   },
   {
-    title: "Over/Under",
-    dataIndex: "remaining",
-    key: "TotalOverUnder",
+    title: "Account Balance",
+    dataIndex: "accountBalance",
+    key: "accountBalance",
+    sorter: (a, b) => a.accountBalance - b.accountBalance,
     render: (text) =>
       text > 0 ? (
         "$" + parseInt(text).toLocaleString()
       ) : (
-        <p style={{ color: `red` }}>${parseInt(text).toLocaleString()}</p>
+        <p style={{ color: `red` }}>
+          {parseInt(text) < 0 ? '-' : ''}${Math.abs(parseInt(text)).toLocaleString()}
+        </p>
       ),
+      filters: [
+        {
+          text: "Over",
+          value: "over",
+        },
+        {
+          text: "Under",
+          value: "under",
+        }
+      ],
+      onFilter: (value, record) => {
+        if (value === "over") {
+          return record.accountBalance <= 0;
+        } else if (value === "under") {
+          return record.accountBalance > 0;
+        }
+        return false; // Handle unexpected filter values
+      },
+  },
+  {
+    title: "Under/Over",
+    dataIndex: "remaining",
+    key: "remaining",
+    render: (text) => {
+      let color = text > 0 ? 'green' :text === 0 ? 'orange': 'red'
+      return !isNaN(text) ? (
+        <Tag color={color} key={text}>
+          {parseInt(text) > 0 ? 'Under' :text === 0 ? 'No Over/Under': 'Over'}
+        </Tag>
+      ) : (
+        "-"
+      );
+    },
     sorter: (a, b) => a.remaining - b.remaining,
+    filters: [
+      {
+        text: "Over",
+        value: "Over",
+      },
+      {
+        text: "Under",
+        value: "Under",
+      },
+      {
+        text: "No Over/Under",
+        value: "No Over/Under",
+      }
+    ],
+    onFilter: (value, record) => {
+      if (value === "Over") {
+        return record.remaining < 0;
+      } else if (value === "Under") {
+        return record.remaining > 0;
+      } else if (value === "No Over/Under") {
+        return record.remaining === 0;
+      }
+      return false; // Handle unexpected filter values
+    },
   },
   {
     title: "Monthly Budget",
@@ -65,12 +126,35 @@ export const adviewTableColumns = [
     render: (text) => (text > 0 ? "$" + parseInt(text).toLocaleString() : "-"),
     sorter: (a, b) => a.monthly_spent - b.monthly_spent,
   },
+  // {
+  //   title: (
+  //     <Tooltip title="This column represents how much budget is remaining this month and is calculated by the total Monthly Budget minus Month-to-Date Spent.">
+  //       Remaining
+  //     </Tooltip>
+  //   ),
+  //   dataIndex: "remaining",
+  //   key: "Remaining",
+  //   sorter: (a, b) => a.remaining - b.remaining,
+  //   render: (text) => (
+  //     <Tooltip title={`This column represents how much budget is remaining this month and is calculated by the total Monthly Budget minus Month-to-Date Spent.`}>
+  //       {text > 0 ? "$" + parseInt(text).toLocaleString() : "-"}
+  //     </Tooltip>
+  //   ),
+  // },
   {
-    title: "Remaining",
+    title: (
+      <Tooltip title="This column represents how much budget is remaining this month and is calculated by the total Monthly Budget minus Month-to-Date Spent.">
+        <div style={{ width: '100%', height: '100%' }}>Remaining</div>
+      </Tooltip>
+    ),
     dataIndex: "remaining",
     key: "Remaining",
-    render: (text) => (text > 0 ? "$" + parseInt(text).toLocaleString() : "-"),
     sorter: (a, b) => a.remaining - b.remaining,
+    render: (text) => (
+      <Tooltip title={`This column represents how much budget is remaining this month and is calculated by the total Monthly Budget minus Month-to-Date Spent.`}>
+        <div style={{ width: '100%' }}>{text > 0 ? "$" + parseInt(text).toLocaleString() : "-"}</div>
+      </Tooltip>
+    ),
   },
   {
     title: "Status",
@@ -203,6 +287,52 @@ export const AccountsTableColumns = (setEmail, showModal) => {
       dataIndex: "client",
       key: "Client",
       width: "40%",
+      sorter: (a, b) => a.client.length - b.client.length,
+      onFilter: (value, record) =>
+        record.client
+          .toString()
+          .toLowerCase()
+          .includes(value.toString().toLowerCase()),
+      filterIcon: (filtered) => <FilterFilled />,
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Filter Account"
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => confirm()}
+            style={{ width: 188, marginBottom: 8, display: "block" }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Filter
+            </Button>
+            <Button
+              onClick={() => {
+                clearFilters();
+                setSelectedKeys([]); // Clear selected keys
+                confirm();
+              }}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Reset
+            </Button>
+          </Space>
+        </div>
+      ),
     },
     {
       title: "Action",
@@ -235,6 +365,106 @@ export const AccountsTableColumns = (setEmail, showModal) => {
             {val === "1" ? "Active" : "Inactive"}
           </Tag>
         );
+      },
+      sorter: (a, b) => a.is_active_from_bubble - b.is_active_from_bubble,
+    filters: [
+      {
+        text: "Active",
+        value: "1",
+      },
+      {
+        text: "Inactive",
+        value: "0",
+      }
+    ],
+    onFilter: (value, record) => record.is_active_from_bubble.indexOf(value) === 0,
+    },
+    {
+      title: "Account Balance",
+      dataIndex: "accountBalance",
+      key: "accountBalance",
+      sorter: (a, b) => a.accountBalance - b.accountBalance,
+      render: (text) =>
+        text > 0 ? (
+          "$" + parseInt(text).toLocaleString()
+        ) : (
+          <p style={{ color: `red` }}>
+            {parseInt(text) < 0 ? '-' : ''}${Math.abs(parseInt(text)).toLocaleString()}
+          </p>
+        ),
+        filters: [
+          {
+            text: "Over",
+            value: "over",
+          },
+          {
+            text: "Under",
+            value: "under",
+          }
+        ],
+        onFilter: (value, record) => {
+          if (value === "over") {
+            return record.accountBalance <= 0;
+          } else if (value === "under") {
+            return record.accountBalance > 0;
+          }
+          return false; // Handle unexpected filter values
+        },
+    },
+    {
+      title: "Google",
+      dataIndex: "google",
+      key: "Google",
+      align: "center",
+      render: (val, obj) => {
+        let is_linked = obj.is_google_login
+        if (is_linked === "0") {
+          return <><CloseCircleOutlined style={{ color: 'red' }} /></>
+        } else {
+          return <><CheckCircleTwoTone twoToneColor="#52c41a" /></>
+        }
+      },
+    },
+    {
+      title: "Bing",
+      dataIndex: "bing",
+      key: "Bing",
+      align: "center",
+      render: (val, obj) => {
+        let is_linked = obj.is_bing_login
+        if (is_linked === "0") {
+          return <><CloseCircleOutlined style={{ color: 'red' }} /></>
+        } else {
+          return <><CheckCircleTwoTone twoToneColor="#52c41a" /></>
+        }
+      },
+    },
+    {
+      title: "LinkedIn",
+      dataIndex: "linkedin",
+      key: "LinkedIn",
+      align: "center",
+      render: (val, obj) => {
+        let is_linked = obj.is_linkedin_login
+        if (is_linked === "0") {
+          return <><CloseCircleOutlined style={{ color: 'red' }} /></>
+        } else {
+          return <><CheckCircleTwoTone twoToneColor="#52c41a" /></>
+        }
+      },
+    },
+    {
+      title: "Meta",
+      dataIndex: "facebook",
+      key: "Facebook",
+      align: "center",
+      render: (val, obj) => {
+        let is_linked = obj.is_meta_login
+        if (is_linked === "0") {
+          return <><CloseCircleOutlined style={{ color: 'red' }} /></>
+        } else {
+          return <><CheckCircleTwoTone twoToneColor="#52c41a" /></>
+        }
       },
     },
   ];

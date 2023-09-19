@@ -1,13 +1,14 @@
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import OversightTable from "./screens/OversightTable";
-import UOTableScreen from "./screens/UOTableScreen";
 import { LinkedinBtn } from "./Components/SocialButtons/Linkedin";
 import { BingBtn } from "./Components/SocialButtons/BingBtn";
 import Login from "./screens/Login";
 import ProtectedRoute from "./ProtectedRoute";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import AccountsTableScreen from "./screens/AccountsTableScreen";
+import MonthlyLogScreen from "./screens/MonthlyLogScreen";
+import AccountsScreen from "./screens/AccountsScreen";
+import ThisMonthScreen from "./screens/ThisMonthScreen";
+import PrivacyPolicy from "./screens/PrivacyPolicy";
 
 function App() {
   return (
@@ -21,19 +22,34 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <OversightTable />
+                <ThisMonthScreen />
               </ProtectedRoute>
             }
+          />
+          <Route 
+          path="/monthly-log" 
+          element={
+            <ProtectedRoute>
+                <MonthlyLogScreen />
+              </ProtectedRoute>
+          }
           />
           <Route
             path="/accounts"
             element={
               <ProtectedRoute>
-                <AccountsTableScreen />
+                <AccountsScreen />
               </ProtectedRoute>
             }
           />
-          <Route path="/monthly-log" element={<UOTableScreen />} />
+          <Route
+            path="/privacy-policy"
+            element={
+              <ProtectedRoute>
+                <PrivacyPolicy />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </GoogleOAuthProvider>

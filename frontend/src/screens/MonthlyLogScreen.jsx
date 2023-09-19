@@ -1,14 +1,14 @@
 import React, { Fragment } from 'react'
-import UnderOverTable from '../Components/UnderOverTable'
+import MonthlyLogTable from '../Components/MonthlyLogTable'
 import Layout from '../Layout/Layout'
 
-const UOTableScreen = () => {
+const MonthlyLogScreen = () => {
     return (
         <Fragment>
             <Layout />
-            <UnderOverTable />
+            <MonthlyLogTable />
         </Fragment>
     )
 }
 
-export default UOTableScreen
+export default MonthlyLogScreen

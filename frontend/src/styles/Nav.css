@@ -8,13 +8,22 @@
   top: 0vh;
   z-index: 2;
 }
-.NavText {
-  margin-left: 10px;
+.NavRow{
+  height: 100%;
+}
+.LogoCol{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.NavLogo{
+  height: 5vh;
 }
 .NavList {
   display: flex;
   justify-content: space-evenly;
-  gap: 1vh;
+  align-items: center;
 }
 .nav_items {
   color: grey !important;
@@ -24,4 +33,12 @@
 }
 .active {
   color: #026bff !important;
+}
+.LogOutBtn{
+  border: none;
+  background-color: lightgray;
+  padding: .5vh 1.5vh;
+  border-radius: 5px;
+  color: red;
+  font-weight: bold;
 }

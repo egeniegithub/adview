@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import Layout from "../Layout/Layout";
 import AccountsTable from "../Components/AccountsTable";
 
-function AccountsTableScreen() {
+function AccountsScreen() {
   return (
     <Fragment>
       <Layout />
@@ -11,4 +11,4 @@ function AccountsTableScreen() {
   );
 }
 
-export default AccountsTableScreen;
+export default AccountsScreen;

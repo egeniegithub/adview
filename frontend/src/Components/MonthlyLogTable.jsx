@@ -1,9 +1,9 @@
 import { Button, Input, Space, Spin, Table, Tag } from "antd";
 import React, { Fragment, useEffect, useState } from "react";
-import { FilterFilled, LoadingOutlined } from "@ant-design/icons";
+import { FilterFilled, LoadingOutlined, WarningOutlined } from "@ant-design/icons";
 import { underOverData } from "../Services/AdviewTables";
 
-const UnderOverTable = () => {
+const MonthlyLogTable = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [list, setList] = useState([]);
   useEffect(() => {
@@ -131,21 +131,147 @@ const UnderOverTable = () => {
         text > 0 ? "$" + parseInt(text).toLocaleString() : "-",
       sorter: (a, b) => a.monthly_spent - b.monthly_spent,
     },
+    // {
+    //   title: "Under/Over",
+    //   dataIndex: "remaining",
+    //   key: "remaining",
+    //   render: (text) => {
+    //     let color = text > 0 ? 'green' :'red'
+    //     return !isNaN(text) ? (
+    //       <Tag color={color} key={text}>
+    //         {parseInt(text) < 0 ? '-' : ''}${Math.abs(parseInt(text)).toLocaleString()}
+    //       </Tag>
+    //     ) : (
+    //       "-"
+    //     );
+    //   },
+    //   sorter: (a, b) => a.remaining - b.remaining,
+    // },
     {
       title: "Under/Over",
       dataIndex: "remaining",
       key: "remaining",
       render: (text) => {
-        let color = text > 0 ? 'green' :'red'
+        let color = text > 0 ? 'green' :text === 0 ? 'orange': 'red'
         return !isNaN(text) ? (
           <Tag color={color} key={text}>
-            $ {parseInt(text).toLocaleString()}
+            {parseInt(text) > 0 ? 'Under' :text === 0 ? 'No Over/Under': 'Over'}
           </Tag>
         ) : (
           "-"
         );
       },
       sorter: (a, b) => a.remaining - b.remaining,
+      filters: [
+        {
+          text: "Over",
+          value: "Over",
+        },
+        {
+          text: "Under",
+          value: "Under",
+        },
+        {
+          text: "No Over/Under",
+          value: "No Over/Under",
+        }
+      ],
+      onFilter: (value, record) => {
+        if (value === "Over") {
+          return record.remaining < 0;
+        } else if (value === "Under") {
+          return record.remaining > 0;
+        } else if (value === "No Over/Under") {
+          return record.remaining === 0;
+        }
+        return false; // Handle unexpected filter values
+      },
+    },
+    {
+      title: "Google",
+      dataIndex: "google",
+      key: "Google",
+      render: (val, obj) => {
+        let is_sync_users_with_ads =
+          JSON.parse(localStorage.getItem("is_sync_users_with_ads")) || {};
+        let is_sync = is_sync_users_with_ads[obj.id] || {};
+        // console.log("check incuse ", obj)
+        if (is_sync.google === false) {
+          return (
+            <>
+              {" "}
+              {"$" + parseInt(val).toLocaleString()}{" "}
+              <WarningOutlined style={{ color: "red" }} />
+            </>
+          );
+        } else {
+          return val > 0 ? "$" + parseInt(val).toLocaleString() : "-";
+        }
+      },
+      sorter: (a, b) => a.google - b.google,
+    },
+    {
+      title: "Bing",
+      dataIndex: "bing",
+      key: "Bing",
+      render: (val, obj) => {
+        let is_sync_users_with_ads =
+          JSON.parse(localStorage.getItem("is_sync_users_with_ads")) || {};
+        let is_sync = is_sync_users_with_ads[obj.id] || {};
+        if (is_sync.bing === false) {
+          return (
+            <>
+              {"$" + parseInt(val).toLocaleString()}{" "}
+              <WarningOutlined style={{ color: "red" }} />
+            </>
+          );
+        } else {
+          return val > 0 ? "$" + parseInt(val).toLocaleString() : "-";
+        }
+      },
+      sorter: (a, b) => a.bing - b.bing,
+    },
+    {
+      title: "LinkedIn",
+      dataIndex: "linkedin",
+      key: "LinkedIn",
+      render: (val, obj) => {
+        let is_sync_users_with_ads =
+          JSON.parse(localStorage.getItem("is_sync_users_with_ads")) || {};
+        let is_sync = is_sync_users_with_ads[obj.id] || {};
+        if (is_sync.linkedin === false) {
+          return (
+            <>
+              {"$" + parseInt(val).toLocaleString()}{" "}
+              <WarningOutlined style={{ color: "red" }} />
+            </>
+          );
+        } else {
+          return val > 0 ? "$" + parseInt(val).toLocaleString() : "-";
+        }
+      },
+      sorter: (a, b) => a.linkedin - b.linkedin,
+    },
+    {
+      title: "Meta",
+      dataIndex: "facebook",
+      key: "Facebook",
+      render: (val, obj) => {
+        let is_sync_users_with_ads =
+          JSON.parse(localStorage.getItem("is_sync_users_with_ads")) || {};
+        let is_sync = is_sync_users_with_ads[obj.id] || {};
+        if (is_sync.facebook === false) {
+          return (
+            <>
+              {"$" + parseInt(val).toLocaleString()}{" "}
+              <WarningOutlined style={{ color: "red" }} />
+            </>
+          );
+        } else {
+          return val > 0 ? "$" + parseInt(val).toLocaleString() : "-";
+        }
+      },
+      sorter: (a, b) => a.facebook - b.facebook,
     },
   ];
 
@@ -175,5 +301,5 @@ const UnderOverTable = () => {
   );
 };
 
-export default UnderOverTable;
+export default MonthlyLogTable;
 

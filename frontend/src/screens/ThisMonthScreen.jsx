@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import AdViewTable from "../Components/AdviewTable";
 import Layout from "../Layout/Layout";
 
-function OversightTable() {
+function ThisMonthScreen() {
   return (
     <Fragment>
       <Layout />
@@ -11,4 +11,4 @@ function OversightTable() {
   );
 }
 
-export default OversightTable;
+export default ThisMonthScreen;
