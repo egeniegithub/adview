@@ -49,7 +49,7 @@ export  const getUserInfo = async (tokens, code,setStates,setUserName) => {
   let LinkedUsers = await getLinkedAdsAccountsWithLinkedin(
     tokens.access_token
   );
-  if (LinkedUsers.list.length) {
+  if (LinkedUsers?.list?.length) {
     LinkedUsers.list.forEach((ele, i) => {
       ele.key = i + 1;
       ele.auto_track = false;

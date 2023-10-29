@@ -66,15 +66,22 @@ export const LinkedinBtn = ({
     }),
   };
 
+  //http://localhost:3000/linkedin?error=unauthorized_scope_error&error_description=Scope+%26quot%3Br_liteprofile%26quot%3B+is+not+authorized+for+your+application&state=gKivQapCTNK6jlxympdu 
+
   const { linkedInLogin } = useLinkedIn({
     clientId: `${process.env.REACT_APP_LI_CLIENT_ID}`,
     redirectUri: `${window.location.origin}/linkedin`,
     scope: "r_liteprofile,rw_ads,r_ads,r_ads_reporting",
     onSuccess: (code) => {
+      console.log(`${window.location.origin}/linkedin`, "linkedIn");
+      console.log(`${process.env.REACT_APP_LI_CLIENT_ID}`, "clientId");
       throttledFunction(code);
     },
     onError: (error) => {
-      // console.log("error",error);
+      console.log("error",error);
+      console.log("m running dont worry");
+      console.log(`${process.env.REACT_APP_LI_CLIENT_ID}`, "clientId");
+      console.log(`${window.location.origin}/linkedin`, "linkedIn");
     },
   });
 

@@ -46,14 +46,14 @@ const Nav = () => {
             <p>Accounts</p>
           </NavLink>
 
-          <NavLink
+          {/* <NavLink
             to="/privacy-policy"
             className={({ isActive }) =>
               isActive ? "active nav_items" : "nav_items"
             }
           >
             <p>Privacy Policy</p>
-          </NavLink>
+          </NavLink> */}
           
 
               <button
