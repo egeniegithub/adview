@@ -29,6 +29,18 @@ export class ClientMonthlyDatum {
     monthly_spent: string;
 
     @Column()
+    google: string;
+
+    @Column()
+    bing: string;
+
+    @Column()
+    linkedin: string;
+
+    @Column()
+    facebook: string;
+
+    @Column()
     remaining: string;
 
     @Column()

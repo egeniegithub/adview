@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Any, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateClientDatumDto } from './dto/create-client-datum.dto';
 import { UpdateClientDatumDto } from './dto/update-client-datum.dto';
 import { ClientDatum } from './entities/client-datum.entity';
@@ -9,11 +9,15 @@ import { Cron } from '@nestjs/schedule';
 import e from 'express';
 import axios from 'axios';
 import { WebHookPayload } from './client-data.controller';
+import * as nodemailer from 'nodemailer';
 
 
 
 @Injectable()
 export class ClientDataService {
+  private retryCount = 0
+  private maxRetries = 3
+  private emailSent = false;
   constructor(
     @InjectRepository(ClientDatum)
     private readonly clientDataRepository: Repository<ClientDatum>,
@@ -39,12 +43,37 @@ export class ClientDataService {
   }
 
   async findAll() {
-    const data = await this.clientDataRepository.find();
+    const data = await this.clientDataRepository.find({ relations: { monthly_datum: true } });
+    data.forEach((e: any) => {
+      if (e?.monthly_datum.length) {
+        let sum = 0
+        for (let i = 0; i < e.monthly_datum.length - 1; i++) {
+          sum += parseInt(e.monthly_datum[i].remaining)
+        }
+        e.accountBalance = sum + ''
+        e.monthly_datum = []  // empty array assigned just to optimize api response size
+      }
+    });
     return data;
   }
 
+  // async findsActives() {
+  //   const data = await this.clientDataRepository.find({ where: { is_active_from_bubble: '1' } });
+  //   return data;
+  // }
+
   async findsActives() {
-    const data = await this.clientDataRepository.find({ where: { is_active_from_bubble: '1' } });
+    const data = await this.clientDataRepository.find({ where: { is_active_from_bubble: '1' }, relations: { monthly_datum: true } });
+    data.forEach((e: any) => {
+      if (e?.monthly_datum.length) {
+        let sum = 0
+        for (let i = 0; i < e.monthly_datum.length - 1; i++) {
+          sum += parseInt(e.monthly_datum[i].remaining)
+        }
+        e.accountBalance = sum + ''
+        e.monthly_datum = []  // empty array assigned just to optimize api response size
+      }
+    })
     return data;
   }
 
@@ -124,15 +153,60 @@ export class ClientDataService {
     }
   }
 
+  async sendEmail() {
+    const transporter = nodemailer.createTransport({
+      host: 'Gmail',
+      auth: {
+        user: process.env.NODE_MAIL_EMAIL,
+        pass: process.env.NODE_MAIL_PASSWORD,
+      },
+    });
+    const fromName = `Adview ${process.env.NODE_MAIL_EMAIL}`
+    const msg = {
+      to: 'muzamil.egenie@gmail.com',
+      from: fromName,
+      subject: 'Monthly Logs Data Alert',
+      html: `<h2>ALert!</h2>
+      <strong>Failed to fetch and save data for this month in the monthly logs. The cron job has exceeded the maximum number of retries. Please attempt to run it manually and save the data before it is lost.</strong>
+      <h3>Best Wishes,</h3>
+      <h3>/Adview</h3>
+      `,
+    };
+    try {
+      const response = await transporter.sendMail(msg);
+      return response;
+    } catch (error) {
+      console.log(error, "error");
+      return error;
+    }
+  };
 
   //crone job will run 1st day of every month at 9:00AM EST time
   @Cron('0 9 1 * *', {
     name: 'monthly update',
     timeZone: 'EST',
   })
+
   async handleCron() {
-    let data = await this.ComputeMonthlyData()
-    Logger.log('Cron job response', data);
+    try {
+      let data = await this.ComputeMonthlyData()
+      Logger.log('Cron job try block ran', data);
+    }
+    catch (error) {
+      if (this.retryCount < this.maxRetries) {
+        this.retryCount++;
+        setTimeout(() => {
+          this.handleCron();
+        }, 2 * 60 * 60 * 1000); // 2 hours in milliseconds
+        Logger.log('Cron job catch block ran, retrying...', error);
+      } else {
+        Logger.log('Cron job exceeded maximum retries');
+        if (!this.emailSent) {
+          this.sendEmail();
+          this.emailSent = true; // To avoid sending multiple emails
+        }
+      }
+    }
   }
 
   // Monthly Calculation
@@ -174,26 +248,51 @@ export class ClientDataService {
       // Calculate the date one month ago
       let arr = []
       if (list.length) {
+
+        let spliceArr = []
         // filter out duplicate frequency 
         for (let i = 0; i < list.length; i++) {
-          const ele = list[i];
+          let isDuplicate = false;
+          let sumOfBudget = 0
+          let ele = list[i];
           for (let j = i + 1; j < list.length; j++) {
             if (ele.account_custom_account == list[j].account_custom_account && ele.billing_schedule_option_billing_schedule == 'Month-to-Month' && list[j].billing_schedule_option_billing_schedule == 'Month-to-Month') {
-              // remove from list if duplicate
-              list.splice(j, 1);
+              // Add both M2M for a client
+              isDuplicate = true
+              sumOfBudget += ele.budget_number + list[j].budget_number
             }
           }
+          if (isDuplicate == true) {
+            ele.budget_number = sumOfBudget
+            spliceArr.push(ele)
+          }
+          else spliceArr.push(ele)
         }
-        list.forEach(e => {
+
+        const filteredArray = [];
+        const seenNames = new Set();
+
+        spliceArr.forEach((obj) => {
+          const key = `${obj.account_custom_account}_${obj.billing_schedule_option_billing_schedule}`;
+          if (!seenNames.has(key)) {
+            seenNames.add(key);
+            filteredArray.push(obj);
+          }
+        });
+
+        console.log(filteredArray);
+
+        filteredArray.forEach(e => {
           let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule, media_buyer_option_media_buyer: buyer }: WebHookPayload = e
           // find corresponding user 
           const { email: bub_email, facebook, bing, linkedin, google } = savedUsers.find((u) => u.email == email) || {};
           if (!bub_email)
             return
 
-          const total = (facebook > '0' ? parseInt(facebook) : 0) + (google > '0' ? parseInt(google) : 0) + (bing > '0' ? parseInt(bing) : 0) + (linkedin > '0' ? parseInt(linkedin) : 0)
+          const total = (facebook > '0' ? parseInt(facebook) : 0) + (google > '0' ? parseInt(google) : 0) + (bing > '0' ? parseInt(bing) : 0) + (linkedin > '0' ? parseInt(linkedin) : 0);
+
           // check if client have multiple repeat for different frequency 
-          let duplicateArr = list.filter(e => e['account_custom_account'] == email)
+          let duplicateArr = filteredArray.filter(e => e['account_custom_account'] == email)
 
           // if parent frequency is one-time and have duplicate id it mean its already been calculated and skip this iteration 
           if (duplicateArr.length > 1 && billing_schedule_option_billing_schedule == 'One-Time')
@@ -208,10 +307,10 @@ export class ClientDataService {
           }
           // find user to make relation with client table
           let user = savedUsers.find((u) => u.email == email) || {};
-          let obj = { email, buyer: buyer, month, year, frequency: billing_schedule_option_billing_schedule, remaining: `` + (budget_number - total) || `0`, monthly_spent: `` + total, monthly_budget: `` + budget_number, user }
+          let obj = { email, buyer: buyer, month, year, frequency: billing_schedule_option_billing_schedule, remaining: `` + (budget_number - total) || `0`, monthly_spent: `` + total, monthly_budget: `` + budget_number, user, facebook, google, bing, linkedin }
           arr.push(obj)
         });
-        // insert list in monthly table         
+        // insert list in monthly table
         await this.clientMonthlyDataRepository.insert(arr)
         this.UpdateBubbleStatusForUser(savedUsers, arr)
 
@@ -224,6 +323,57 @@ export class ClientDataService {
       return ('Failed cron jon operation')
     }
   }
+
+  // Enter spend data manually
+  // async ComputeSpendData() {
+  //   try {
+  //     let savedUsers = await this.clientMonthlyDataRepository.find()
+
+  //     // let list = [] bubble data
+  //     // Calculate the date one month ago
+  //     let arr = []
+
+  //       arr.forEach(e => {
+  //         let { account_custom_account: email, name_text, budget_number, billing_schedule_option_billing_schedule, media_buyer_option_media_buyer: buyer }: WebHookPayload = e
+  //         // find corresponding user 
+  //         const { email: bub_email, facebook, bing, linkedin, google } = savedUsers.find((u) => u.email == email) || {};
+  //         if (!bub_email)
+  //           return
+
+  //         const total = (facebook > '0' ? parseInt(facebook) : 0) + (google > '0' ? parseInt(google) : 0) + (bing > '0' ? parseInt(bing) : 0) + (linkedin > '0' ? parseInt(linkedin) : 0);
+
+  //         // check if client have multiple repeat for different frequency 
+  //         let duplicateArr = filteredArray.filter(e => e['account_custom_account'] == email)
+
+  //         // if parent frequency is one-time and have duplicate id it mean its already been calculated and skip this iteration 
+  //         if (duplicateArr.length > 1 && billing_schedule_option_billing_schedule == 'One-Time')
+  //           return
+
+  //         if (duplicateArr.length > 1) {
+  //           duplicateArr.forEach((e: WebHookPayload) => {
+  //             if (e.billing_schedule_option_billing_schedule == 'One-Time') {
+  //               budget_number += e.budget_number
+  //             }
+  //           })
+  //         }
+  //         // find user to make relation with client table
+  //         let user = savedUsers.find((u) => u.email == email) || {};
+  //         let obj = { email, buyer: buyer, month, year, frequency: billing_schedule_option_billing_schedule, monthly_budget: `` + budget_number, user }
+  //         arr.push(obj)
+  //       });
+  //       // insert list in monthly table
+  //       await this.clientMonthlyDataRepository.insert(arr)
+  //       this.UpdateBubbleStatusForUser(savedUsers, arr)
+
+  //       return ('Cron job success')
+  //     }
+
+  //   }
+  //   catch (err) {
+  //     Logger.log("Error in Cron Job ", err)
+  //     return ('Failed cron jon operation')
+  //   }
+  // }
 
 
   // handle bubble user update budget 
